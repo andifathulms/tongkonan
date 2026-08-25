@@ -147,8 +147,16 @@ export interface SweepOptions {
   readonly bow: number
   /** metres of texture per metre of surface, so grain never stretches */
   readonly uvScale: number
-  /** shift the whole surface along its own normal — used for ijuk courses */
-  readonly offset?: number
+  /** restrict the band across the slope; 0 is the ridge, 1 the eave */
+  readonly fFrom?: number
+  readonly fTo?: number
+  /**
+   * Push the surface off itself along its own normal, as a function of the
+   * position across the slope. Ijuk courses use this to stand proud at the
+   * foot and lie flush at the head, which is what draws the shadow line
+   * between courses — most of what makes the material read.
+   */
+  readonly offsetAt?: (f: number) => number
 }
 
 /**
@@ -165,7 +173,8 @@ export function sweepSurface(stations: readonly Station[], o: SweepOptions): Mes
 
   const firstStation = stations[0]
   if (!firstStation) return mesh
-  const push = o.offset ?? 0
+  const fFrom = o.fFrom ?? 0
+  const fTo = o.fTo ?? 1
 
   for (let i = 0; i < cols; i++) {
     const st = stations[i]
@@ -179,9 +188,10 @@ export function sweepSurface(stations: readonly Station[], o: SweepOptions): Mes
     const outZ = -dy * o.side / len
 
     for (let j = 0; j <= rows; j++) {
-      const f = j / rows
+      const f = lerp(fFrom, fTo, j / rows)
       const chordY = lerp(st.ridgeY, st.eaveY, f)
       const bowY = o.bow * Math.sin(Math.PI * f)
+      const push = o.offsetAt ? o.offsetAt(f) : 0
       mesh.positions.push(
         st.x,
         chordY + bowY + push * outY,
