@@ -43,11 +43,16 @@ lib/banua/        the generator — pure, no DOM, runs in Node
   roof.ts           ridge assembly, rafters, purlins, ijuk courses
   assembly.ts       build order and the normalised timeline
   invariants.ts     the checks that gate the build
+  whatif.ts         the one place a rule is temporarily something else
+  sensitivity.ts    how far the house moves if a dimension is a fifth out
+  counterexample.ts a house built to make a check refuse it
+  address.ts        the three rules, to and from a query string
 lib/solar/
   position.ts       NOAA solar position; shared with the zero-shadow-day tool
   presets.ts        equinox, June solstice, and the computed zero-shadow day
 lib/draw/
   orthographic.ts   plan, elevation and long section as SVG line drawings
+  sheet.ts          all three on one 1:50 sheet with the source table
 components/         renderer, controls, provenance strip
 app/[locale]/       bangun, rakit, baca, sumber
 ```

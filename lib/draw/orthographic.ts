@@ -22,12 +22,30 @@ export type Projection = 'denah' | 'tampak' | 'potongan'
 type Point = readonly [number, number]
 type Polyline = readonly Point[]
 
-interface Line {
+export interface Line {
   readonly points: Polyline
   readonly weight: 'cut' | 'beyond' | 'annotation'
 }
 
-const PIGMENT = { ink: '#17150F', film: '#D8D7CD', muted: '#6B675C', rara: '#8E3B25' }
+export interface DrawnView {
+  readonly lines: readonly Line[]
+  /** page millimetres, before any sheet placement */
+  readonly minX: number
+  readonly minY: number
+  readonly width: number
+  readonly height: number
+}
+
+// The same values the screen uses. Muted ink is the corrected step: the old
+// one was 3.90:1 on the film and the notes set in it are the part of a sheet
+// that must not be hard to read.
+export const PIGMENT = {
+  ink: '#17150F',
+  film: '#D8D7CD',
+  muted: '#575349',
+  rara: '#8E3B25',
+  riri: '#C8912B',
+}
 
 /* ── Projection ───────────────────────────────────────────────────────── */
 
@@ -35,8 +53,8 @@ const PIGMENT = { ink: '#17150F', film: '#D8D7CD', muted: '#6B675C', rara: '#8E3
  * Metres to page millimetres at 1:50, so the numbers in the file are the
  * numbers a ruler would give on a printed sheet.
  */
-const SCALE = 1000 / 50
-const MARGIN = 18
+export const SCALE = 1000 / 50
+export const MARGIN = 18
 
 function project(p: readonly [number, number, number], view: Projection): Point {
   const [x, y, z] = p
@@ -264,7 +282,7 @@ function annotations(house: House, layout: Layout, view: Projection): Line[] {
 
 /* ── SVG ──────────────────────────────────────────────────────────────── */
 
-const STROKE: Record<Line['weight'], { width: number; colour: string; dash?: string }> = {
+export const STROKE: Record<Line['weight'], { width: number; colour: string; dash?: string }> = {
   cut: { width: 1.1, colour: PIGMENT.ink },
   beyond: { width: 0.35, colour: PIGMENT.muted },
   annotation: { width: 0.3, colour: PIGMENT.muted, dash: '4 3' },
@@ -274,12 +292,14 @@ export interface DrawingOptions {
   readonly locale: 'id' | 'en'
 }
 
-export function drawOrthographic(
-  house: House,
-  layout: Layout,
-  view: Projection,
-  options: DrawingOptions,
-): string {
+/**
+ * One projection as lines and a bounding box, before it is put on any sheet.
+ *
+ * Split out so a single view and a composed sheet draw the same geometry from
+ * the same call. A sheet that redrew the house its own way could disagree
+ * with the drawing beside it, and then neither would be checkable.
+ */
+export function viewLines(house: House, layout: Layout, view: Projection): DrawnView {
   const lines = [
     ...linesForParts(house, layout, view),
     ...linesForRoof(layout, view),
@@ -298,7 +318,38 @@ export function drawOrthographic(
       if (y > maxY) maxY = y
     }
   }
-  if (!Number.isFinite(minX)) return ''
+  if (!Number.isFinite(minX)) {
+    return { lines: [], minX: 0, minY: 0, width: 0, height: 0 }
+  }
+  return { lines, minX, minY, width: maxX - minX, height: maxY - minY }
+}
+
+/** Serialise lines onto a sheet, offset into place. */
+export function pathsFor(lines: readonly Line[], ox: number, oy: number): string {
+  return lines
+    .map((line) => {
+      const s = STROKE[line.weight]
+      const d = line.points
+        .map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${(x + ox).toFixed(2)} ${(y + oy).toFixed(2)}`)
+        .join(' ')
+      return `<path d="${d}" fill="none" stroke="${s.colour}" stroke-width="${s.width}"${
+        s.dash ? ` stroke-dasharray="${s.dash}"` : ''
+      } stroke-linecap="round" stroke-linejoin="round"/>`
+    })
+    .join('\n')
+}
+
+export function drawOrthographic(
+  house: House,
+  layout: Layout,
+  view: Projection,
+  options: DrawingOptions,
+): string {
+  const drawn0 = viewLines(house, layout, view)
+  if (drawn0.lines.length === 0) return ''
+  const { lines, minX, minY } = drawn0
+  const maxX = minX + drawn0.width
+  const maxY = minY + drawn0.height
 
   const titleHeight = 30
   // The title block sets a floor on the sheet width: a narrow elevation would
@@ -310,17 +361,7 @@ export function drawOrthographic(
   const ox = MARGIN - minX + (width - drawn) / 2
   const oy = MARGIN - minY
 
-  const paths = lines
-    .map((line) => {
-      const s = STROKE[line.weight]
-      const d = line.points
-        .map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${(x + ox).toFixed(2)} ${(y + oy).toFixed(2)}`)
-        .join(' ')
-      return `<path d="${d}" fill="none" stroke="${s.colour}" stroke-width="${s.width}"${
-        s.dash ? ` stroke-dasharray="${s.dash}"` : ''
-      } stroke-linecap="round" stroke-linejoin="round"/>`
-    })
-    .join('\n')
+  const paths = pathsFor(lines, ox, oy)
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width.toFixed(1)}mm" height="${height.toFixed(1)}mm" viewBox="0 0 ${width.toFixed(2)} ${height.toFixed(2)}">`,
@@ -413,7 +454,7 @@ function convexHull(points: readonly Point[]): Point[] {
   return [...build(sorted), ...build([...sorted].reverse())]
 }
 
-function escapeXml(s: string): string {
+export function escapeXml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')

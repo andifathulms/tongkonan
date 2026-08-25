@@ -152,6 +152,11 @@ export const COPY = {
     denah: t('Denah', 'Plan'),
     tampak: t('Tampak muka', 'Front elevation'),
     potongan: t('Potongan memanjang', 'Long section'),
+    sheet: t('Lembar lengkap', 'Full sheet'),
+    sheetGloss: t(
+      'Ketiga gambar, daftar ukuran lengkap beserta kelas dan kutipannya, arah utara, dan bilah skala \u2014 pada satu lembar. Gambar ukur yang asal ukurannya tertinggal di situs adalah gambar yang kehilangan asal-usulnya begitu dicetak.',
+      'All three drawings, the full dimension table with its classes and citations, a north point and a scale bar \u2014 on one page. A measured drawing whose provenance stays on a website is a drawing that loses it the moment it is printed.',
+    ),
     gloss: t(
       'Gambar garis ortografis 1:50, dalam SVG. Garis bisa diperiksa; gambar berbayang tidak. Setiap lembar mencantumkan berapa persen ukurannya adalah perkiraan penulis.',
       'An orthographic line drawing at 1:50, as SVG. Lines can be checked; a shaded image cannot. Every sheet states what share of its dimensions are the author’s own.',
