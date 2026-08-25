@@ -14,7 +14,17 @@
  * here is `measured`, because no survey has been wired in yet.
  */
 
-import type { Dim, Layout, Rank, Rules, Source, SourceKey, StageInfo } from './types'
+import type {
+  Dim,
+  Layout,
+  Part,
+  ProvenanceClass,
+  Rank,
+  Rules,
+  Source,
+  SourceKey,
+  StageInfo,
+} from './types'
 
 /* ── The source table ─────────────────────────────────────────────────── */
 
@@ -138,6 +148,54 @@ export type DimKey = keyof typeof DIMS
 export const DIM_KEYS = Object.keys(DIMS) as readonly DimKey[]
 
 export const ALL_DIMS: readonly Dim[] = DIM_KEYS.map((k) => DIMS[k])
+
+/**
+ * The class of a part, given the dimensions that produced it.
+ *
+ * A part is only as sourced as its least-sourced input. A post whose section
+ * is invented and whose spacing is invented is an invented post, and the fact
+ * that its pairing is canon does not redeem the metres. Taking the worst is
+ * the only rule that cannot flatter the model.
+ */
+export function worstClass(keys: readonly DimKey[]): ProvenanceClass {
+  let worst: ProvenanceClass = 'measured'
+  for (const key of keys) {
+    const cls = DIMS[key].class
+    if (cls === 'interpolated') return 'interpolated'
+    if (cls === 'canon') worst = 'canon'
+  }
+  return worst
+}
+
+/** The provenance class of one part, for the overlay and for /sumber. */
+export function partClass(part: Pick<Part, 'dims'>): ProvenanceClass {
+  return worstClass(part.dims)
+}
+
+/**
+ * How the house divides by provenance class, counted in parts rather than in
+ * dimensions.
+ *
+ * This answers a different question from `provenanceSplit`, and the two will
+ * disagree: one canon dimension can govern a hundred parts and one
+ * interpolated dimension can govern three. Both numbers are true and neither
+ * is the whole picture, so the app shows the dimension split as the metric
+ * and this one only where the model itself is being marked up.
+ */
+export function partSplit(parts: readonly Pick<Part, 'dims'>[]): {
+  measured: number
+  canon: number
+  interpolated: number
+  total: number
+} {
+  const count = (c: ProvenanceClass) => parts.filter((p) => partClass(p) === c).length
+  return {
+    measured: count('measured'),
+    canon: count('canon'),
+    interpolated: count('interpolated'),
+    total: parts.length,
+  }
+}
 
 /** The provenance split, as counts. The rail draws this and it is the metric. */
 export function provenanceSplit(dims: readonly Dim[] = ALL_DIMS): {

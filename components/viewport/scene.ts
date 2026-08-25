@@ -14,7 +14,8 @@
  */
 
 import * as THREE from 'three'
-import type { House, Layout, Part } from '@/lib/banua/types'
+import type { House, Layout, Part, ProvenanceClass } from '@/lib/banua/types'
+import { partClass } from '@/lib/banua/rules'
 import type { SolarPosition } from '@/lib/solar/position'
 import { sunDirection } from '@/lib/solar/position'
 import { createMaterials, TEXTURE_METRES } from '../materials'
@@ -40,11 +41,18 @@ export interface SceneOptions {
   explode: number
   /** cut the house on the ridge plane to show the three occupancy zones */
   section: boolean
+  /**
+   * Mark every part by the provenance of the dimensions that produced it,
+   * instead of by what it is made of. The bar in the rail says how much of
+   * the house is the author's own; this says which of it.
+   */
+  provenance: boolean
   reducedMotion: boolean
 }
 
 const BOLU = 0x17150f
 const RARA = 0x8e3b25
+const RIRI = 0xc8912b
 const KAPUR = 0xe9e3d2
 const GROUND = 0xc3bda9
 
@@ -60,6 +68,10 @@ export class HouseScene {
   private materials: MaterialSet
   private houseGroup = new THREE.Group()
   private byPart = new Map<string, THREE.Object3D>()
+  /** the pigment material each part is normally drawn in, to go back to */
+  private restMaterial = new Map<string, THREE.Material>()
+  private provenanceMaterials: Record<ProvenanceClass, THREE.MeshStandardMaterial>
+  private provenanceOn = false
   private restPosition = new Map<string, THREE.Vector3>()
   /** Which parts are boxes: only those may be scaled during placement. */
   private boxParts = new Set<string>()
@@ -94,6 +106,18 @@ export class HouseScene {
     }
 
     this.materials = createMaterials(this.renderer.capabilities.getMaxAnisotropy())
+    /*
+      Flat, untextured and matte, so the overlay reads as a mark made on the
+      model rather than as another material the house could be built from.
+      The three colours are the ones the rail already uses for the classes.
+    */
+    const marked = (color: number) =>
+      new THREE.MeshStandardMaterial({ color, roughness: 0.92, metalness: 0 })
+    this.provenanceMaterials = {
+      measured: marked(BOLU),
+      canon: marked(RIRI),
+      interpolated: marked(RARA),
+    }
 
     // One directional light, shadow-casting, driven by the computed sun.
     this.sunLight = new THREE.DirectionalLight(0xffffff, 3)
@@ -166,6 +190,7 @@ export class HouseScene {
       object.name = part.id
       this.houseGroup.add(object)
       this.byPart.set(part.id, object)
+      this.restMaterial.set(part.id, this.materials[part.material])
       this.restPosition.set(part.id, object.position.clone())
       if (part.kind === 'box') this.boxParts.add(part.id)
     }
@@ -182,6 +207,10 @@ export class HouseScene {
       0,
       layout.eaveHalfWidth + 1.4,
     )
+
+    // A rebuild replaces every mesh, so a mode that was on has to be put
+    // back on the new ones.
+    if (this.provenanceOn) this.setProvenanceMarking(true)
 
     this.frameShadowCamera(house)
     this.rain.configure(layout)
@@ -212,12 +241,33 @@ export class HouseScene {
     return new THREE.Mesh(geometry, material)
   }
 
+  /**
+   * Swap every part between what it is made of and where its numbers came
+   * from.
+   *
+   * The honest result at present is a house that is almost entirely rara,
+   * because almost every metre in the rule pack is the author's own. That is
+   * the point of the mode and it is not softened here — the legend in the
+   * rail is what stops it reading as an error.
+   */
+  private setProvenanceMarking(on: boolean): void {
+    if (!this.house) return
+    for (const part of this.house.parts) {
+      const object = this.byPart.get(part.id)
+      if (!(object instanceof THREE.Mesh)) continue
+      const rest = this.restMaterial.get(part.id)
+      object.material = on ? this.provenanceMaterials[partClass(part)] : rest ?? object.material
+    }
+    this.needsRender = true
+  }
+
   private clearHouse(): void {
     for (const child of [...this.houseGroup.children]) {
       this.houseGroup.remove(child)
       if (child instanceof THREE.Mesh) child.geometry.dispose()
     }
     this.byPart.clear()
+    this.restMaterial.clear()
     this.restPosition.clear()
     this.boxParts.clear()
     this.orderIndex.clear()
@@ -299,11 +349,17 @@ export class HouseScene {
       options.rain,
       options.explode,
       options.section,
+      options.provenance,
       options.reducedMotion,
       options.reveal ? options.reveal.t.toFixed(4) : 'none',
     ].join('|')
     if (signature === this.lastApplied) return
     this.lastApplied = signature
+
+    if (options.provenance !== this.provenanceOn) {
+      this.provenanceOn = options.provenance
+      this.setProvenanceMarking(options.provenance)
+    }
 
     for (const [id, object] of this.byPart) {
       const rest = this.restPosition.get(id)

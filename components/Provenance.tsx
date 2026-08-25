@@ -20,10 +20,23 @@ export function ProvenanceStrip({
   dims,
   locale,
   compact = false,
+  marking,
+  onMarking,
+  parts,
 }: {
   dims: readonly Dim[]
   locale: Locale
   compact?: boolean
+  /**
+   * When present, the strip also drives the overlay that marks the model
+   * itself. It belongs here rather than with the scene toggles: the control
+   * and the legend that explains its three colours are the same idea, and
+   * splitting them would put a colour on screen whose meaning lives elsewhere.
+   */
+  marking?: boolean
+  onMarking?: (v: boolean) => void
+  /** part counts, shown only while the model is marked */
+  parts?: { measured: number; canon: number; interpolated: number; total: number }
 }) {
   const split = provenanceSplit(dims)
   const pct = (n: number) => (split.total === 0 ? 0 : (n / split.total) * 100)
@@ -69,7 +82,22 @@ export function ProvenanceStrip({
       </div>
 
       {/* Legend contract: nothing on screen carries meaning only the code knows. */}
-      <dl className="mt-3 flex flex-col gap-1.5">
+      {parts ? (
+        /*
+          Two counts, two denominators, and they disagree: one canon rule can
+          govern a hundred parts while one invented metre governs three. Both
+          are true, so both are named rather than one standing in for the other.
+        */
+        <div className="mt-3 flex items-baseline gap-2">
+          <span className="micro ml-auto w-12 text-right">
+            {pick(COPY.provenance.byPart, locale)}
+          </span>
+          <span className="micro w-16 text-right">
+            {pick(COPY.provenance.byDimension, locale)}
+          </span>
+        </div>
+      ) : null}
+      <dl className={['flex flex-col gap-1.5', parts ? 'mt-1' : 'mt-3'].join(' ')}>
         {bands.map((b) => (
           <div key={b.key} className="flex items-baseline gap-2">
             {/*
@@ -84,13 +112,47 @@ export function ProvenanceStrip({
               style={{ background: b.colour, borderColor: b.edge }}
             />
             <dt className="micro text-bolu">{pick(b.label, locale)}</dt>
-            <dd className="num ml-auto text-meta text-bolu">
+            {parts ? (
+              <dd className="num ml-auto w-12 text-meta text-bolu">{parts[b.key]}</dd>
+            ) : null}
+            <dd className={['num text-meta text-bolu', parts ? 'w-16' : 'ml-auto'].join(' ')}>
               {b.n}
               <span className="text-muted">/{split.total}</span>
             </dd>
           </div>
         ))}
       </dl>
+
+      {onMarking ? (
+        <label className="mt-4 flex cursor-pointer items-start gap-2">
+          <input
+            type="checkbox"
+            checked={marking ?? false}
+            onChange={(e) => onMarking(e.target.checked)}
+            className="mt-1 h-4 w-4 shrink-0 accent-bolu"
+          />
+          <span>
+            <span className="block text-body leading-tight">
+              {pick(COPY.provenance.mark, locale)}
+            </span>
+            <span className="mt-1 block text-body text-muted">
+              {pick(COPY.provenance.markHint, locale)}
+            </span>
+          </span>
+        </label>
+      ) : null}
+
+      {marking && parts ? (
+        <p className="mt-3 text-body text-muted">
+          {fill(
+            parts.interpolated === parts.total
+              ? pick(COPY.provenance.markAll, locale)
+              : pick(COPY.provenance.markSome, locale),
+            { n: parts.interpolated, total: parts.total },
+          )}{' '}
+          {pick(COPY.provenance.markWhy, locale)}
+        </p>
+      ) : null}
 
       {!compact ? (
         <p className="mt-3 text-body text-muted">
@@ -100,6 +162,10 @@ export function ProvenanceStrip({
       ) : null}
     </div>
   )
+}
+
+function fill(template: string, values: Record<string, number>): string {
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) => String(values[key] ?? whole))
 }
 
 /** The class of a single dimension, as a mono tag. Used in tables and readouts. */

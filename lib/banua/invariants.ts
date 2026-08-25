@@ -15,7 +15,7 @@ import { STAGE_ORDER } from './types'
 import { rotatedHalfExtents, slopeDrop } from './geometry'
 import { ridgeOf } from './frame'
 import { RIDGE_CAP_BAND, ijukBands } from './roof'
-import { DIMS, rankInfo } from './rules'
+import { DIMS, DIM_KEYS, partClass, rankInfo } from './rules'
 
 export type CheckStatus = 'pass' | 'fail' | 'skip'
 
@@ -513,6 +513,46 @@ export function checkPostCount(house: House, layout: Layout): CheckResult {
 }
 
 /**
+ * Every part declares what it was derived from.
+ *
+ * The model can be marked up by provenance only because each part names the
+ * dimensions that decided it. That tagging is the kind of thing that rots
+ * silently — a new member gets added during a geometry change and nobody
+ * notices it is claiming to come from nowhere, and it renders in whatever
+ * colour an empty list happens to produce. So the tagging is not a
+ * convention, it is a check: no part may be untagged, and no part may cite a
+ * dimension that does not exist.
+ */
+export function checkPartProvenance(house: House): CheckResult {
+  const known = new Set<string>(DIM_KEYS)
+  const untagged: string[] = []
+  const unknown: string[] = []
+
+  for (const part of house.parts) {
+    if (part.dims.length === 0) untagged.push(part.id)
+    for (const key of part.dims) {
+      if (!known.has(key)) unknown.push(`${part.id}:${key}`)
+    }
+  }
+
+  const split = { measured: 0, canon: 0, interpolated: 0 }
+  for (const part of house.parts) split[partClass(part)]++
+
+  const ok = untagged.length === 0 && unknown.length === 0
+  return {
+    key: 'part-provenance',
+    titleId: 'Tiap bagian menyebut ukuran asalnya',
+    titleEn: 'Every part declares the dimensions it came from',
+    status: ok ? 'pass' : 'fail',
+    detail: ok
+      ? `${house.parts.length} bagian, semuanya bertanda. Menurut kelas terlemah: ` +
+        `${split.measured} terukur, ${split.canon} kanon, ${split.interpolated} perkiraan penulis.`
+      : `Tanpa tanda: ${untagged.slice(0, 6).join(', ') || 'tidak ada'}. ` +
+        `Ukuran tak dikenal: ${unknown.slice(0, 6).join(', ') || 'tidak ada'}.`,
+  }
+}
+
+/**
  * The generator against a real measured drawing.
  *
  * Reports skipped, and will keep reporting skipped until a survey is wired
@@ -546,6 +586,7 @@ export function runInvariants(house: House, layout: Layout): readonly CheckResul
     checkEaveOversail(layout),
     checkEaveClearsPlate(layout),
     checkPostCount(house, layout),
+    checkPartProvenance(house),
     checkAgainstSurvey(),
   ]
 }

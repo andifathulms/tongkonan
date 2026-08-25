@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { buildHouse, buildTimeline, placedAt } from '@/lib/banua/assembly'
-import { ALL_DIMS, DEFAULT_RULES, normaliseRules, provenanceSplit } from '@/lib/banua/rules'
+import {
+  ALL_DIMS,
+  DEFAULT_RULES,
+  DIM_KEYS,
+  normaliseRules,
+  partClass,
+  partSplit,
+  provenanceSplit,
+  worstClass,
+} from '@/lib/banua/rules'
 import { STAGE_ORDER } from '@/lib/banua/types'
 import type { Rules, Stage } from '@/lib/banua/types'
 
@@ -132,5 +141,55 @@ describe('orientation is a constraint', () => {
     expect(layout.frontProwX).toBeLessThan(0)
     expect(layout.rearProwX).toBeGreaterThan(0)
     expect(layout.frontProwY).toBeGreaterThan(layout.rearProwY)
+  })
+})
+
+describe('provenance, per part', () => {
+  it('every part names dimensions that exist', () => {
+    const { house } = buildHouse(DEFAULT_RULES)
+    const known = new Set<string>(DIM_KEYS)
+    for (const part of house.parts) {
+      expect(part.dims.length, `${part.id} is untagged`).toBeGreaterThan(0)
+      for (const key of part.dims) expect(known.has(key), `${part.id} cites ${key}`).toBe(true)
+    }
+  })
+
+  it('classes a part by its least-sourced input, never its best', () => {
+    // orientation is canon, bayLength is the author's own.
+    expect(worstClass(['orientation'])).toBe('canon')
+    expect(worstClass(['orientation', 'bayLength'])).toBe('interpolated')
+    expect(worstClass([])).toBe('measured')
+  })
+
+  it('the split by part and the split by dimension are allowed to disagree', () => {
+    const { house, layout } = buildHouse(DEFAULT_RULES)
+    const byPart = partSplit(house.parts)
+    const byDim = provenanceSplit(layout.dims)
+    expect(byPart.total).toBe(house.parts.length)
+    expect(byDim.total).toBe(layout.dims.length)
+    // The point of marking the model: the two counts answer different
+    // questions and neither substitutes for the other.
+    expect(byPart.total).not.toBe(byDim.total)
+  })
+
+  it('reports what the marked model actually shows', () => {
+    const { house } = buildHouse(DEFAULT_RULES)
+    const split = partSplit(house.parts)
+    const pct = (n: number) => Math.round((n / split.total) * 100)
+    console.log(
+      `parts: ${split.measured} measured (${pct(split.measured)}%), ` +
+        `${split.canon} canon (${pct(split.canon)}%), ` +
+        `${split.interpolated} interpolated (${pct(split.interpolated)}%)`,
+    )
+    expect(split.measured + split.canon + split.interpolated).toBe(split.total)
+  })
+
+  it('a part that cites only canon rules is not marked as invented', () => {
+    const { house } = buildHouse(DEFAULT_RULES)
+    // Every part currently depends on at least one metric value, so this is
+    // a statement about the rule pack rather than about the code: when a
+    // survey lands, these verdicts move without anything here changing.
+    const classes = new Set(house.parts.map((p) => partClass(p)))
+    expect(classes.has('interpolated')).toBe(true)
   })
 })

@@ -79,6 +79,7 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
       'rangka-atap',
       order++,
       'kayu',
+      ['ridgeRise', 'ridgeSag', 'frontProwRise', 'rearProwRise', 'prowOverhang', 'ridgeSags', 'frontHigher'],
       tubeMesh(ridgePath, () => 0.075 * s, 8, 0.5),
     ),
   )
@@ -162,6 +163,7 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
           'rangka-atap',
           order++,
           'bambu',
+          ['roofKneeDrop', 'eaveOversail', 'ridgeRise', 'bodyWidth'],
           tubeMesh(path, () => 0.045 * s, 6, 0.3),
         ),
       )
@@ -178,6 +180,7 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
         'rangka-atap',
         order++,
         'papan',
+        ['roofKneeDrop', 'eaveOversail', 'eaveDrop', 'ridgeRise', 'ridgeSag'],
         sweepSurface(stations, {
           side,
           across: 8,
@@ -203,6 +206,7 @@ function rafter(id: string, order: number, center: Vec3, size: Vec3, rotation: V
     stage: 'rangka-atap',
     order,
     material: 'kayu',
+    dims: ['raftersPerBay', 'ridgeRise', 'roofKneeDrop', 'eaveOversail', 'eaveDrop', 'bodyWidth'],
     center,
     size,
     rotation,
@@ -312,6 +316,7 @@ export function buildIjuk(layout: Layout): readonly Part[] {
         'ijuk',
         order++,
         'ijuk',
+        ['ijukCourseDepth', 'ijukThickness', 'ijukLap', 'roofKneeDrop', 'eaveOversail'],
         mergeMeshes(meshes),
       ),
     )
@@ -335,6 +340,7 @@ export function buildIjuk(layout: Layout): readonly Part[] {
       'ijuk',
       order++,
       'ijuk',
+      ['ijukThickness', 'ijukLap', 'ridgeRise', 'ridgeSag'],
       mergeMeshes([capRight, mirrorZ(capRight)]),
     ),
   )

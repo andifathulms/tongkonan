@@ -8,6 +8,7 @@
  */
 
 import { DIMS, bayNames, rankInfo } from './rules'
+import type { DimKey } from './rules'
 import {
   clamp01,
   slopeLength,
@@ -149,19 +150,26 @@ interface Naming {
   readonly nameEn: string
 }
 
+/**
+ * @param dims the dimensions that decided this part's size and place. Not
+ *   optional and not decorative: the model can be marked up by provenance
+ *   only because every part says what it was derived from, and
+ *   `checkPartProvenance` fails the build on an empty list.
+ */
 function box(
   id: string,
   naming: Naming,
   stage: Stage,
   order: number,
   material: BoxPart['material'],
+  dims: readonly DimKey[],
   center: Vec3,
   size: Vec3,
   rotation?: Vec3,
 ): BoxPart {
   return rotation
-    ? { kind: 'box', id, ...naming, stage, order, material, center, size, rotation }
-    : { kind: 'box', id, ...naming, stage, order, material, center, size }
+    ? { kind: 'box', id, ...naming, stage, order, material, dims, center, size, rotation }
+    : { kind: 'box', id, ...naming, stage, order, material, dims, center, size }
 }
 
 export function meshPart(
@@ -170,6 +178,7 @@ export function meshPart(
   stage: Stage,
   order: number,
   material: MeshPart['material'],
+  dims: readonly DimKey[],
   mesh: MeshData,
 ): MeshPart {
   return {
@@ -179,6 +188,7 @@ export function meshPart(
     stage,
     order,
     material,
+    dims,
     positions: mesh.positions,
     normals: mesh.normals,
     uvs: mesh.uvs,
@@ -216,6 +226,7 @@ export function buildFrame(layout: Layout): FrameResult {
           'batu',
           n,
           'batu',
+          ['padHeight', 'padDiameter', 'bayLength', 'bodyWidth', 'postsPerRow'],
           [x, padH / 2, z],
           [padD, padH, padD],
         ),
@@ -243,6 +254,15 @@ export function buildFrame(layout: Layout): FrameResult {
           'ariri',
           p,
           'kayu',
+          [
+            'postSection',
+            'kolongHeight',
+            'padHeight',
+            'floorFrameDepth',
+            'bayLength',
+            'bodyWidth',
+            'postsPerRow',
+          ],
           [x, (foot + head) / 2, z],
           [sec, head - foot, sec],
         ),
@@ -270,6 +290,7 @@ export function buildFrame(layout: Layout): FrameResult {
         'rangka-lantai',
         i,
         'kayu',
+        ['floorFrameDepth', 'postSection', 'bayLength', 'bodyWidth'],
         [0, layout.floorFrameY + frameDepth / 2, z],
         // Overruns the end posts by a section: a corner peg has to be inside
         // timber on both sides of the joint, not right at the cut end.
@@ -289,6 +310,7 @@ export function buildFrame(layout: Layout): FrameResult {
         'rangka-lantai',
         layout.postZ.length + i,
         'kayu',
+        ['floorFrameDepth', 'postSection', 'bayLength', 'bodyWidth'],
         [x, layout.floorFrameY + frameDepth / 2, 0],
         [sillW, frameDepth, layout.bodyWidth + sec],
       ),
@@ -317,6 +339,7 @@ export function buildFrame(layout: Layout): FrameResult {
         'lantai',
         i,
         'papan',
+        ['deckThickness', 'bodyWidth', 'bayLength'],
         [0, layout.deckY - deckT / 2, z],
         [layout.bodyLength, deckT, layout.bodyWidth / boards],
       ),
@@ -344,6 +367,7 @@ export function buildFrame(layout: Layout): FrameResult {
           'dinding',
           b * 2 + j,
           'papan',
+          ['wallThickness', 'wallHeight', 'bayLength', 'bodyWidth'],
           [cx, wallCY, side * (layout.bodyWidth / 2 - wallT / 2)],
           [len, wallH, wallT],
         ),
@@ -363,6 +387,7 @@ export function buildFrame(layout: Layout): FrameResult {
         'dinding',
         layout.rules.bays * 2 + j,
         'kayu',
+        ['plateDepth', 'plateWidth', 'wallHeight', 'bayLength', 'bodyWidth'],
         [0, layout.plateY, z],
         [layout.bodyLength, plateD, plateW],
       ),
@@ -384,6 +409,7 @@ export function buildFrame(layout: Layout): FrameResult {
         // The front gable is the carved face when rank permits it; the rear
         // stays plain even on a layuk.
         side < 0 && rankInfo(layout.rules.rank).carvedGable ? 'ukiran' : 'papan',
+        ['wallThickness', 'wallHeight', 'bodyWidth', 'bayLength'],
         [side * (layout.bodyLength / 2 - wallT / 2), wallCY, 0],
         [wallT, wallH, layout.bodyWidth],
       ),
@@ -407,6 +433,7 @@ export function buildFrame(layout: Layout): FrameResult {
       'tulak-somba',
       0,
       'batu',
+      ['padHeight', 'padDiameter', 'prowOverhang', 'bayLength'],
       [layout.tulakSombaX, padH / 2, 0],
       [padD * 1.25, padH, padD * 1.25],
     ),
@@ -418,6 +445,15 @@ export function buildFrame(layout: Layout): FrameResult {
       'tulak-somba',
       1,
       rankInfo(layout.rules.rank).carvedGable ? 'ukiran' : 'kayu',
+      [
+        'tulakSombaSection',
+        'prowOverhang',
+        'ridgeRise',
+        'ridgeSag',
+        'frontProwRise',
+        'kolongHeight',
+        'padHeight',
+      ],
       [layout.tulakSombaX, tsFoot + tsH / 2, 0],
       [tsSec, tsH, tsSec],
     ),
@@ -482,6 +518,7 @@ export function buildHorns(layout: Layout): readonly Part[] {
         'tanduk',
         i,
         'tanduk',
+        ['hornSpread', 'hornSpacing', 'hornsAreTally', 'tulakSombaSection', 'wallHeight'],
         mergeMeshes([right, mirrorZ(right)]),
       ),
     )

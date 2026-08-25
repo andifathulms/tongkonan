@@ -116,6 +116,31 @@ export const COPY = {
       'Bilah ini bergerak ketika survei nyata dimasukkan. Pergerakannya adalah ukuran kemajuan proyek ini.',
       "This bar moves as real surveys are wired in. That movement is the project's progress metric.",
     ),
+    mark: t('Tandai model', 'Mark the model'),
+    markHint: t(
+      'Mewarnai tiap bagian menurut asal ukuran yang membentuknya, bukan menurut bahannya. Tiap bagian dinilai dari sumbernya yang paling lemah.',
+      "Colours each part by where its dimensions came from rather than by what it is made of. A part is classed by its least-sourced input.",
+    ),
+    /**
+     * Said with the counts rather than in the abstract, because the claim is
+     * only true while it is true. `{n}` and `{total}` are filled from the
+     * house on screen, so a survey landing moves this sentence without anyone
+     * remembering to edit it.
+     */
+    markAll: t(
+      'Seluruh {total} bagian bertumpu pada sedikitnya satu ukuran perkiraan penulis.',
+      'All {total} parts rest on at least one dimension the author invented.',
+    ),
+    markSome: t(
+      '{n} dari {total} bagian bertumpu pada sedikitnya satu ukuran perkiraan penulis.',
+      '{n} of {total} parts rest on at least one dimension the author invented.',
+    ),
+    markWhy: t(
+      'Aturan kanon dalam pustaka menyatakan struktur \u2014 arah hadap, punggung yang melengkung, tanduk sebagai catatan \u2014 bukan panjang. Jadi logika bentuknya bersumber, ukurannya tidak.',
+      'The canon rules in the pack state structure \u2014 which way it faces, that the ridge sags, that the horns are a tally \u2014 not lengths. So the shape\u2019s logic is sourced and its sizes are not.',
+    ),
+    byPart: t('Menurut bagian', 'By part'),
+    byDimension: t('Menurut ukuran', 'By dimension'),
     renderWarning: t(
       'Gambar tiga dimensi yang mulus menyiratkan ketelitian yang tidak dimiliki sumbernya. Bilah ini yang menjaga keduanya jujur.',
       'A smooth 3D render implies a precision the sources do not have. This bar is what keeps the two honest.',

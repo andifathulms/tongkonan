@@ -17,7 +17,7 @@ import { RailSection } from './Sheet'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { buildHouse, buildTimeline } from '@/lib/banua/assembly'
-import { DEFAULT_RULES, rankInfo } from '@/lib/banua/rules'
+import { DEFAULT_RULES, partSplit, rankInfo } from '@/lib/banua/rules'
 import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/banua/address'
 import type { Rules } from '@/lib/banua/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
@@ -36,6 +36,7 @@ export function BangunClient({ locale }: { locale: Locale }) {
   const [view, setView] = useState<ViewKey>('perspektif')
   const [figure, setFigure] = useState(true) // on by default: it is the scale bar
   const [rain, setRain] = useState(false)
+  const [marking, setMarking] = useState(false)
   const [presetKey, setPresetKey] = useState<DatePreset['key']>('kulminasi')
   // Mid-morning by default: raking enough to read the form, and a short drag
   // of the time control to noon shows the shadow all but disappear.
@@ -80,7 +81,13 @@ export function BangunClient({ locale }: { locale: Locale }) {
           <OrientationNote locale={locale} />
           <DrawingExport house={house} layout={layout} locale={locale} />
           <RailSection title={pick(COPY.provenance.heading, locale)}>
-            <ProvenanceStrip dims={layout.dims} locale={locale} />
+            <ProvenanceStrip
+              dims={layout.dims}
+              locale={locale}
+              marking={marking}
+              onMarking={setMarking}
+              parts={marking ? partSplit(house.parts) : undefined}
+            />
           </RailSection>
         </>
       }
@@ -93,6 +100,7 @@ export function BangunClient({ locale }: { locale: Locale }) {
         view={view}
         figure={figure}
         rain={rain}
+        provenance={marking}
         reveal={rebuild < 1 ? { timeline, t: rebuild } : null}
       >
         <ViewSwitch view={view} onChange={setView} locale={locale} />

@@ -7,6 +7,8 @@
  * timber, not a drawing instruction.
  */
 
+import type { DimKey } from './rules'
+
 export type Vec3 = readonly [number, number, number]
 
 /* ── Provenance ───────────────────────────────────────────────────────────
@@ -140,6 +142,23 @@ interface PartBase {
   readonly stage: Stage
   readonly order: number
   readonly material: MaterialKey
+  /**
+   * The dimensions that decided this part's size and place.
+   *
+   * The provenance bar says how much of the house is guessed. It cannot say
+   * *which* of it, and that is the more useful half — the sources give
+   * structure richly and metres almost never, so the topology is largely
+   * sourced while the sizes are largely not. Declaring the governing
+   * dimensions per part is what lets the model show that distinction instead
+   * of asserting a single fraction over everything.
+   *
+   * Rank scale is not listed. Every dimension in the house passes through it,
+   * so listing it everywhere would say nothing; it is canon, and a part is
+   * classed by its least-sourced input, so its absence changes no verdict.
+   *
+   * An empty list is a bug and `checkPartProvenance` fails the build on it.
+   */
+  readonly dims: readonly DimKey[]
 }
 
 export interface BoxPart extends PartBase {
