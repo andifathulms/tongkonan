@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { buildHouse } from '@/lib/banua/assembly'
 import { runInvariants } from '@/lib/banua/invariants'
 import type { Rules } from '@/lib/banua/types'
+import { DEFAULT_RULES } from '@/lib/banua/rules'
 
 const CASES: Rules[] = [
   { rank: 'pekamberan', bays: 3, horns: 6 },
@@ -21,4 +22,17 @@ describe('invariants', () => {
       expect(results.filter((r) => r.status === 'fail')).toEqual([])
     })
   }
+})
+
+describe('every check speaks both locales', () => {
+  it('states its verdict in Indonesian and in English', () => {
+    const { house, layout } = buildHouse(DEFAULT_RULES)
+    for (const r of runInvariants(house, layout)) {
+      expect(r.detail.length, `${r.key} has no Indonesian detail`).toBeGreaterThan(0)
+      expect(r.detailEn.length, `${r.key} has no English detail`).toBeGreaterThan(0)
+      // The two are translations, not a copy: a detail left untranslated is
+      // the defect this test exists to catch.
+      expect(r.detailEn, `${r.key} detail is not translated`).not.toBe(r.detail)
+    }
+  })
 })

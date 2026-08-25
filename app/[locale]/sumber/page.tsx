@@ -181,7 +181,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
                   </span>
                 </div>
                 <p className="mt-1 pl-[3.6rem] text-body text-muted">
-                  {r.detail}
+                  {locale === 'id' ? r.detail : r.detailEn}
                 </p>
               </li>
             ))}
@@ -318,7 +318,9 @@ function CounterCase({
         </span>
         <span className="text-meta text-muted">{pick(COPY.checks.counterProws, locale)}</span>
       </div>
-      <p className="mt-2 text-meta text-muted">{result.detail}</p>
+      <p className="mt-2 text-meta text-muted">
+        {locale === 'id' ? result.detail : result.detailEn}
+      </p>
     </div>
   )
 }

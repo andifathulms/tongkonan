@@ -24,8 +24,15 @@ export interface CheckResult {
   readonly titleId: string
   readonly titleEn: string
   readonly status: CheckStatus
-  /** What was measured, in words and numbers. Shown as-is in the UI. */
+  /**
+   * What was measured, in words and numbers. Shown as-is in the UI.
+   *
+   * Both locales, like the title above it. The numbers are identical; only
+   * the words around them differ. A check whose verdict a reader cannot read
+   * is not evidence to that reader, and /sumber exists to be checked.
+   */
   readonly detail: string
+  readonly detailEn: string
 }
 
 const TOL = 1e-4
@@ -173,6 +180,10 @@ export function checkSymmetry(house: House): CheckResult {
       orphan === 0
         ? `${all.length / 3} titik; simpangan cermin terbesar ${(worst * 1000).toFixed(2)} mm.`
         : `${orphan} titik tanpa pasangan cermin dalam 5 mm.`,
+    detailEn:
+      orphan === 0
+        ? `${all.length / 3} points; largest mirror deviation ${(worst * 1000).toFixed(2)} mm.`
+        : `${orphan} points with no mirror partner within 5 mm.`,
   }
 }
 
@@ -214,6 +225,9 @@ export function checkJoints(house: House): CheckResult {
     detail: ok
       ? `${house.joints.length} sambungan pasak, takik, dan tumpu; semuanya bertaut.`
       : `hilang: ${missing.join(', ') || '—'}; tidak bertaut: ${loose.join(', ') || '—'}.`,
+    detailEn: ok
+      ? `${house.joints.length} pasak, takik and tumpu joints; every one engaged.`
+      : `missing: ${missing.join(', ') || '—'}; not engaged: ${loose.join(', ') || '—'}.`,
   }
 }
 
@@ -275,6 +289,15 @@ export function checkBuildOrder(house: House): CheckResult {
         ]
           .filter(Boolean)
           .join('; '),
+    detailEn: ok
+      ? `${house.parts.length} parts, every one bearing on something already standing or on the ground.`
+      : [
+          belowGround.length ? `below ground: ${belowGround.map((p) => p.id).join(', ')}` : '',
+          unsupported.length ? `unsupported: ${unsupported.join(', ')}` : '',
+          monotone ? '' : 'order is not monotonic',
+        ]
+          .filter(Boolean)
+          .join('; '),
   }
 }
 
@@ -304,6 +327,10 @@ export function checkJointStages(house: House): CheckResult {
       bad.length === 0
         ? 'Setiap sambungan menaut dua bagian pada tahap yang sama atau berurutan.'
         : `melompat tahap: ${bad.join(', ')}.`,
+    detailEn:
+      bad.length === 0
+        ? 'Every joint engages two parts from the same stage or from consecutive ones.'
+        : `skips a stage: ${bad.join(', ')}.`,
   }
 }
 
@@ -366,6 +393,10 @@ export function checkMeshes(house: House): CheckResult {
       problems.length === 0
         ? `${tris} segitiga; indeks dalam jangkauan, tidak ada yang merosot, semua normal bersatuan.`
         : problems.slice(0, 6).join('; '),
+    detailEn:
+      problems.length === 0
+        ? `${tris} triangles; indices in range, none degenerate, every normal unit length.`
+        : problems.slice(0, 6).join('; '),
   }
 }
 
@@ -399,6 +430,9 @@ export function checkRidgeProfile(layout: Layout): CheckResult {
     detail: ok
       ? `titik terendah pada s=${lowestS.toFixed(2)} (${lowest.toFixed(2)} m); haluan depan ${front.toFixed(2)} m, belakang ${rear.toFixed(2)} m.`
       : `s terendah ${lowestS.toFixed(2)}, depan ${front.toFixed(2)}, belakang ${rear.toFixed(2)}.`,
+    detailEn: ok
+      ? `lowest point at s=${lowestS.toFixed(2)} (${lowest.toFixed(2)} m); front prow ${front.toFixed(2)} m, rear ${rear.toFixed(2)} m.`
+      : `lowest s ${lowestS.toFixed(2)}, front ${front.toFixed(2)}, rear ${rear.toFixed(2)}.`,
   }
 }
 
@@ -443,6 +477,10 @@ export function checkIjukCoverage(house: House, layout: Layout): CheckResult {
       gaps.length === 0
         ? `${bands.length} lapis; tindihan terkecil ${(minLap * 100).toFixed(1)}% dari bentang lereng.`
         : gaps.join('; '),
+    detailEn:
+      gaps.length === 0
+        ? `${bands.length} courses; smallest lap ${(minLap * 100).toFixed(1)}% of the slope run.`
+        : gaps.join('; '),
   }
 }
 
@@ -463,6 +501,7 @@ export function checkEaveOversail(layout: Layout): CheckResult {
     titleEn: 'The eave oversails the outer post line',
     status: ok ? 'pass' : 'fail',
     detail: `tepi atap ${layout.eaveHalfWidth.toFixed(2)} m dari sumbu; muka tiang terluar ${outerPostFace.toFixed(2)} m; julur ${clear.toFixed(2)} m.`,
+    detailEn: `eave ${layout.eaveHalfWidth.toFixed(2)} m from the axis; outer post face ${outerPostFace.toFixed(2)} m; oversail ${clear.toFixed(2)} m.`,
   }
 }
 
@@ -490,6 +529,7 @@ export function checkEaveClearsPlate(layout: Layout): CheckResult {
     titleEn: 'The eave clears the wall plate',
     status: ok ? 'pass' : 'fail',
     detail: `atap pada z=${plateZ.toFixed(2)} m berada di ${roofY.toFixed(2)} m; puncak balok tumpuan ${plateTop.toFixed(2)} m; tepi atap ${layout.eaveHalfWidth.toFixed(2)} m.`,
+    detailEn: `roof at z=${plateZ.toFixed(2)} m sits at ${roofY.toFixed(2)} m; top of the wall plate ${plateTop.toFixed(2)} m; eave ${layout.eaveHalfWidth.toFixed(2)} m.`,
   }
 }
 
@@ -509,6 +549,9 @@ export function checkPostCount(house: House, layout: Layout): CheckResult {
     detail: ok
       ? `${layout.rules.bays} ruang → ${expectedRows} baris × ${layout.postZ.length} tiang = ${expected} a'riri, ${stones} batu umpak.`
       : `diharapkan ${expected}, ditemukan ${posts} tiang dan ${stones} batu.`,
+    detailEn: ok
+      ? `${layout.rules.bays} bays → ${expectedRows} rows × ${layout.postZ.length} posts = ${expected} a'riri, ${stones} pad stones.`
+      : `expected ${expected}, found ${posts} posts and ${stones} stones.`,
   }
 }
 
@@ -549,6 +592,11 @@ export function checkPartProvenance(house: House): CheckResult {
         `${split.measured} terukur, ${split.canon} kanon, ${split.interpolated} perkiraan penulis.`
       : `Tanpa tanda: ${untagged.slice(0, 6).join(', ') || 'tidak ada'}. ` +
         `Ukuran tak dikenal: ${unknown.slice(0, 6).join(', ') || 'tidak ada'}.`,
+    detailEn: ok
+      ? `${house.parts.length} parts, every one tagged. By least-sourced input: ` +
+        `${split.measured} measured, ${split.canon} canon, ${split.interpolated} interpolated.`
+      : `Untagged: ${untagged.slice(0, 6).join(', ') || 'none'}. ` +
+        `Unknown dimensions: ${unknown.slice(0, 6).join(', ') || 'none'}.`,
   }
 }
 
@@ -569,6 +617,8 @@ export function checkAgainstSurvey(): CheckResult {
     status: 'skip',
     detail:
       'Dilewati. Belum ada gambar ukur yang dimasukkan, jadi tidak ada yang bisa dibandingkan. Pemeriksaan ini tidak akan diluluskan dengan cara melonggarkannya.',
+    detailEn:
+      'Skipped. No measured drawing has been wired in, so there is nothing to compare against. This check will not be made to pass by weakening it.',
   }
 }
 
