@@ -85,6 +85,7 @@ export function BangunClient({ locale }: { locale: Locale }) {
       }
     >
       <Viewport
+        locale={locale}
         house={house}
         layout={layout}
         sun={sun}
@@ -176,9 +177,15 @@ function Readout({
   return (
     // Below the view switch on a narrow screen, beside it on a wide one:
     // at 390px the two would otherwise sit on top of each other.
-    <div className="pointer-events-none absolute left-3 top-14 z-10 max-w-[15rem] rounded border border-[color:var(--hairline)] bg-[rgba(216,215,205,0.88)] px-3 py-2.5 backdrop-blur-[2px] sheet:top-3">
-      <p className="text-[13px] font-medium leading-tight">{rankName}</p>
-      <p className="mt-0.5 text-[11px] leading-snug text-[color:var(--muted)]">
+    <div className="pointer-events-none absolute left-3 top-14 z-10 max-w-[15rem] rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px] sheet:top-3">
+      {/*
+        Without this line the six figures read as the specifications of a real
+        building. They are outputs of the three rules in the rail, and saying
+        so is what connects the controls to the model.
+      */}
+      <p className="micro">{pick(COPY.computed, locale)}</p>
+      <p className="mt-1 text-body font-medium leading-tight">{rankName}</p>
+      <p className="mt-0.5 text-meta text-muted">
         {layout.bayNames.join(' · ')} — {rules.horns}{' '}
         {pick(COPY.controls.horns, locale).toLowerCase()}
       </p>
@@ -186,8 +193,8 @@ function Readout({
       <dl className="flex flex-col gap-0.5">
         {rows.map(([label, value]) => (
           <div key={label} className="flex items-baseline justify-between gap-3">
-            <dt className="text-[11px] leading-snug text-[color:var(--muted)]">{label}</dt>
-            <dd className="num text-[12px]">{value}</dd>
+            <dt className="text-meta text-muted">{label}</dt>
+            <dd className="num text-meta">{value}</dd>
           </div>
         ))}
       </dl>

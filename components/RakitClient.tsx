@@ -212,6 +212,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
       }
     >
       <Viewport
+        locale={locale}
         house={house}
         layout={layout}
         sun={sun}

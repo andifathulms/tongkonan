@@ -7,8 +7,11 @@ import type { CameraState, ViewKey } from './scene'
 import type { House, Layout } from '@/lib/banua/types'
 import type { SolarPosition } from '@/lib/solar/position'
 import type { Timeline } from '@/lib/banua/assembly'
+import { COPY, pick } from '@/lib/i18n'
+import type { Locale } from '@/lib/i18n'
 
 export interface ViewportProps {
+  locale: Locale
   house: House
   layout: Layout
   sun: SolarPosition
@@ -28,6 +31,7 @@ export interface ViewportProps {
 const TRANSITION_MS = 1100
 
 export function Viewport({
+  locale,
   house,
   layout,
   sun,
@@ -44,6 +48,8 @@ export function Viewport({
   const hostRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HouseScene | null>(null)
   const [scaleBar, setScaleBar] = useState<{ metres: number; pixels: number } | null>(null)
+  // The hint retires itself the moment the reader does the thing it names.
+  const [touched, setTouched] = useState(false)
   const reducedMotion = usePrefersReducedMotion()
 
   // Everything the render loop reads lives in a ref, so a prop change does not
@@ -159,6 +165,7 @@ export function Viewport({
 
     const down = (e: PointerEvent) => {
       dragging = true
+      setTouched(true)
       lastX = e.clientX
       lastY = e.clientY
       canvas.setPointerCapture(e.pointerId)
@@ -178,6 +185,7 @@ export function Viewport({
     }
     const wheel = (e: WheelEvent) => {
       e.preventDefault()
+      setTouched(true)
       sceneRef.current?.dolly(e.deltaY > 0 ? 1.08 : 1 / 1.08)
     }
     const touchMove = (e: TouchEvent) => {
@@ -215,11 +223,26 @@ export function Viewport({
       <canvas
         ref={canvasRef}
         className="block h-full w-full touch-none"
-        aria-label="Model tongkonan"
+        role="img"
+        aria-label={pick(COPY.modelLabel, locale)}
       />
       {caption}
       {children}
       {scaleBar ? <ScaleBar {...scaleBar} /> : null}
+      {/*
+        Rotation is drag-only and deliberately never idles, so nothing about a
+        still model says it can be turned. Saying so is the only affordance
+        left, and it goes away as soon as it has been used.
+      */}
+      <p
+        aria-hidden
+        className={[
+          'micro pointer-events-none absolute bottom-16 right-3 select-none text-right transition-opacity duration-layout sheet:bottom-3',
+          touched ? 'opacity-0' : 'opacity-100',
+        ].join(' ')}
+      >
+        {pick(COPY.hint, locale)}
+      </p>
     </div>
   )
 }
@@ -232,7 +255,9 @@ export function Viewport({
  */
 function ScaleBar({ metres, pixels }: { metres: number; pixels: number }) {
   return (
-    <div className="pointer-events-none absolute bottom-3 left-3 select-none">
+    // Lifted clear of the masthead band on a narrow screen; that band only
+    // exists under 860px, so above it the bar sits back on the bottom edge.
+    <div className="pointer-events-none absolute bottom-16 left-3 select-none sheet:bottom-3">
       <div
         className="h-2 border-b border-l border-r border-bolu"
         style={{ width: `${pixels}px` }}

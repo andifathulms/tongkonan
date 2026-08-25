@@ -144,6 +144,7 @@ export function BacaClient({ locale }: { locale: Locale }) {
       }
     >
       <Viewport
+        locale={locale}
         house={house}
         layout={layout}
         sun={sun}

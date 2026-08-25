@@ -46,15 +46,16 @@ export function Sheet({
       >
         <div className={isViewport ? 'relative h-full w-full' : 'relative sheet:h-full'}>
           {children}
+          {isViewport ? <Masthead locale={locale} route={route} /> : null}
         </div>
       </main>
       <aside
         className={[
-          'flex flex-col bg-[color:var(--film)]',
-          'sheet:order-1 sheet:min-h-0 sheet:w-rail sheet:shrink-0 sheet:overflow-y-auto sheet:border-r sheet:border-t-0',
+          'flex flex-col bg-film',
+          'sheet:order-1 sheet:min-h-0 sheet:w-rail sheet:shrink-0 sheet:overflow-y-auto sheet:border-r sheet:border-t-0 sheet:border-hairline',
           isViewport
-            ? 'order-2 border-t border-[color:var(--hairline)]'
-            : 'order-1 border-b border-[color:var(--hairline)] sheet:border-b-0',
+            ? 'order-2 border-t border-hairline'
+            : 'order-1 border-b border-hairline sheet:border-b-0',
         ].join(' ')}
       >
         <TitleBlock locale={locale} route={route} />
@@ -64,18 +65,45 @@ export function Sheet({
   )
 }
 
+/**
+ * What this is, over the drawing, on a narrow screen only.
+ *
+ * Under 860px the rail sits below the viewport, so the wordmark, the claim
+ * and the language switch are all off-screen on arrival and the first thing a
+ * stranger sees is an unexplained model. This band is the same three things,
+ * put where they are unavoidable. Above 860px the rail is already beside the
+ * drawing and the band would be saying it twice, so it is not rendered.
+ */
+function Masthead({ locale, route }: { locale: Locale; route: Route }) {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 border-t border-hairline bg-veil px-3 py-2 backdrop-blur-[2px] sheet:hidden">
+      <div className="flex items-center justify-between gap-3">
+        <span className="micro text-bolu">{pick(COPY.appName, locale)}</span>
+        <div className="pointer-events-auto">
+          <LocaleSwitch locale={locale} route={route} />
+        </div>
+      </div>
+      <p className="mt-1 text-body leading-snug text-bolu">{pick(COPY.tagline, locale)}</p>
+    </div>
+  )
+}
+
 function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
   return (
     <header className="px-4 pb-4 pt-4">
       <div className="flex items-baseline justify-between gap-3">
-        <Link href={href(locale, 'bangun')} className="text-lg font-medium leading-tight">
+        <Link href={href(locale, 'bangun')} className="micro text-bolu">
           {pick(COPY.appName, locale)}
         </Link>
         <LocaleSwitch locale={locale} route={route} />
       </div>
-      <p className="mt-1 text-[13px] leading-snug text-[color:var(--muted)]">
-        {pick(COPY.tagline, locale)}
-      </p>
+      {/*
+        The tagline is the largest thing in the rail and the wordmark is the
+        smallest. That inversion is deliberate: a stranger needs the claim
+        before the name, and the name means nothing until they have it.
+      */}
+      <p className="mt-2 text-lead text-bolu">{pick(COPY.tagline, locale)}</p>
+      <p className="mt-2 text-body text-muted">{pick(COPY.thesis, locale)}</p>
 
       <hr className="rule my-4" />
 
@@ -90,18 +118,16 @@ function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
                   aria-current={active ? 'page' : undefined}
                   className={[
                     'block rounded px-2 py-1.5 transition-colors duration-state',
-                    active
-                      ? 'bg-bolu text-kapur'
-                      : 'text-bolu hover:bg-[rgba(23,21,15,0.06)]',
+                    active ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
                   ].join(' ')}
                 >
-                  <span className="block text-[15px] leading-tight">
+                  <span className="block text-body leading-tight">
                     {pick(COPY.nav[r], locale)}
                   </span>
                   <span
                     className={[
-                      'mt-0.5 block text-[11px] leading-tight',
-                      active ? 'text-[rgba(233,227,210,0.7)]' : 'text-[color:var(--muted)]',
+                      'mt-0.5 block text-meta',
+                      active ? 'text-muted-on-ink' : 'text-muted',
                     ].join(' ')}
                   >
                     {pick(COPY.navGloss[r], locale)}
@@ -116,22 +142,34 @@ function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
   )
 }
 
+/**
+ * The language switch.
+ *
+ * Half the readers this is built for cannot read the locale it defaults to,
+ * so the way out has to be findable without reading anything: full ink on the
+ * inactive side, a rule between the two, and a target you can hit with a
+ * thumb. The label of each side is written in its own language, because a
+ * reader looking for English is looking for the word English.
+ */
 function LocaleSwitch({ locale, route }: { locale: Locale; route: Route }) {
   return (
-    <div className="flex items-center gap-1">
-      {LOCALES.map((l) => (
+    <div className="flex items-stretch overflow-hidden rounded border border-hairline">
+      {LOCALES.map((l, i) => (
         <Link
           key={l}
           href={href(l, route)}
           hrefLang={l}
-          aria-label={LOCALE_NAMES[l]}
+          lang={l}
+          aria-label={`${LOCALE_NAMES[l]} — ${pick(COPY.openIn, l)}`}
+          title={pick(COPY.openIn, l)}
           aria-current={l === locale ? 'true' : undefined}
           className={[
-            'micro rounded px-1.5 py-0.5 transition-colors duration-state',
-            l === locale ? 'bg-bolu text-kapur' : 'hover:bg-[rgba(23,21,15,0.06)]',
+            'micro flex min-h-[26px] items-center px-2 transition-colors duration-state',
+            i > 0 ? 'border-l border-hairline' : '',
+            l === locale ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
           ].join(' ')}
         >
-          {l}
+          {l.toUpperCase()}
         </Link>
       ))}
     </div>
@@ -147,7 +185,7 @@ export function RailSection({
   children: React.ReactNode
 }) {
   return (
-    <section className="border-t border-[color:var(--hairline)] px-4 py-4">
+    <section className="border-t border-hairline px-4 py-4">
       {title ? <h2 className="micro mb-3">{title}</h2> : null}
       {children}
     </section>

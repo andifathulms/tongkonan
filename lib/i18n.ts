@@ -37,6 +37,24 @@ export const COPY = {
     'Rumah yang dihitung dari aturannya, bukan digambar.',
     'A house generated from its rules, not drawn.',
   ),
+  /**
+   * The thesis, said once where the model is.
+   *
+   * On a phone the rail sits below the viewport, so every word explaining the
+   * project is off-screen on arrival. Without this the first screen is a
+   * handsome model and no argument, which is the opposite of the point.
+   */
+  thesis: t(
+    'Ubah pangkat, jumlah ruang, atau jumlah tanduk — rumah dihitung ulang dari aturan itu.',
+    'Change the rank, the bay count, or the horns — the house is recomputed from those rules.',
+  ),
+  hint: t('Seret untuk memutar · gulir untuk mendekat', 'Drag to rotate · scroll to zoom'),
+  computed: t('Dihitung dari aturan', 'Computed from the rules'),
+  modelLabel: t(
+    'Model tongkonan, dihitung dari aturannya',
+    'Tongkonan model, generated from its rules',
+  ),
+  openIn: t('Buka dalam Bahasa Indonesia', 'Open in English'),
 
   nav: {
     bangun: t('Bangun', 'Generate'),
