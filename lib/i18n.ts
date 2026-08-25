@@ -132,6 +132,45 @@ export const COPY = {
     ),
   },
 
+  read: {
+    heading: t('Yang bisa dibaca', 'What can be read'),
+    intro: t(
+      'Rumah ini menyatakan dirinya kepada siapa pun yang berjalan mendekat. Tidak satu pun dari keterangan berikut tertulis; semuanya terbaca dari bentuk.',
+      'The house states itself to anyone walking up to it. None of the following is written down; all of it is read off the form.',
+    ),
+    hornsTitle: t('Berapa kali rumah ini berduka', 'How many times this house has mourned'),
+    hornsBody: t(
+      'Hitung tanduk pada tulak somba. Tiap satu adalah satu upacara rambu solo yang pernah digelar keluarga ini — catatan, bukan hiasan.',
+      'Count the horns on the tulak somba. Each one is a funeral this family has held — a record, not an ornament.',
+    ),
+    rankTitle: t('Kedudukan keluarga', 'Where the family stands'),
+    rankBody: t(
+      'Skala badan rumah dan seberapa jauh ukiran diizinkan menutup bidangnya. Pangkat tidak diumumkan; ia terlihat dari ukuran dan hak menghias.',
+      'The scale of the body, and how far carving is permitted to cover it. Rank is not announced; it is visible in size and in the right to decorate.',
+    ),
+    baysTitle: t('Berapa ruang di dalamnya', 'How many rooms are inside'),
+    baysBody: t(
+      'Hitung baris tiang di kolong. Tiap ruang menambah satu baris, jadi pembagian di dalam bisa dibaca dari luar tanpa masuk.',
+      'Count the post rows in the underfloor. Each bay adds one, so the division inside can be read from outside without entering.',
+    ),
+    facingTitle: t('Mana muka rumah', 'Which way the house faces'),
+    facingBody: t(
+      'Haluan yang lebih tinggi adalah muka, dan muka selalu menghadap utara. Sekali diketahui, satu rumah cukup untuk menentukan arah seluruh halaman.',
+      'The higher prow is the front, and the front always faces north. Once that is known, one house is enough to orient the whole courtyard.',
+    ),
+    carvingTitle: t('Di mana ukiran diletakkan', 'Where the carving goes'),
+    carvingBody: t(
+      'Pa\u2019ssura menutup papan muka, bukan seluruh rumah. Yang digambar di sini hanya motif yang jelas-jelas geometris; motif yang penggunaannya terbatas tidak dirender.',
+      'Pa\u2019ssura covers the front board, not the whole house. Only the plainly geometric motifs are drawn here; motifs whose use is restricted are not rendered.',
+    ),
+    facade: t('Muka', 'Façade'),
+    section: t('Potongan', 'Section'),
+    sectionGloss: t(
+      'Rumah dipotong pada bidang punggung. Ketiga tingkat itu fakta ruang, bukan diagram.',
+      'The house is cut on the ridge plane. The three zones are a spatial fact, not a diagram.',
+    ),
+  },
+
   assembly: {
     heading: t('Urutan pendirian', 'Build order'),
     play: t('Jalankan', 'Play'),

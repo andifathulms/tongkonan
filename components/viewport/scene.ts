@@ -22,7 +22,7 @@ import type { MaterialSet } from '../materials'
 import type { Timeline } from '@/lib/banua/assembly'
 import { progressAt } from '@/lib/banua/assembly'
 
-export type ViewKey = 'perspektif' | 'tampak' | 'kolong'
+export type ViewKey = 'perspektif' | 'tampak' | 'kolong' | 'potongan'
 
 export interface CameraState {
   azimuth: number
@@ -38,6 +38,8 @@ export interface SceneOptions {
   reveal: { timeline: Timeline; t: number } | null
   /** 0 assembled, 1 fully exploded along the build order */
   explode: number
+  /** cut the house on the ridge plane to show the three occupancy zones */
+  section: boolean
   reducedMotion: boolean
 }
 
@@ -67,6 +69,8 @@ export class HouseScene {
   private contact: THREE.Mesh
   private figure: THREE.Group
   private rain: RainRig
+  private zones: ZoneRig
+  private clip = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
   private layout: Layout | null = null
   private house: House | null = null
   private needsRender = true
@@ -142,6 +146,9 @@ export class HouseScene {
     this.rain = new RainRig()
     this.scene.add(this.rain.group)
 
+    this.zones = new ZoneRig()
+    this.scene.add(this.zones.group)
+
     this.scene.add(this.houseGroup)
   }
 
@@ -178,6 +185,7 @@ export class HouseScene {
 
     this.frameShadowCamera(house)
     this.rain.configure(layout)
+    this.zones.configure(layout, house)
     this.fitCamera()
     this.needsRender = true
   }
@@ -273,6 +281,7 @@ export class HouseScene {
 
   apply(options: SceneOptions, elapsedSeconds: number): void {
     this.figure.visible = options.figure
+    this.setSection(options.section)
     this.rain.setActive(options.rain, this.layout)
     const raining = options.rain && !options.reducedMotion
     if (raining) {
@@ -289,6 +298,7 @@ export class HouseScene {
       options.figure,
       options.rain,
       options.explode,
+      options.section,
       options.reducedMotion,
       options.reveal ? options.reveal.t.toFixed(4) : 'none',
     ].join('|')
@@ -337,6 +347,28 @@ export class HouseScene {
     this.needsRender = true
   }
 
+  /**
+   * The section cut.
+   *
+   * A real clipping plane on the ridge plane, not a drawn diagram: the three
+   * vertical zones are a spatial fact about the building, and showing them as
+   * a flat illustration would be arguing for them rather than showing them.
+   */
+  private setSection(on: boolean): void {
+    if (this.renderer.localClippingEnabled === on) return
+    this.renderer.localClippingEnabled = on
+    const planes = on ? [this.clip] : []
+    this.houseGroup.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const material = child.material
+        if (Array.isArray(material)) material.forEach((m) => (m.clippingPlanes = planes))
+        else material.clippingPlanes = planes
+      }
+    })
+    this.zones.group.visible = on
+    this.needsRender = true
+  }
+
   /** How far a part lifts in the exploded view: later in the build, higher up. */
   private explodeOffset(id: string): number {
     const house = this.house
@@ -360,7 +392,17 @@ export class HouseScene {
       case 'tampak':
         // Looking at the north face, from the north. Near-horizontal, so it
         // reads as an elevation rather than a three-quarter view.
-        return { azimuth: Math.PI, polar: Math.PI / 2 - 0.03, distance: distance * 0.95, target }
+        return { azimuth: Math.PI, polar: Math.PI / 2 - 0.03, distance: distance * 0.66, target }
+      case 'potongan':
+        // Square on to the cut face, which the clipping plane leaves pointing
+        // toward +Z. Near-horizontal, so the three zones stack the way they
+        // stack in the building rather than being read off a perspective.
+        return {
+          azimuth: Math.PI / 2,
+          polar: Math.PI / 2 - 0.05,
+          distance: distance * 0.86,
+          target,
+        }
       case 'kolong':
         // Drops under the floor into the sulluk banua and looks up.
         return {
@@ -470,6 +512,7 @@ export class HouseScene {
     this.clearHouse()
     this.materials.dispose()
     this.rain.dispose()
+    this.zones.dispose()
     this.renderer.dispose()
   }
 }
@@ -590,6 +633,54 @@ function seeded(seed: number): () => number {
   return () => {
     s = (s * 1664525 + 1013904223) >>> 0
     return s / 4294967296
+  }
+}
+
+/**
+ * The three vertical zones, drawn on the cut plane.
+ *
+ * sulluk banua below the floor, kale banua on the living floor, rattiang
+ * banua in the attic. The lines mark where one ends and the next begins; the
+ * rail names them, because nothing on screen may carry meaning that only the
+ * code knows.
+ */
+class ZoneRig {
+  readonly group = new THREE.Group()
+
+  constructor() {
+    this.group.visible = false
+  }
+
+  configure(layout: Layout, house: House): void {
+    this.dispose()
+    // Run past the building at both ends, the way extension lines do on a
+    // drawing: the boundary is being pointed at, not enclosed.
+    const over = 1.6
+    const x0 = layout.frontProwX - over
+    const x1 = layout.rearProwX + over
+    const z = 0.02
+    const boundaries = [0, layout.floorFrameY, layout.deckY, layout.plateY, house.bounds.max[1]]
+    const points: number[] = []
+    for (const y of boundaries) points.push(x0, y, z, x1, y, z)
+
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3))
+    this.group.add(
+      new THREE.LineSegments(
+        geometry,
+        new THREE.LineBasicMaterial({ color: BOLU, transparent: true, opacity: 0.8 }),
+      ),
+    )
+  }
+
+  dispose(): void {
+    for (const child of [...this.group.children]) {
+      this.group.remove(child)
+      if (child instanceof THREE.LineSegments) {
+        child.geometry.dispose()
+        ;(child.material as THREE.Material).dispose()
+      }
+    }
   }
 }
 

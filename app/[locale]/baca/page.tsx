@@ -1,16 +1,12 @@
-import { Sheet } from '@/components/Sheet'
-import { LOCALES, isLocale } from '@/lib/i18n'
 import { notFound } from 'next/navigation'
+import { BacaClient } from '@/components/BacaClient'
+import { LOCALES, isLocale } from '@/lib/i18n'
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }))
 }
 
-export default function Page({ params }: { params: { locale: string } }) {
+export default function Baca({ params }: { params: { locale: string } }) {
   if (!isLocale(params.locale)) notFound()
-  return (
-    <Sheet locale={params.locale} route="baca" rail={null}>
-      <div />
-    </Sheet>
-  )
+  return <BacaClient locale={params.locale} />
 }

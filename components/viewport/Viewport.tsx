@@ -17,6 +17,8 @@ export interface ViewportProps {
   rain: boolean
   reveal: { timeline: Timeline; t: number } | null
   explode?: number
+  /** cut the house on the ridge plane to show the three occupancy zones */
+  section?: boolean
   /** Overlaid on the viewport while a stage is active. */
   caption?: React.ReactNode
   children?: React.ReactNode
@@ -34,6 +36,7 @@ export function Viewport({
   rain,
   reveal,
   explode = 0,
+  section = false,
   caption,
   children,
 }: ViewportProps) {
@@ -50,10 +53,11 @@ export function Viewport({
     rain,
     reveal,
     explode,
+    section,
     reducedMotion,
     transition: null as null | { from: CameraState; to: CameraState; startedAt: number },
   })
-  state.current = { ...state.current, figure, rain, reveal, explode, reducedMotion }
+  state.current = { ...state.current, figure, rain, reveal, explode, section, reducedMotion }
 
   /* ── Set up once ──────────────────────────────────────────────────── */
   useEffect(() => {
@@ -92,6 +96,7 @@ export function Viewport({
           rain: state.current.rain,
           reveal: state.current.reveal,
           explode: state.current.explode,
+          section: state.current.section,
           reducedMotion: state.current.reducedMotion,
         },
         dt,

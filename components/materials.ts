@@ -241,12 +241,15 @@ function stoneCanvas(): HTMLCanvasElement {
   const S = 256
   const { ctx, el } = canvas(S)
   const r = rng(5501)
-  ctx.fillStyle = mix(GROUND, BOLU, 0.42)
+  const base = mix(GROUND, BOLU, 0.46)
+  ctx.fillStyle = base
   ctx.fillRect(0, 0, S, S)
-  for (let i = 0; i < 900; i++) {
-    ctx.fillStyle = mix(mix(GROUND, BOLU, 0.42), r() > 0.5 ? KAPUR : BOLU, r() * 0.3)
+  // Fine grain, not blotches: a river stone is close to even in tone, and
+  // high-contrast mottling reads as an animal hide rather than as rock.
+  for (let i = 0; i < 2600; i++) {
+    ctx.fillStyle = mix(base, r() > 0.5 ? KAPUR : BOLU, 0.04 + r() * 0.09)
     ctx.beginPath()
-    ctx.arc(r() * S, r() * S, 1 + r() * 7, 0, Math.PI * 2)
+    ctx.arc(r() * S, r() * S, 0.6 + r() * 2.2, 0, Math.PI * 2)
     ctx.fill()
   }
   return el
