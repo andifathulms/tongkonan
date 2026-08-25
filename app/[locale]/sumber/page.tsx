@@ -284,7 +284,12 @@ function IfWrong({
 }) {
   if (!s) return null
   return (
-    <span className="mt-1 block text-micro font-normal normal-case text-muted">
+    // `num`, because this is a measurement and DESIGN.md says every number is
+    // mono. `text-micro` alone carries the size and the tracking but not the
+    // family, so this was the one figure in the app set in letter-spaced sans,
+    // directly beneath a tabular one. Not `.micro` either: that uppercases,
+    // and a unit is not a label — it would render "1.80 M".
+    <span className="num mt-1 block text-micro text-muted">
       {s.worst > 0
         ? `${fill(pick(COPY.sources.ifWrong, locale), { pct })}: ${s.worst.toFixed(2)} m`
         : pick(COPY.sources.sensitivityNone, locale)}
