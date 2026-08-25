@@ -12,6 +12,7 @@ import {
   ViewSwitch,
 } from './Controls'
 import { ProvenanceStrip } from './Provenance'
+import { DrawingExport } from './DrawingExport'
 import { RailSection } from './Sheet'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
@@ -74,6 +75,7 @@ export function BangunClient({ locale }: { locale: Locale }) {
             locale={locale}
           />
           <OrientationNote locale={locale} />
+          <DrawingExport house={house} layout={layout} locale={locale} />
           <RailSection title={pick(COPY.provenance.heading, locale)}>
             <ProvenanceStrip dims={layout.dims} locale={locale} />
           </RailSection>

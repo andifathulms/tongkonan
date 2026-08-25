@@ -104,6 +104,17 @@ export const COPY = {
     ),
   },
 
+  draw: {
+    heading: t('Unduh gambar', 'Download drawing'),
+    denah: t('Denah', 'Plan'),
+    tampak: t('Tampak muka', 'Front elevation'),
+    potongan: t('Potongan memanjang', 'Long section'),
+    gloss: t(
+      'Gambar garis ortografis 1:50, dalam SVG. Garis bisa diperiksa; gambar berbayang tidak. Setiap lembar mencantumkan berapa persen ukurannya adalah perkiraan penulis.',
+      'An orthographic line drawing at 1:50, as SVG. Lines can be checked; a shaded image cannot. Every sheet states what share of its dimensions are the author’s own.',
+    ),
+  },
+
   scale: t('Skala', 'Scale'),
   legend: t('Keterangan', 'Legend'),
 
