@@ -289,6 +289,22 @@ export const COPY = {
       'Every dimension the house is generated from is below, with its class and its citation. This is the project’s honesty layer, and it is given a room of its own because a smooth 3D render implies a precision the sources do not have.',
     ),
     tableHeading: t('Daftar ukuran', 'The dimensions'),
+    sensitivityHeading: t('Mana yang paling menentukan', 'Which of these matters most'),
+    sensitivityIntro: t(
+      'Hampir semua ukuran di halaman ini adalah perkiraan penulis. Yang tidak dikatakan bilah asal ukuran adalah apakah itu penting. Tiap baris di bawah dihitung dengan membangun ulang rumah: satu ukuran digeser {pct}%, lalu diukur sejauh mana rumah ikut bergeser. Tidak ada yang ditaksir — angkanya adalah selisih dua hasil generator.',
+      'Nearly every dimension on this page is the author\u2019s own. What the provenance bar does not say is whether that matters. Each row below is computed by rebuilding the house: one dimension is pushed {pct}%, and the house is measured to see how far it follows. Nothing is estimated \u2014 the figures are the difference between two runs of the generator.',
+    ),
+    sensitivityCaveat: t(
+      'Ini kepekaan, bukan ketidakpastian: yang ditunjukkan adalah apa yang bergerak, bukan seberapa mungkin nilainya keliru. Angka {pct}% itu sendiri pilihan penulis.',
+      'This is sensitivity, not uncertainty: it shows what moves, not how likely the value is to be wrong. The {pct}% is itself the author\u2019s choice.',
+    ),
+    sensitivityWorst: t('Pergeseran terbesar', 'Largest shift'),
+    sensitivityNone: t('Tidak menggeser ukuran apa pun', 'Moves no measurement'),
+    ifWrong: t('Bila meleset {pct}%', 'If {pct}% out'),
+    measureFirst: t(
+      'Bila hanya satu ukuran yang bisa disurvei, ini yang pertama.',
+      'If only one dimension could be surveyed, this is the one.',
+    ),
     sourceHeading: t('Daftar pustaka', 'Bibliography'),
     key: t('Kunci', 'Key'),
   },

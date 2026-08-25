@@ -7,6 +7,8 @@ import { DIMS, DIM_KEYS, SOURCES, dimsForLayout, sourceFor } from '@/lib/banua/r
 import { DEFAULT_RULES } from '@/lib/banua/rules'
 import { buildHouse } from '@/lib/banua/assembly'
 import { runInvariants, summarise } from '@/lib/banua/invariants'
+import { PERTURBATION, PROBE_LABELS, sensitivities, sensitivityOf } from '@/lib/banua/sensitivity'
+import type { Sensitivity } from '@/lib/banua/sensitivity'
 import type { Dim } from '@/lib/banua/types'
 
 export function generateStaticParams() {
@@ -29,6 +31,10 @@ export default function Sumber({ params }: { params: { locale: string } }) {
   const results = runInvariants(house, layout)
   const totals = summarise(results)
   const dims = dimsForLayout(layout)
+  // 35 rebuilds, run once at build time. This page is static HTML by the time
+  // anyone reads it, so the cost is paid by the build and never by a reader.
+  const sensitivity = sensitivities(DEFAULT_RULES)
+  const pct = Math.round(PERTURBATION * 100)
 
   return (
     <Sheet
@@ -60,6 +66,37 @@ export default function Sumber({ params }: { params: { locale: string } }) {
 
           <hr className="rule my-8" />
 
+          <h2 className="micro">{pick(COPY.sources.sensitivityHeading, locale)}</h2>
+          <p className="mt-2 max-w-prose text-body text-muted">
+            {fill(pick(COPY.sources.sensitivityIntro, locale), { pct })}
+          </p>
+          <ol className="mt-5 flex flex-col">
+            {sensitivity
+              .filter((s) => s.worst > 0)
+              .slice(0, 8)
+              .map((s, i) => (
+                <li
+                  key={s.dim}
+                  className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-hairline py-2.5"
+                >
+                  <span className="num w-10 shrink-0 text-meta text-muted">{i + 1}</span>
+                  <span className="font-mono text-meta">{s.dim}</span>
+                  <span className="num ml-auto whitespace-nowrap text-body">
+                    {s.worst.toFixed(2)} m
+                  </span>
+                  <span className="w-full pl-[3.25rem] text-meta text-muted sheet:w-auto sheet:pl-0">
+                    {PROBE_LABELS[s.worstProbe][locale]}
+                  </span>
+                </li>
+              ))}
+          </ol>
+          <p className="mt-3 max-w-prose text-body text-muted">
+            {pick(COPY.sources.measureFirst, locale)}{' '}
+            {fill(pick(COPY.sources.sensitivityCaveat, locale), { pct })}
+          </p>
+
+          <hr className="rule my-8" />
+
           <h2 className="micro">{pick(COPY.sources.tableHeading, locale)}</h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[38rem] border-collapse text-left">
@@ -81,6 +118,13 @@ export default function Sumber({ params }: { params: { locale: string } }) {
                       </td>
                       <td className="num whitespace-nowrap py-3 pr-4 text-meta">
                         {formatValue(dim)}
+                        {/*
+                          Kept inside the value cell rather than given a fifth
+                          column: the table is already wide enough to scroll on
+                          a phone, and this belongs beside the number it is
+                          about.
+                        */}
+                        <IfWrong s={sensitivityOf(sensitivity, key)} pct={pct} locale={locale} />
                       </td>
                       <td className="py-3 pr-4">
                         <ProvenanceTag dim={dim} locale={locale} />
@@ -182,4 +226,28 @@ function Tally({ label, value }: { label: string; value: number }) {
       <dd className="num text-meta">{value}</dd>
     </div>
   )
+}
+
+/** How far the house moves if this one number is out. Computed, not claimed. */
+function IfWrong({
+  s,
+  pct,
+  locale,
+}: {
+  s: Sensitivity | undefined
+  pct: number
+  locale: Locale
+}) {
+  if (!s) return null
+  return (
+    <span className="mt-1 block text-micro font-normal normal-case text-muted">
+      {s.worst > 0
+        ? `${fill(pick(COPY.sources.ifWrong, locale), { pct })}: ${s.worst.toFixed(2)} m`
+        : pick(COPY.sources.sensitivityNone, locale)}
+    </span>
+  )
+}
+
+function fill(template: string, values: Record<string, number>): string {
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) => String(values[key] ?? whole))
 }
