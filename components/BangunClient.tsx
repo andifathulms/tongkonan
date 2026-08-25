@@ -1,8 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Sheet } from './Sheet'
-import { Viewport } from './viewport/Viewport'
+import { Viewport, usePrefersReducedMotion } from './viewport/Viewport'
 import type { ViewKey } from './viewport/scene'
 import {
   OrientationNote,
@@ -16,7 +16,7 @@ import { DrawingExport } from './DrawingExport'
 import { RailSection } from './Sheet'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { buildHouse } from '@/lib/banua/assembly'
+import { buildHouse, buildTimeline } from '@/lib/banua/assembly'
 import { DEFAULT_RULES, rankInfo } from '@/lib/banua/rules'
 import type { Rules } from '@/lib/banua/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
@@ -42,6 +42,8 @@ export function BangunClient({ locale }: { locale: Locale }) {
 
   const presets = useMemo(() => datePresets(), [])
   const { house, layout } = useMemo(() => buildHouse(rules), [rules])
+  const timeline = useMemo(() => buildTimeline(house), [house])
+  const rebuild = useRebuildTransition(rules, usePrefersReducedMotion())
 
   const sun = useMemo(() => {
     const preset = presets.find((p) => p.key === presetKey) ?? presets[0]
@@ -89,13 +91,57 @@ export function BangunClient({ locale }: { locale: Locale }) {
         view={view}
         figure={figure}
         rain={rain}
-        reveal={null}
+        reveal={rebuild < 1 ? { timeline, t: rebuild } : null}
       >
         <ViewSwitch view={view} onChange={setView} locale={locale} />
         <Readout locale={locale} rules={rules} rankName={rank.name} layout={layout} />
       </Viewport>
     </Sheet>
   )
+}
+
+/**
+ * The house rebuilding in place when a rule changes.
+ *
+ * Short — a fifth of the frame-raising — because it is punctuation on the
+ * reader's own action, not the orchestrated moment. It exists so that
+ * changing a socially meaningful number reads as the building answering,
+ * rather than as one picture being swapped for another.
+ *
+ * It runs the same build-order timeline the assembly sequence uses, so the
+ * house always reassembles in the order it would actually be built.
+ */
+const REBUILD_MS = 850
+
+function useRebuildTransition(rules: Rules, reducedMotion: boolean): number {
+  const [t, setT] = useState(1)
+  const signature = `${rules.rank}|${rules.bays}|${rules.horns}`
+  const first = useRef(true)
+
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    if (reducedMotion) {
+      // The alternative is the finished house, immediately. Nothing is lost:
+      // the house is the content, and the drop was only ever punctuation.
+      setT(1)
+      return
+    }
+    let raf = 0
+    const start = performance.now()
+    const step = (now: number) => {
+      const p = Math.min(1, (now - start) / REBUILD_MS)
+      setT(p)
+      if (p < 1) raf = requestAnimationFrame(step)
+    }
+    setT(0)
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [signature, reducedMotion])
+
+  return t
 }
 
 /**

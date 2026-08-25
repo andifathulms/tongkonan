@@ -4,7 +4,19 @@ Working instructions for Claude Code. Read PRD.md for what is being built and DE
 
 ## Current state
 
-**M0 — not yet scaffolded.** Nothing exists but these three documents.
+**M5 — all four routes are built and the invariants are green.**
+
+- `lib/banua/` generates a complete house: 131 parts and 33 joints at the default rules. `lib/solar/` is validated against almanac values. `lib/draw/` emits plan, elevation and long section as SVG.
+- `pnpm check` type-checks and runs 34 tests, including the invariant suite over four rule combinations. All ten structural checks pass; `checkAgainstSurvey` reports **skipped** and must stay that way.
+- Provenance: 0 measured, 8 canon, 28 interpolated. That is 78% interpolated and it is shown on every screen. Moving that bar is the work.
+- `/bangun`, `/rakit`, `/baca`, `/sumber` exist in Indonesian and English. The frame-raising sequence, the parameter-change rebuild, the day-of-sun, rain, the four view transitions, and the section cut through the three zones are all in.
+
+Known gaps, all deliberate and none of them hidden:
+
+- **Carving is texture-level.** The pa'barre allo is constructed from its rule rather than traced, but it is drawn onto a canvas, not extruded. Relief casting real shadow is the target.
+- **Contact darkening is a radial-gradient plane.** Real ambient occlusion in the joints and under the raised floor is the largest remaining quality gain. Do not ship the placeholder as the answer.
+- **The body walls are vertical.** The real ones lean outward toward the plate. No source gives an angle, so it is left flat rather than guessed — see the note in `frame.ts`.
+- **No survey is wired in.** Everything above follows from that.
 
 Keep this section accurate. A stale "Current state" is worse than none — a previous project in this portfolio still claimed "not yet scaffolded" long after it had six routes and thirty-five components, and that misled every session that read it. Update this line in the same commit as the work it describes.
 
@@ -31,6 +43,9 @@ lib/banua/        the generator — pure, no DOM, runs in Node
   invariants.ts     the checks that gate the build
 lib/solar/
   position.ts       NOAA solar position; shared with the zero-shadow-day tool
+  presets.ts        equinox, June solstice, and the computed zero-shadow day
+lib/draw/
+  orthographic.ts   plan, elevation and long section as SVG line drawings
 components/         renderer, controls, provenance strip
 app/[locale]/       bangun, rakit, baca, sumber
 ```
