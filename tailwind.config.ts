@@ -7,6 +7,11 @@ const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      screens: {
+        // Below this the rail moves under the viewport and scrolls. The
+        // viewport never gets less than half the screen.
+        sheet: '860px',
+      },
       colors: {
         bolu: '#17150F', // soot
         rara: '#8E3B25', // red earth — the one accent
