@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { PERTURBATION, sensitivities, sensitivityOf } from '@/lib/banua/sensitivity'
 import { ALL_DIMS, DIMS, DIM_KEYS, DEFAULT_RULES } from '@/lib/banua/rules'
+import { ridgeCounterexample } from '@/lib/banua/counterexample'
+import { checkEaveOversail } from '@/lib/banua/invariants'
+import { buildHouse } from '@/lib/banua/assembly'
+import { withDimValue } from '@/lib/banua/whatif'
 
 describe('what a survey would change', () => {
   it('leaves the rule pack exactly as it found it', () => {
@@ -57,5 +61,54 @@ describe('what a survey would change', () => {
   it('every dimension it reports on is one /sumber cites', () => {
     const cited = new Set(ALL_DIMS)
     for (const s of sensitivities()) expect(cited.has(DIMS[s.dim])).toBe(true)
+  })
+})
+
+describe('a check, shown doing its job', () => {
+  it('finds a house the ridge check actually refuses', () => {
+    const c = ridgeCounterexample()
+    expect(c.sound.status).toBe('pass')
+    expect(c.broken.status).toBe('fail')
+    expect(c.value).toBeGreaterThan(c.actual)
+  })
+
+  it('the broken house cannot say which end is its face', () => {
+    const c = ridgeCounterexample()
+    expect(c.prows.sound.front).toBeGreaterThan(c.prows.sound.rear)
+    expect(c.prows.broken.front).toBeLessThanOrEqual(c.prows.broken.rear)
+  })
+
+  it('leaves the rule pack intact, the same as the sensitivity table does', () => {
+    const before = DIM_KEYS.map((k) => DIMS[k].value)
+    ridgeCounterexample()
+    expect(DIM_KEYS.map((k) => DIMS[k].value)).toEqual(before)
+  })
+
+  /*
+   * Recorded rather than fixed, because it is a statement about the evidence
+   * and not about the code. checkEaveOversail compares eaveHalfWidth against
+   * the post line, and eaveHalfWidth is *defined* as half the body plus the
+   * oversail — so the check restates its own inputs and no single dimension
+   * can break it. It is the one invariant in the suite that is true by
+   * construction. If it is ever strengthened to constrain something the
+   * arithmetic does not already guarantee, this test is what should fail.
+   */
+  it('records that the eave oversail check cannot be broken by any one dimension', () => {
+    const unbreakable = DIM_KEYS.every((key) => {
+      const base = DIMS[key].value
+      if (base === 0) return true
+      return [0.05, 0.3, 0.6, 1.6, 3].every((f) => {
+        try {
+          return withDimValue(key, base * f, () =>
+            checkEaveOversail(buildHouse(DEFAULT_RULES).layout),
+          ).status !== 'fail'
+        } catch {
+          // A dimension that makes the generator throw is not a counterexample
+          // to the check; it never gets as far as being one.
+          return true
+        }
+      })
+    })
+    expect(unbreakable).toBe(true)
   })
 })

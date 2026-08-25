@@ -274,6 +274,22 @@ export const COPY = {
       'There is no measured drawing yet, so correctness rests on structural truth. These checks fail the build.',
     ),
     ran: t('Diuji pada rumah', 'Checked against the house'),
+    counterHeading: t('Yang dicegah pemeriksaan', 'What a check is preventing'),
+    counterIntro: t(
+      'Sepuluh baris hijau tidak memberi alasan untuk percaya. Jadi satu pemeriksaan dijalankan pada rumah yang sengaja dibuat gagal, dan yang tercetak di bawah adalah putusan pemeriksaan itu sendiri, bukan uraian penulis.',
+      'Ten green rows are not a reason to believe anything. So one check is run against a house built to break it, and what is printed below is that check\u2019s own verdict rather than a description of it.',
+    ),
+    counterWhy: t(
+      'Haluan depan berdiri lebih tinggi daripada haluan belakang. Itu pernyataan sumber, bukan hasil hitungan \u2014 dan itulah yang membuat satu rumah cukup untuk menentukan arah seluruh halaman. Naikkan haluan belakang melewati depan dan rumah kehilangan kemampuan menyatakan mana mukanya.',
+      'The front prow stands higher than the rear. That is a claim a source makes, not something the arithmetic guarantees \u2014 and it is what makes one house enough to orient a whole courtyard. Raise the rear prow past the front and the house loses the ability to say which end is its face.',
+    ),
+    counterSound: t('Rumah seperti dibangun', 'The house as built'),
+    counterBroken: t('Haluan belakang dinaikkan ke {value} m', 'Rear prow raised to {value} m'),
+    counterProws: t('depan / belakang', 'front / rear'),
+    counterNote: t(
+      'Rumah kedua ini tidak pernah dirender. Ia dibangun saat build, dinyatakan gagal, lalu dibuang.',
+      'The second house is never rendered. It is built during the build, failed, and thrown away.',
+    ),
   },
 
   sources: {

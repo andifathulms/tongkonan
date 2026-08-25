@@ -8,8 +8,10 @@ import { DEFAULT_RULES } from '@/lib/banua/rules'
 import { buildHouse } from '@/lib/banua/assembly'
 import { runInvariants, summarise } from '@/lib/banua/invariants'
 import { PERTURBATION, PROBE_LABELS, sensitivities, sensitivityOf } from '@/lib/banua/sensitivity'
+import { ridgeCounterexample } from '@/lib/banua/counterexample'
 import type { Sensitivity } from '@/lib/banua/sensitivity'
 import type { Dim } from '@/lib/banua/types'
+import type { CheckResult } from '@/lib/banua/invariants'
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }))
@@ -35,6 +37,10 @@ export default function Sumber({ params }: { params: { locale: string } }) {
   // anyone reads it, so the cost is paid by the build and never by a reader.
   const sensitivity = sensitivities(DEFAULT_RULES)
   const pct = Math.round(PERTURBATION * 100)
+  // Also build time. The broken house exists for the length of one check and
+  // is never rendered — this page is the only route that ever sees it, and it
+  // sees it as two numbers and a verdict.
+  const counter = ridgeCounterexample(DEFAULT_RULES)
 
   return (
     <Sheet
@@ -183,6 +189,34 @@ export default function Sumber({ params }: { params: { locale: string } }) {
 
           <hr className="rule my-8" />
 
+          <h2 className="micro">{pick(COPY.checks.counterHeading, locale)}</h2>
+          <p className="mt-2 max-w-prose text-body text-muted">
+            {pick(COPY.checks.counterIntro, locale)}
+          </p>
+          <p className="mt-3 max-w-prose text-body">{pick(COPY.checks.counterWhy, locale)}</p>
+
+          <div className="mt-5 grid gap-px overflow-hidden rounded border border-hairline bg-[color:var(--hairline)] sheet:grid-cols-2">
+            <CounterCase
+              title={pick(COPY.checks.counterSound, locale)}
+              result={counter.sound}
+              prows={counter.prows.sound}
+              locale={locale}
+            />
+            <CounterCase
+              title={fill(pick(COPY.checks.counterBroken, locale), {
+                value: Number(counter.value.toFixed(2)),
+              })}
+              result={counter.broken}
+              prows={counter.prows.broken}
+              locale={locale}
+            />
+          </div>
+          <p className="mt-3 max-w-prose text-body text-muted">
+            {pick(COPY.checks.counterNote, locale)}
+          </p>
+
+          <hr className="rule my-8" />
+
           <h2 className="micro">{pick(COPY.sources.sourceHeading, locale)}</h2>
           <ul className="mt-4 flex flex-col gap-4">
             {SOURCES.filter((s) => s.key !== 'none').map((s) => (
@@ -250,4 +284,41 @@ function IfWrong({
 
 function fill(template: string, values: Record<string, number>): string {
   return template.replace(/\{(\w+)\}/g, (whole, key: string) => String(values[key] ?? whole))
+}
+
+/** One house, one verdict. The status word is the check's, not the page's. */
+function CounterCase({
+  title,
+  result,
+  prows,
+  locale,
+}: {
+  title: string
+  result: CheckResult
+  prows: { front: number; rear: number }
+  locale: Locale
+}) {
+  const failed = result.status === 'fail'
+  return (
+    <div className="bg-film p-4">
+      <p className="micro">{title}</p>
+      <div className="mt-2 flex items-baseline gap-3">
+        <span
+          className="micro shrink-0 rounded px-1.5 py-0.5"
+          style={
+            failed
+              ? { background: 'var(--rara)', color: 'var(--kapur)' }
+              : { background: 'var(--bolu)', color: 'var(--kapur)' }
+          }
+        >
+          {failed ? pick(COPY.checks.fail, locale) : pick(COPY.checks.pass, locale)}
+        </span>
+        <span className="num text-body">
+          {prows.front.toFixed(2)} / {prows.rear.toFixed(2)} m
+        </span>
+        <span className="text-meta text-muted">{pick(COPY.checks.counterProws, locale)}</span>
+      </div>
+      <p className="mt-2 text-meta text-muted">{result.detail}</p>
+    </div>
+  )
 }

@@ -21,6 +21,7 @@ import { buildHouse } from './assembly'
 import { DIMS, DIM_KEYS, DEFAULT_RULES } from './rules'
 import type { DimKey } from './rules'
 import type { Layout, Rules } from './types'
+import { withDimValue } from './whatif'
 
 /**
  * How far each dimension is pushed.
@@ -62,31 +63,6 @@ export interface Sensitivity {
   readonly worstProbe: ProbeKey
   /** Every probe that moved at all, largest first. */
   readonly moved: readonly { probe: ProbeKey; metres: number }[]
-}
-
-/**
- * Run `fn` with one dimension temporarily changed.
- *
- * The generator reads the rule pack directly, everywhere, which is what makes
- * a dimension a single source of truth. Asking what the house would look like
- * if a number were different therefore means changing that number, and this
- * is the only sanctioned place it happens.
- *
- * The value is restored in a `finally`, so nothing outside this function can
- * observe a modified pack — `keepsTheRulePackIntact` in the tests is what
- * holds that. Do not reach for this anywhere else; if a second caller ever
- * wants it, the right move is to thread overrides through `buildHouse`
- * instead.
- */
-function withDimValue<T>(key: DimKey, value: number, fn: () => T): T {
-  const slot = DIMS[key] as { value: number }
-  const original = slot.value
-  slot.value = value
-  try {
-    return fn()
-  } finally {
-    slot.value = original
-  }
 }
 
 function readProbes(rules: Rules): Map<ProbeKey, number> {
