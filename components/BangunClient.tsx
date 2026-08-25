@@ -61,7 +61,25 @@ export function BangunClient({ locale }: { locale: Locale }) {
       route="bangun"
       rail={
         <>
+          {/*
+            Order is hierarchy in a rail that scrolls. The rules come first
+            because they are what the reader changes, and provenance comes
+            second because it is what the house they just changed is worth —
+            it was last, under an export control, which put the project's one
+            argument six screens down on a phone. Everything below is a
+            control or a note, and the export is last because taking the
+            drawing away is the last thing anyone does.
+          */}
           <RuleControls rules={rules} onChange={setRules} locale={locale} />
+          <RailSection title={pick(COPY.provenance.heading, locale)}>
+            <ProvenanceStrip
+              dims={layout.dims}
+              locale={locale}
+              marking={marking}
+              onMarking={setMarking}
+              parts={marking ? partSplit(house.parts) : undefined}
+            />
+          </RailSection>
           <SunControls
             presets={presets}
             presetKey={presetKey}
@@ -80,15 +98,6 @@ export function BangunClient({ locale }: { locale: Locale }) {
           />
           <OrientationNote locale={locale} />
           <DrawingExport house={house} layout={layout} locale={locale} />
-          <RailSection title={pick(COPY.provenance.heading, locale)}>
-            <ProvenanceStrip
-              dims={layout.dims}
-              locale={locale}
-              marking={marking}
-              onMarking={setMarking}
-              parts={marking ? partSplit(house.parts) : undefined}
-            />
-          </RailSection>
         </>
       }
     >
