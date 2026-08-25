@@ -78,8 +78,9 @@ function dim(
   cls: Dim['class'],
   source: SourceKey,
   note: string,
+  noteEn: string,
 ): Dim {
-  return { value, unit, class: cls, source, note }
+  return { value, unit, class: cls, source, note, noteEn }
 }
 
 /**
@@ -88,48 +89,48 @@ function dim(
  */
 export const DIMS = {
   /* body */
-  bayLength: dim(3.0, 'm', 'interpolated', 'none', 'Panjang satu ruang di sepanjang sumbu utara–selatan.'),
-  bodyWidth: dim(4.2, 'm', 'interpolated', 'none', 'Lebar badan rumah, dari dinding ke dinding.'),
-  postSection: dim(0.18, 'm', 'interpolated', 'none', "Sisi penampang a'riri, tiang persegi."),
-  padHeight: dim(0.22, 'm', 'interpolated', 'none', 'Tinggi batu umpak tempat tiang berdiri.'),
-  padDiameter: dim(0.42, 'm', 'interpolated', 'none', 'Lebar batu umpak.'),
+  bayLength: dim(3.0, 'm', 'interpolated', 'none', 'Panjang satu ruang di sepanjang sumbu utara–selatan.', 'Length of one bay along the north–south axis.'),
+  bodyWidth: dim(4.2, 'm', 'interpolated', 'none', 'Lebar badan rumah, dari dinding ke dinding.', 'Width of the body, wall to wall.'),
+  postSection: dim(0.18, 'm', 'interpolated', 'none', "Sisi penampang a'riri, tiang persegi.", "Section of an a'riri, the square underfloor post."),
+  padHeight: dim(0.22, 'm', 'interpolated', 'none', 'Tinggi batu umpak tempat tiang berdiri.', 'Height of the pad stone a post stands on.'),
+  padDiameter: dim(0.42, 'm', 'interpolated', 'none', 'Lebar batu umpak.', 'Width of the pad stone.'),
 
   /* the three vertical zones */
-  kolongHeight: dim(2.15, 'm', 'interpolated', 'none', 'Tinggi kolong (sulluk banua), dari tanah ke rangka lantai.'),
-  wallHeight: dim(1.95, 'm', 'interpolated', 'none', 'Tinggi dinding kale banua, dari lantai ke balok tumpuan.'),
-  floorFrameDepth: dim(0.24, 'm', 'interpolated', 'none', 'Tinggi balok rangka lantai.'),
-  deckThickness: dim(0.05, 'm', 'interpolated', 'none', 'Tebal papan lantai.'),
-  wallThickness: dim(0.06, 'm', 'interpolated', 'none', 'Tebal papan dinding.'),
+  kolongHeight: dim(2.15, 'm', 'interpolated', 'none', 'Tinggi kolong (sulluk banua), dari tanah ke rangka lantai.', 'Clear underfloor height — the sulluk banua — from the ground to the floor frame.'),
+  wallHeight: dim(1.95, 'm', 'interpolated', 'none', 'Tinggi dinding kale banua, dari lantai ke balok tumpuan.', 'Height of the kale banua wall, from the deck to the wall plate.'),
+  floorFrameDepth: dim(0.24, 'm', 'interpolated', 'none', 'Tinggi balok rangka lantai.', 'Depth of the floor frame members.'),
+  deckThickness: dim(0.05, 'm', 'interpolated', 'none', 'Tebal papan lantai.', 'Thickness of a floor board.'),
+  wallThickness: dim(0.06, 'm', 'interpolated', 'none', 'Tebal papan dinding.', 'Thickness of a wall board.'),
 
   /* roof */
-  ridgeRise: dim(2.95, 'm', 'interpolated', 'none', 'Tinggi punggung atap di atas balok tumpuan, di tengah bentang.'),
-  ridgeSag: dim(0.55, 'm', 'interpolated', 'none', 'Turunnya garis punggung di tengah bentang terhadap ujung.'),
-  frontProwRise: dim(2.6, 'm', 'interpolated', 'none', 'Naiknya haluan depan di atas titik terendah punggung.'),
-  rearProwRise: dim(2.1, 'm', 'interpolated', 'none', 'Naiknya haluan belakang; selalu lebih rendah dari depan.'),
-  prowOverhang: dim(3.0, 'm', 'interpolated', 'none', 'Julur haluan melewati ujung badan rumah.'),
-  eaveOversail: dim(1.5, 'm', 'interpolated', 'none', 'Julur atap melewati garis tiang terluar, agar tetesan air jatuh bebas.'),
-  eaveDrop: dim(1.0, 'm', 'interpolated', 'none', 'Turunnya tepi atap di bawah balok tumpuan.'),
-  roofKneeDrop: dim(0.70, 'ratio', 'interpolated', 'none', 'Bagian dari seluruh turunnya atap yang sudah tercapai di garis dinding. Di sinilah atap berpatah: curam di atas, melandai ke tepi.'),
-  plateDepth: dim(0.24, 'm', 'interpolated', 'none', 'Tinggi balok tumpuan tempat kasau bertumpu.'),
-  plateWidth: dim(0.16, 'm', 'interpolated', 'none', 'Lebar balok tumpuan.'),
-  ijukCourseDepth: dim(0.34, 'm', 'interpolated', 'none', 'Tinggi tampak satu lapis ijuk.'),
-  ijukThickness: dim(0.11, 'm', 'interpolated', 'none', 'Tebal satu lapis ijuk yang menonjol dari lapis di bawahnya.'),
-  ijukLap: dim(0.4, 'ratio', 'interpolated', 'none', 'Bagian lapis yang tertindih lapis di atasnya.'),
+  ridgeRise: dim(2.95, 'm', 'interpolated', 'none', 'Tinggi punggung atap di atas balok tumpuan, di tengah bentang.', 'Height of the ridge above the wall plate, at mid-span.'),
+  ridgeSag: dim(0.55, 'm', 'interpolated', 'none', 'Turunnya garis punggung di tengah bentang terhadap ujung.', 'How far the ridge line sags at mid-span relative to its ends.'),
+  frontProwRise: dim(2.6, 'm', 'interpolated', 'none', 'Naiknya haluan depan di atas titik terendah punggung.', 'Rise of the front prow above the lowest point of the ridge.'),
+  rearProwRise: dim(2.1, 'm', 'interpolated', 'none', 'Naiknya haluan belakang; selalu lebih rendah dari depan.', 'Rise of the rear prow; always lower than the front.'),
+  prowOverhang: dim(3.0, 'm', 'interpolated', 'none', 'Julur haluan melewati ujung badan rumah.', 'How far each prow projects beyond the end of the body.'),
+  eaveOversail: dim(1.5, 'm', 'interpolated', 'none', 'Julur atap melewati garis tiang terluar, agar tetesan air jatuh bebas.', 'How far the eave oversails the outer post line, so the drip falls clear.'),
+  eaveDrop: dim(1.0, 'm', 'interpolated', 'none', 'Turunnya tepi atap di bawah balok tumpuan.', 'How far the eave hangs below the wall plate.'),
+  roofKneeDrop: dim(0.70, 'ratio', 'interpolated', 'none', 'Bagian dari seluruh turunnya atap yang sudah tercapai di garis dinding. Di sinilah atap berpatah: curam di atas, melandai ke tepi.', "The share of the roof's total drop already reached at the wall line. This is where the roof breaks: steep above, shallower out to the eave."),
+  plateDepth: dim(0.24, 'm', 'interpolated', 'none', 'Tinggi balok tumpuan tempat kasau bertumpu.', 'Depth of the wall plate the rafters bear on.'),
+  plateWidth: dim(0.16, 'm', 'interpolated', 'none', 'Lebar balok tumpuan.', 'Width of the wall plate.'),
+  ijukCourseDepth: dim(0.34, 'm', 'interpolated', 'none', 'Tinggi tampak satu lapis ijuk.', 'Exposed depth of one ijuk course.'),
+  ijukThickness: dim(0.11, 'm', 'interpolated', 'none', 'Tebal satu lapis ijuk yang menonjol dari lapis di bawahnya.', 'How far a course stands proud of the one below it.'),
+  ijukLap: dim(0.4, 'ratio', 'interpolated', 'none', 'Bagian lapis yang tertindih lapis di atasnya.', 'The share of a course that the course above laps over.'),
 
   /* tulak somba and horns */
-  tulakSombaSection: dim(0.40, 'm', 'interpolated', 'none', 'Sisi penampang tulak somba, tiang penyangga haluan depan.'),
-  hornSpacing: dim(0.42, 'm', 'interpolated', 'none', 'Jarak vertikal antar tanduk pada tulak somba.'),
-  hornSpread: dim(0.62, 'm', 'interpolated', 'none', 'Rentang tanduk kerbau dari ujung ke ujung.'),
+  tulakSombaSection: dim(0.40, 'm', 'interpolated', 'none', 'Sisi penampang tulak somba, tiang penyangga haluan depan.', 'Section of the tulak somba, the post carrying the front prow.'),
+  hornSpacing: dim(0.42, 'm', 'interpolated', 'none', 'Jarak vertikal antar tanduk pada tulak somba.', 'Vertical spacing between horns on the tulak somba.'),
+  hornSpread: dim(0.62, 'm', 'interpolated', 'none', 'Rentang tanduk kerbau dari ujung ke ujung.', 'Spread of a buffalo horn, tip to tip.'),
 
   /* rules that are structure, not measurement */
-  orientation: dim(0, 'deg', 'canon', 'nooy-palm-1979', 'Rumah membujur utara–selatan; muka (ulunna banua) menghadap utara.'),
-  bayCountCommon: dim(3, 'count', 'canon', 'waterson-1990', "Pembagian umum badan rumah: tangdo', sali, sumbung."),
-  ridgeSags: dim(1, 'ratio', 'canon', 'kis-jovak-1988', 'Garis punggung melengkung turun di tengah, kedua haluan naik.'),
-  frontHigher: dim(1, 'ratio', 'canon', 'kis-jovak-1988', 'Haluan depan lebih tinggi daripada haluan belakang.'),
-  hornsAreTally: dim(1, 'count', 'canon', 'nooy-palm-1979', 'Tanduk kerbau adalah catatan jumlah upacara rambu solo yang pernah digelar.'),
-  noNails: dim(1, 'ratio', 'canon', 'schefold-2003', 'Sambungan pasak; rangka disusun tanpa paku.'),
-  raftersPerBay: dim(4, 'count', 'interpolated', 'none', 'Jumlah kasau tiap ruang, tiap sisi.'),
-  postsPerRow: dim(2, 'count', 'canon', 'depdikbud-sulsel', 'Tiang berpasangan melintang, simetris terhadap bidang punggung.'),
+  orientation: dim(0, 'deg', 'canon', 'nooy-palm-1979', 'Rumah membujur utara–selatan; muka (ulunna banua) menghadap utara.', 'The house lies north–south; the front, ulunna banua, faces north.'),
+  bayCountCommon: dim(3, 'count', 'canon', 'waterson-1990', "Pembagian umum badan rumah: tangdo', sali, sumbung.", "The common division of the body: tangdo', sali, sumbung."),
+  ridgeSags: dim(1, 'ratio', 'canon', 'kis-jovak-1988', 'Garis punggung melengkung turun di tengah, kedua haluan naik.', 'The ridge line sags in the middle and both prows rise.'),
+  frontHigher: dim(1, 'ratio', 'canon', 'kis-jovak-1988', 'Haluan depan lebih tinggi daripada haluan belakang.', 'The front prow stands higher than the rear.'),
+  hornsAreTally: dim(1, 'count', 'canon', 'nooy-palm-1979', 'Tanduk kerbau adalah catatan jumlah upacara rambu solo yang pernah digelar.', 'The buffalo horns are a record of how many rambu solo funerals have been held.'),
+  noNails: dim(1, 'ratio', 'canon', 'schefold-2003', 'Sambungan pasak; rangka disusun tanpa paku.', 'Pegged joints; the frame goes up without nails.'),
+  raftersPerBay: dim(4, 'count', 'interpolated', 'none', 'Jumlah kasau tiap ruang, tiap sisi.', 'Number of rafters per bay, per side.'),
+  postsPerRow: dim(2, 'count', 'canon', 'depdikbud-sulsel', 'Tiang berpasangan melintang, simetris terhadap bidang punggung.', 'Posts stand in transverse pairs, symmetric about the ridge plane.'),
 } as const
 
 export type DimKey = keyof typeof DIMS
@@ -178,8 +179,8 @@ export const RANKS: readonly RankInfo[] = [
     name: 'Tongkonan layuk',
     glossId: 'Rumah asal satu keturunan; pusat adat, dan yang paling besar.',
     glossEn: 'The origin house of a lineage; seat of custom, and the largest.',
-    scale: dim(1.15, 'ratio', 'canon', 'nooy-palm-1979', 'Tongkonan layuk berskala paling besar di antara tiga tingkat.'),
-    elaboration: dim(1, 'ratio', 'canon', 'waterson-1990', 'Ukiran penuh diizinkan pada tingkat ini.'),
+    scale: dim(1.15, 'ratio', 'canon', 'nooy-palm-1979', 'Tongkonan layuk berskala paling besar di antara tiga tingkat.', 'The tongkonan layuk is the largest of the three ranks.'),
+    elaboration: dim(1, 'ratio', 'canon', 'waterson-1990', 'Ukiran penuh diizinkan pada tingkat ini.', 'Full carving is permitted at this rank.'),
     carvedGable: true,
     maxBays: 5,
   },
@@ -188,8 +189,8 @@ export const RANKS: readonly RankInfo[] = [
     name: 'Tongkonan pekamberan',
     glossId: 'Rumah yang memegang jabatan adat; menengah.',
     glossEn: 'A house holding customary office; the middle rank.',
-    scale: dim(1.0, 'ratio', 'canon', 'nooy-palm-1979', 'Skala acuan; dua tingkat lain diukur terhadap ini.'),
-    elaboration: dim(0.65, 'ratio', 'interpolated', 'none', 'Sebagian bidang berukir.'),
+    scale: dim(1.0, 'ratio', 'canon', 'nooy-palm-1979', 'Skala acuan; dua tingkat lain diukur terhadap ini.', 'The reference scale; the other two ranks are measured against it.'),
+    elaboration: dim(0.65, 'ratio', 'interpolated', 'none', 'Sebagian bidang berukir.', 'Some surfaces carry carving.'),
     carvedGable: true,
     maxBays: 4,
   },
@@ -198,8 +199,8 @@ export const RANKS: readonly RankInfo[] = [
     name: "Tongkonan batu a'riri",
     glossId: 'Rumah keluarga biasa; tanpa jabatan adat.',
     glossEn: 'An ordinary family house, holding no customary office.',
-    scale: dim(0.88, 'ratio', 'canon', 'nooy-palm-1979', 'Tingkat terkecil; tanpa hak elaborasi.'),
-    elaboration: dim(0.25, 'ratio', 'interpolated', 'none', 'Ukiran terbatas atau tidak ada.'),
+    scale: dim(0.88, 'ratio', 'canon', 'nooy-palm-1979', 'Tingkat terkecil; tanpa hak elaborasi.', 'The smallest rank, with no right of elaboration.'),
+    elaboration: dim(0.25, 'ratio', 'interpolated', 'none', 'Ukiran terbatas atau tidak ada.', 'Carving limited or absent.'),
     carvedGable: false,
     maxBays: 3,
   },

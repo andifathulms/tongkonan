@@ -219,6 +219,7 @@ export const COPY = {
       'Belum ada gambar ukur, jadi ketepatan bertumpu pada kebenaran struktural. Pemeriksaan ini menggagalkan build.',
       'There is no measured drawing yet, so correctness rests on structural truth. These checks fail the build.',
     ),
+    ran: t('Diuji pada rumah', 'Checked against the house'),
   },
 
   sources: {
@@ -229,6 +230,13 @@ export const COPY = {
     citation: t('Kutipan', 'Citation'),
     note: t('Keterangan', 'What it means'),
     none: t('Tidak ada sumber', 'No source'),
+    intro: t(
+      'Setiap ukuran yang membentuk rumah ini ada di bawah, beserta kelas dan kutipannya. Inilah lapisan kejujuran proyek ini, dan ia diberi ruangnya sendiri karena gambar tiga dimensi yang mulus menyiratkan ketelitian yang tidak dimiliki sumbernya.',
+      'Every dimension the house is generated from is below, with its class and its citation. This is the project’s honesty layer, and it is given a room of its own because a smooth 3D render implies a precision the sources do not have.',
+    ),
+    tableHeading: t('Daftar ukuran', 'The dimensions'),
+    sourceHeading: t('Daftar pustaka', 'Bibliography'),
+    key: t('Kunci', 'Key'),
   },
 } as const
 

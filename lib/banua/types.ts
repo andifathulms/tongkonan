@@ -43,8 +43,9 @@ export interface Dim {
   readonly unit: 'm' | 'deg' | 'count' | 'ratio'
   readonly class: ProvenanceClass
   readonly source: SourceKey
-  /** What the value means, in Indonesian. Shown in /sumber. */
+  /** What the value means. Shown in full on /sumber, in both locales. */
   readonly note: string
+  readonly noteEn: string
 }
 
 export interface Source {
