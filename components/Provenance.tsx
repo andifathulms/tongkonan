@@ -123,6 +123,12 @@ export function ProvenanceStrip({
         ))}
       </dl>
 
+      {/*
+        A rule, not another margin: below this the strip stops reporting and
+        starts offering something to do.
+      */}
+      {onMarking ? <hr className="rule mt-4" /> : null}
+
       {onMarking ? (
         <label className="mt-4 flex cursor-pointer items-start gap-2">
           <input
@@ -135,27 +141,33 @@ export function ProvenanceStrip({
             <span className="block text-body leading-tight">
               {pick(COPY.provenance.mark, locale)}
             </span>
-            <span className="mt-1 block text-body text-muted">
+            <span className="mt-1 block text-meta text-muted">
               {pick(COPY.provenance.markHint, locale)}
             </span>
           </span>
         </label>
       ) : null}
 
+      {/*
+        The finding is a result, not a caption. It was set identically to the
+        standing warning below it, which made the most important sentence in
+        the app the third of three grey paragraphs.
+      */}
       {marking && parts ? (
-        <p className="mt-3 text-body text-muted">
+        <p className="mt-4 text-body text-bolu">
           {fill(
             parts.interpolated === parts.total
               ? pick(COPY.provenance.markAll, locale)
               : pick(COPY.provenance.markSome, locale),
             { n: parts.interpolated, total: parts.total },
           )}{' '}
-          {pick(COPY.provenance.markWhy, locale)}
+          <span className="text-muted">{pick(COPY.provenance.markWhy, locale)}</span>
         </p>
       ) : null}
 
+      {/* The standing warning: always true, so it never competes for attention. */}
       {!compact ? (
-        <p className="mt-3 text-body text-muted">
+        <p className="mt-4 border-t border-hairline pt-3 text-meta text-muted">
           {pick(COPY.provenance.renderWarning, locale)}{' '}
           {pick(COPY.provenance.line, locale)}
         </p>
