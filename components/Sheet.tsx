@@ -76,14 +76,17 @@ export function Sheet({
  */
 function Masthead({ locale, route }: { locale: Locale; route: Route }) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 border-t border-hairline bg-veil px-3 py-2 backdrop-blur-[2px] sheet:hidden">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex min-h-[var(--masthead-h)] flex-col justify-center border-t border-hairline bg-veil px-3 py-2 backdrop-blur-[2px] sheet:hidden">
       <div className="flex items-center justify-between gap-3">
         <span className="micro text-bolu">{pick(COPY.appName, locale)}</span>
         <div className="pointer-events-auto">
           <LocaleSwitch locale={locale} route={route} />
         </div>
       </div>
-      <p className="mt-1 text-body leading-snug text-bolu">{pick(COPY.tagline, locale)}</p>
+      {/* Two lines is the contract --masthead-h is sized for. */}
+      <p className="mt-1 line-clamp-2 text-body leading-snug text-bolu">
+        {pick(COPY.tagline, locale)}
+      </p>
     </div>
   )
 }

@@ -70,6 +70,20 @@
   --sp-7: 48px;
   --sp-8: 64px;
 
+  /*
+   * Height reserved for the masthead band that sits over the foot of the
+   * model under 860px.
+   *
+   * It is a token because two components depend on it and neither can see the
+   * other: the band is drawn by Sheet and the scale bar and the drag hint are
+   * drawn by Viewport, and when each assumed the other's height the scale bar
+   * ended up underneath the band. DESIGN.md requires the bar to be visible at
+   * all times, so the contract is written down instead of guessed: the band
+   * is never shorter than this, and its tagline is clamped to two lines so it
+   * can never be taller.
+   */
+  --masthead-h: 92px;
+
   --t-state: 150ms;
   --t-layout: 400ms;
   --t-orchestrated: 1100ms;
