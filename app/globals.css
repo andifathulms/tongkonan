@@ -109,26 +109,38 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* A single-sided rule gets radius 0; everything else gets 2px. */
-.rule {
-  border: 0;
-  border-top: 1px solid var(--hairline);
-  border-radius: 0;
-}
+/*
+ * These live in the components layer on purpose.
+ *
+ * Written as plain rules they are emitted after @tailwind utilities, so
+ * `.micro`'s colour beat every `text-*` utility sitting beside it in the same
+ * class list — `class="micro text-kapur"` rendered muted, and the active
+ * chips in the language switch and the view switch were muted ink on soot at
+ * 2.38:1. In the components layer a utility wins, which is what a utility is
+ * for, and the defaults below apply only when nothing overrides them.
+ */
+@layer components {
+  /* A single-sided rule gets radius 0; everything else gets 2px. */
+  .rule {
+    border: 0;
+    border-top: 1px solid var(--hairline);
+    border-radius: 0;
+  }
 
-.micro {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: var(--fs-micro);
-  line-height: var(--lh-snug);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
+  .micro {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: var(--fs-micro);
+    line-height: var(--lh-snug);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
-.num {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
+  .num {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
 }
 
 :focus-visible {
