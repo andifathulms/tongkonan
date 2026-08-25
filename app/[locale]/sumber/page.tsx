@@ -34,6 +34,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
     <Sheet
       locale={locale}
       route="sumber"
+      variant="document"
       rail={
         <>
           <RailSection title={pick(COPY.provenance.heading, locale)}>
@@ -52,7 +53,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
         </>
       }
     >
-      <div className="absolute inset-0 overflow-y-auto">
+      <div className="sheet:h-full sheet:overflow-y-auto">
         <div className="mx-auto max-w-3xl px-5 py-8 sheet:px-8">
           <h1 className="text-xl font-medium">{pick(COPY.sources.heading, locale)}</h1>
           <p className="mt-2 max-w-prose text-body">{pick(COPY.sources.intro, locale)}</p>

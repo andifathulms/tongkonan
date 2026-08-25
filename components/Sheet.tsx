@@ -13,20 +13,53 @@ export function Sheet({
   locale,
   route,
   rail,
+  variant = 'viewport',
   children,
 }: {
   locale: Locale
   route: Route
   rail: React.ReactNode
+  /**
+   * `viewport` puts a drawing in the drawing area. `document` puts prose and
+   * a table there instead, and those want to flow down the page on a phone
+   * rather than being penned into the slot the model would have had.
+   */
+  variant?: 'viewport' | 'document'
   children: React.ReactNode
 }) {
+  const isViewport = variant === 'viewport'
   return (
-    <div className="flex h-dvh flex-col-reverse sheet:flex-row">
-      <aside className="flex min-h-0 shrink-0 flex-col overflow-y-auto border-t border-[color:var(--hairline)] sheet:w-rail sheet:border-r sheet:border-t-0">
+    <div className="flex min-h-dvh flex-col sheet:h-dvh sheet:flex-row">
+      {/*
+        On a phone a drawing stays stuck to the top of the screen while the
+        rail scrolls under it, so changing a rule and seeing the house answer
+        does not cost a scroll in each direction. It keeps 55% of the screen:
+        the drawing is the argument, and it never becomes the caption.
+      */}
+      <main
+        className={[
+          'sheet:order-2 sheet:h-auto sheet:min-h-0 sheet:flex-1',
+          isViewport
+            ? 'sticky top-0 order-1 h-[55dvh] shrink-0 sheet:static'
+            : 'order-2 min-h-0',
+        ].join(' ')}
+      >
+        <div className={isViewport ? 'relative h-full w-full' : 'relative sheet:h-full'}>
+          {children}
+        </div>
+      </main>
+      <aside
+        className={[
+          'flex flex-col bg-[color:var(--film)]',
+          'sheet:order-1 sheet:min-h-0 sheet:w-rail sheet:shrink-0 sheet:overflow-y-auto sheet:border-r sheet:border-t-0',
+          isViewport
+            ? 'order-2 border-t border-[color:var(--hairline)]'
+            : 'order-1 border-b border-[color:var(--hairline)] sheet:border-b-0',
+        ].join(' ')}
+      >
         <TitleBlock locale={locale} route={route} />
         <div className="flex flex-col">{rail}</div>
       </aside>
-      <main className="relative min-h-[50dvh] flex-1 sheet:min-h-0">{children}</main>
     </div>
   )
 }

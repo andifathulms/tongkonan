@@ -126,7 +126,9 @@ function Readout({
   ]
 
   return (
-    <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[15rem] rounded border border-[color:var(--hairline)] bg-[rgba(216,215,205,0.88)] px-3 py-2.5 backdrop-blur-[2px]">
+    // Below the view switch on a narrow screen, beside it on a wide one:
+    // at 390px the two would otherwise sit on top of each other.
+    <div className="pointer-events-none absolute left-3 top-14 z-10 max-w-[15rem] rounded border border-[color:var(--hairline)] bg-[rgba(216,215,205,0.88)] px-3 py-2.5 backdrop-blur-[2px] sheet:top-3">
       <p className="text-[13px] font-medium leading-tight">{rankName}</p>
       <p className="mt-0.5 text-[11px] leading-snug text-[color:var(--muted)]">
         {layout.bayNames.join(' · ')} — {rules.horns}{' '}

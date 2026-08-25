@@ -18,7 +18,7 @@ export default function LocaleLayout({
   // The root <html> is Indonesian, the default. Marking the subtree here is
   // what tells a screen reader it has changed language on the English routes.
   return (
-    <div lang={params.locale} className="h-dvh">
+    <div lang={params.locale} className="min-h-dvh">
       {children}
     </div>
   )
