@@ -1,8 +1,15 @@
 import type { Config } from 'tailwindcss'
 
-// Tokens come from DESIGN.md and nowhere else. The pigment set is closed:
-// four traditional pa'ssura colours, plus interface neutrals that deliberately
-// sit outside the set so pigment always reads as content.
+/*
+ * Tokens come from DESIGN.md, are written down in app/globals.css, and are
+ * mapped onto utility names here. This file declares no values of its own —
+ * every entry below points at a custom property, so there is exactly one
+ * place a colour or a size is decided and the renderer can read the same one.
+ *
+ * The pigment set is closed: four traditional pa'ssura colours, plus
+ * interface neutrals that deliberately sit outside the set so pigment always
+ * reads as content.
+ */
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
@@ -13,21 +20,27 @@ const config: Config = {
         sheet: '860px',
       },
       colors: {
-        bolu: '#17150F', // soot
-        rara: '#8E3B25', // red earth — the one accent
-        riri: '#C8912B', // turmeric
-        kapur: '#E9E3D2', // slaked lime
-        film: '#D8D7CD', // drafting film
-        ground: '#C3BDA9', // ground plane
-        muted: '#6B675C', // muted ink
+        bolu: 'var(--bolu)', // soot
+        rara: 'var(--rara)', // red earth — the one accent
+        riri: 'var(--riri)', // turmeric, as a fill
+        'riri-ink': 'var(--riri-ink)', // turmeric dropped in value, for strokes and labels
+        kapur: 'var(--kapur)', // slaked lime
+        film: 'var(--film)', // drafting film
+        ground: 'var(--ground)', // ground plane
+        muted: 'var(--muted)', // muted ink
+        'muted-on-ink': 'var(--muted-on-ink)', // muted ink, over a soot field
+        hairline: 'var(--hairline)',
+        wash: 'var(--wash)', // hover
+        veil: 'var(--veil)', // panels floating over the model
       },
       fontFamily: {
+        // Two families, both from the system. Sans reads; mono measures.
         sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
       },
       spacing: {
-        // 4px grid. Tailwind's default scale is already on it; these are the
-        // rail widths the surveyor's-sheet layout needs.
+        // 4px grid. Tailwind's default scale is already on it; this is the
+        // rail width the surveyor's-sheet layout needs.
         rail: '320px',
       },
       borderRadius: {
@@ -41,9 +54,13 @@ const config: Config = {
         orchestrated: '1100ms',
       },
       fontSize: {
-        micro: ['10px', { lineHeight: '14px', letterSpacing: '0.1em' }],
-        label: ['11px', { lineHeight: '16px', letterSpacing: '0.1em' }],
-        body: ['16px', { lineHeight: '24px' }],
+        // The one type scale. A bracketed pixel size in a component is a bug.
+        micro: ['var(--fs-micro)', { lineHeight: 'var(--lh-snug)', letterSpacing: '0.1em' }],
+        meta: ['var(--fs-meta)', { lineHeight: 'var(--lh-snug)' }],
+        body: ['var(--fs-body)', { lineHeight: 'var(--lh-body)' }],
+        lead: ['var(--fs-lead)', { lineHeight: 'var(--lh-snug)' }],
+        title: ['var(--fs-title)', { lineHeight: 'var(--lh-tight)' }],
+        display: ['var(--fs-display)', { lineHeight: 'var(--lh-tight)' }],
       },
     },
   },

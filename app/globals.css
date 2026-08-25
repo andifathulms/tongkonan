@@ -3,21 +3,66 @@
 @tailwind utilities;
 
 /*
+ * ── Tokens ───────────────────────────────────────────────────────────────
+ *
+ * One place. Components reference these by name and never write a raw value;
+ * a size or a colour that appears in a className bracket is a bug.
+ *
  * The four pa'ssura pigments and the interface neutrals. The neutrals sit
  * outside the pigment set on purpose, so pigment always reads as content.
- * These are duplicated as CSS variables because the renderer needs the same
- * values and there must be exactly one place they are written down.
+ * These are duplicated into the Tailwind config, which maps utility names
+ * onto them — the values themselves are written down only here, because the
+ * renderer reads them too.
+ *
+ * Contrast is stated for every pair the interface actually uses. Text pairs
+ * clear 4.5:1; a pigment used as a meaning-bearing mark has an ink variant
+ * for its stroke and its label, so the hue stays the pigment while the thing
+ * that has to be seen is the thing that is seen.
  */
 :root {
-  --bolu: #17150f;
-  --rara: #8e3b25;
-  --riri: #c8912b;
-  --kapur: #e9e3d2;
-  --film: #d8d7cd;
-  --ground: #c3bda9;
-  --muted: #6b675c;
+  /* Pigment */
+  --bolu: #17150f; /* soot          — on --film 12.62:1 */
+  --rara: #8e3b25; /* red earth     — on --film  5.18:1, the one accent */
+  --riri: #c8912b; /* turmeric      — fill only: on --film 1.93:1 */
+  --riri-ink: #7a5510; /* turmeric, dropped in value for strokes and labels: 4.63:1 */
+  --kapur: #e9e3d2; /* slaked lime   — on --bolu 14.24:1 */
+
+  /* Interface neutrals */
+  --film: #d8d7cd; /* drafting film — the page */
+  --ground: #c3bda9; /* ground plane */
+  --muted: #575349; /* muted ink     — on --film 5.30:1, on --kapur 5.98:1 */
+  --muted-on-ink: #aea99b; /* the same step, over --bolu: 7.78:1 */
 
   --hairline: rgba(23, 21, 15, 0.16);
+  --wash: rgba(23, 21, 15, 0.06); /* hover */
+  --veil: rgba(216, 215, 205, 0.9); /* panels floating over the model */
+
+  /*
+   * ── Type scale ──────────────────────────────────────────────────────
+   * One scale, ~1.2 between steps. Body copy is 16px and prose never goes
+   * below it; the two steps under body are mono micro-labels, which are
+   * read as marks on a drawing rather than as sentences.
+   */
+  --fs-micro: 11px; /* mono, uppercase, tracked — sheet labels */
+  --fs-meta: 13px; /* mono figures and secondary marks only */
+  --fs-body: 16px; /* all prose */
+  --fs-lead: 19px; /* the thesis line, control names */
+  --fs-title: 24px; /* section and page titles */
+  --fs-display: 30px; /* the wordmark */
+
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-body: 1.5;
+
+  /* ── Spacing ── 4px grid, named so a component never counts pixels. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
 
   --t-state: 150ms;
   --t-layout: 400ms;
@@ -32,11 +77,15 @@ body {
 body {
   background: var(--film);
   color: var(--bolu);
+  /*
+   * Two families and no more: the system sans for reading, a system mono for
+   * anything that is a measurement. Nothing is downloaded.
+   */
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   /* 16px floor for body copy. Mono micro-labels go smaller, because they are
      labels rather than reading. */
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -49,8 +98,8 @@ body {
 
 .micro {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
-  line-height: 14px;
+  font-size: var(--fs-micro);
+  line-height: var(--lh-snug);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
