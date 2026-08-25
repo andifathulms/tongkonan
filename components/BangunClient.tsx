@@ -18,6 +18,7 @@ import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { buildHouse, buildTimeline } from '@/lib/banua/assembly'
 import { DEFAULT_RULES, rankInfo } from '@/lib/banua/rules'
+import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/banua/address'
 import type { Rules } from '@/lib/banua/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import type { DatePreset } from '@/lib/solar/presets'
@@ -31,7 +32,7 @@ import { solarPosition } from '@/lib/solar/position'
  * the only screen where all three rules are on the page at once.
  */
 export function BangunClient({ locale }: { locale: Locale }) {
-  const [rules, setRules] = useState<Rules>(DEFAULT_RULES)
+  const [rules, setRules, addressReady] = useRuleAddress()
   const [view, setView] = useState<ViewKey>('perspektif')
   const [figure, setFigure] = useState(true) // on by default: it is the scale bar
   const [rain, setRain] = useState(false)
@@ -43,7 +44,7 @@ export function BangunClient({ locale }: { locale: Locale }) {
   const presets = useMemo(() => datePresets(), [])
   const { house, layout } = useMemo(() => buildHouse(rules), [rules])
   const timeline = useMemo(() => buildTimeline(house), [house])
-  const rebuild = useRebuildTransition(rules, usePrefersReducedMotion())
+  const rebuild = useRebuildTransition(rules, usePrefersReducedMotion(), addressReady)
 
   const sun = useMemo(() => {
     const preset = presets.find((p) => p.key === presetKey) ?? presets[0]
@@ -114,17 +115,23 @@ export function BangunClient({ locale }: { locale: Locale }) {
  */
 const REBUILD_MS = 850
 
-function useRebuildTransition(rules: Rules, reducedMotion: boolean): number {
+/**
+ * @param settled false while the rules are still being read off the address.
+ *   Whatever the address turns out to say is this reader's starting house,
+ *   not a change they made, so it arrives built rather than being raised in
+ *   front of them.
+ */
+function useRebuildTransition(rules: Rules, reducedMotion: boolean, settled: boolean): number {
   const [t, setT] = useState(1)
   const signature = `${rules.rank}|${rules.bays}|${rules.horns}`
-  const first = useRef(true)
+  const shown = useRef<string | null>(null)
 
   useEffect(() => {
-    if (first.current) {
-      first.current = false
-      return
-    }
-    if (reducedMotion) {
+    if (!settled) return
+    if (shown.current === signature) return
+    const isFirst = shown.current === null
+    shown.current = signature
+    if (isFirst || reducedMotion) {
       // The alternative is the finished house, immediately. Nothing is lost:
       // the house is the content, and the drop was only ever punctuation.
       setT(1)
@@ -140,9 +147,42 @@ function useRebuildTransition(rules: Rules, reducedMotion: boolean): number {
     setT(0)
     raf = requestAnimationFrame(step)
     return () => cancelAnimationFrame(raf)
-  }, [signature, reducedMotion])
+  }, [signature, reducedMotion, settled])
 
   return t
+}
+
+/**
+ * Rules held in the address bar.
+ *
+ * The page is prerendered with the defaults, so the address is read after
+ * mount rather than during render — a client that read it during render would
+ * disagree with the HTML it is hydrating. `settled` is how the rest of the
+ * screen knows the difference between the house the address asked for and a
+ * house the reader has since built.
+ *
+ * Changes replace the entry rather than pushing one. A rule is a description
+ * being edited, not a place being visited, and thirty pushes would make Back
+ * useless for leaving the page.
+ */
+function useRuleAddress(): [Rules, (next: Rules) => void, boolean] {
+  const [rules, setRules] = useState<Rules>(DEFAULT_RULES)
+  const [settled, setSettled] = useState(false)
+
+  useEffect(() => {
+    setRules(rulesFromQuery(window.location.search))
+    setSettled(true)
+  }, [])
+
+  useEffect(() => {
+    if (!settled) return
+    const query = rulesToQuery(rules)
+    if (query === window.location.search.replace(/^\?/, '')) return
+    window.history.replaceState(null, '', `${window.location.pathname}?${query}`)
+  }, [rules, settled])
+
+  const change = (next: Rules) => setRules((prev) => (rulesEqual(prev, next) ? prev : next))
+  return [rules, change, settled]
 }
 
 /**
