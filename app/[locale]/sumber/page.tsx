@@ -166,22 +166,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             {results.map((r) => (
               <li key={r.key} className="border-b border-hairline py-3">
                 <div className="flex items-baseline gap-3">
-                  <span
-                    className="micro shrink-0 rounded px-1.5 py-0.5"
-                    style={
-                      r.status === 'fail'
-                        ? { background: 'var(--rara)', color: 'var(--kapur)' }
-                        : r.status === 'skip'
-                          ? { background: 'var(--riri)', color: 'var(--bolu)' }
-                          : { background: 'var(--bolu)', color: 'var(--kapur)' }
-                    }
-                  >
-                    {r.status === 'pass'
-                      ? pick(COPY.checks.pass, locale)
-                      : r.status === 'fail'
-                        ? pick(COPY.checks.fail, locale)
-                        : pick(COPY.checks.skip, locale)}
-                  </span>
+                  <CheckChip status={r.status} locale={locale} />
                   <span className="text-body leading-snug">
                     {locale === 'id' ? r.titleId : r.titleEn}
                   </span>
@@ -272,6 +257,37 @@ function Tally({ label, value }: { label: string; value: number }) {
   )
 }
 
+/**
+ * A check's verdict, as a chip.
+ *
+ * One definition rather than two inline copies in raw custom properties: the
+ * list of invariants and the counterexample beside it were drifting apart
+ * already — the second had no skip case at all. Colours come from the token
+ * classes, so the next change to the palette reaches both.
+ *
+ * Contrast, on the film: kapur on bolu 14.24:1, kapur on rara 5.85:1, bolu on
+ * riri 6.55:1.
+ */
+function CheckChip({ status, locale }: { status: CheckResult['status']; locale: Locale }) {
+  const face =
+    status === 'fail'
+      ? 'bg-rara text-kapur'
+      : status === 'skip'
+        ? 'bg-riri text-bolu'
+        : 'bg-bolu text-kapur'
+  const label =
+    status === 'fail'
+      ? COPY.checks.fail
+      : status === 'skip'
+        ? COPY.checks.skip
+        : COPY.checks.pass
+  return (
+    <span className={`micro shrink-0 rounded px-1.5 py-0.5 ${face}`}>
+      {pick(label, locale)}
+    </span>
+  )
+}
+
 /** How far the house moves if this one number is out. Computed, not claimed. */
 function IfWrong({
   s,
@@ -313,21 +329,11 @@ function CounterCase({
   prows: { front: number; rear: number }
   locale: Locale
 }) {
-  const failed = result.status === 'fail'
   return (
     <div className="bg-film p-4">
       <p className="micro">{title}</p>
       <div className="mt-2 flex items-baseline gap-3">
-        <span
-          className="micro shrink-0 rounded px-1.5 py-0.5"
-          style={
-            failed
-              ? { background: 'var(--rara)', color: 'var(--kapur)' }
-              : { background: 'var(--bolu)', color: 'var(--kapur)' }
-          }
-        >
-          {failed ? pick(COPY.checks.fail, locale) : pick(COPY.checks.pass, locale)}
-        </span>
+        <CheckChip status={result.status} locale={locale} />
         <span className="num text-body">
           {prows.front.toFixed(2)} / {prows.rear.toFixed(2)} m
         </span>
