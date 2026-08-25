@@ -41,18 +41,14 @@ export function RuleControls({
               aria-pressed={rules.rank === r.rank}
               className={[
                 'rounded px-2 py-1.5 text-left transition-colors duration-state',
-                rules.rank === r.rank
-                  ? 'bg-bolu text-kapur'
-                  : 'hover:bg-[rgba(23,21,15,0.06)]',
+                rules.rank === r.rank ? 'bg-bolu text-kapur' : 'hover:bg-wash',
               ].join(' ')}
             >
-              <span className="block text-[14px] leading-tight">{r.name}</span>
+              <span className="block text-body leading-tight">{r.name}</span>
               <span
                 className={[
-                  'mt-0.5 block text-[11px] leading-snug',
-                  rules.rank === r.rank
-                    ? 'text-[rgba(233,227,210,0.72)]'
-                    : 'text-[color:var(--muted)]',
+                  'mt-0.5 block text-meta',
+                  rules.rank === r.rank ? 'text-muted-on-ink' : 'text-muted',
                 ].join(' ')}
               >
                 {locale === 'id' ? r.glossId : r.glossEn}
@@ -79,9 +75,9 @@ export function RuleControls({
           label={pick(COPY.controls.bays, locale)}
         />
         {unusual ? (
-          <p className="mt-2 text-[12px] leading-snug" style={{ color: 'var(--rara)' }}>
+          <p className="mt-2 text-body text-rara">
             {pick(COPY.controls.unusual, locale)}{' '}
-            <span className="text-[color:var(--muted)]">
+            <span className="text-muted">
               {rankInfo(rules.rank).name}: ≤ {rankInfo(rules.rank).maxBays}
             </span>
           </p>
@@ -105,7 +101,7 @@ export function RuleControls({
           value={rules.horns}
           onChange={(e) => onChange({ ...rules, horns: Number(e.target.value) })}
           aria-label={pick(COPY.controls.horns, locale)}
-          className="w-full accent-[color:var(--bolu)]"
+          className="w-full accent-bolu"
         />
       </Field>
     </RailSection>
@@ -122,9 +118,7 @@ export function RuleControls({
 export function OrientationNote({ locale }: { locale: Locale }) {
   return (
     <RailSection title={pick(COPY.orientation.heading, locale)}>
-      <p className="text-[13px] leading-snug text-[color:var(--muted)]">
-        {pick(COPY.orientation.body, locale)}
-      </p>
+      <p className="text-body text-muted">{pick(COPY.orientation.body, locale)}</p>
     </RailSection>
   )
 }
@@ -158,21 +152,17 @@ export function SunControls({
             aria-pressed={p.key === presetKey}
             className={[
               'rounded px-2 py-1.5 text-left transition-colors duration-state',
-              p.key === presetKey ? 'bg-bolu text-kapur' : 'hover:bg-[rgba(23,21,15,0.06)]',
+              p.key === presetKey ? 'bg-bolu text-kapur' : 'hover:bg-wash',
             ].join(' ')}
           >
-            <span className="flex items-baseline justify-between gap-2 text-[14px] leading-tight">
+            <span className="flex items-baseline justify-between gap-2 text-body leading-tight">
               {locale === 'id' ? p.labelId : p.labelEn}
-              <span className="num text-[12px] opacity-70">
-                {p.noonAltitude.toFixed(1)}°
-              </span>
+              <span className="num text-meta">{p.noonAltitude.toFixed(1)}°</span>
             </span>
             <span
               className={[
-                'mt-0.5 block text-[11px] leading-snug',
-                p.key === presetKey
-                  ? 'text-[rgba(233,227,210,0.72)]'
-                  : 'text-[color:var(--muted)]',
+                'mt-0.5 block text-meta',
+                p.key === presetKey ? 'text-muted-on-ink' : 'text-muted',
               ].join(' ')}
             >
               {locale === 'id' ? p.glossId : p.glossEn}
@@ -184,7 +174,7 @@ export function SunControls({
       <div className="mt-4">
         <div className="mb-1 flex items-baseline justify-between">
           <span className="micro">{pick(COPY.controls.time, locale)} WITA</span>
-          <span className="num text-[13px]">{formatClock(minutes)}</span>
+          <span className="num text-meta">{formatClock(minutes)}</span>
         </div>
         <input
           type="range"
@@ -194,15 +184,15 @@ export function SunControls({
           value={minutes}
           onChange={(e) => onMinutes(Number(e.target.value))}
           aria-label={pick(COPY.controls.time, locale)}
-          className="w-full accent-[color:var(--bolu)]"
+          className="w-full accent-bolu"
         />
         <div className="mt-1 flex items-baseline justify-between">
           <span className="micro">
             {locale === 'id' ? 'Tinggi matahari' : 'Solar altitude'}
           </span>
-          <span className="num text-[13px]">{altitude.toFixed(1)}°</span>
+          <span className="num text-meta">{altitude.toFixed(1)}°</span>
         </div>
-        <p className="mt-2 text-[11px] leading-snug text-[color:var(--muted)]">
+        <p className="mt-2 text-body text-muted">
           {active
             ? locale === 'id'
               ? `Tengah hari pada tanggal ini: ${active.noonAltitude.toFixed(1)}° di atas ufuk. Rantepao 2,97° LS, 119,90° BT.`
@@ -268,7 +258,7 @@ export function ViewSwitch({
     { key: 'kolong', label: pick(COPY.views.kolong, locale) },
   ]
   return (
-    <div className="absolute right-3 top-3 z-10 flex gap-px rounded border border-[color:var(--hairline)] bg-[color:var(--film)] p-px">
+    <div className="absolute right-3 top-3 z-10 flex gap-px rounded border border-hairline bg-film p-px">
       {views.map((v) => (
         <button
           key={v.key}
@@ -276,8 +266,8 @@ export function ViewSwitch({
           onClick={() => onChange(v.key)}
           aria-pressed={v.key === view}
           className={[
-            'micro rounded px-2 py-1.5 transition-colors duration-state',
-            v.key === view ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-[rgba(23,21,15,0.06)]',
+            'micro inline-flex min-h-[26px] items-center rounded px-2 transition-colors duration-state',
+            v.key === view ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
           ].join(' ')}
         >
           {v.label}
@@ -304,12 +294,10 @@ function Field({
     <div className="mb-5 last:mb-0">
       <div className="mb-2 flex items-baseline justify-between gap-2">
         <span className="micro">{label}</span>
-        {value ? <span className="num text-[13px]">{value}</span> : null}
+        {value ? <span className="num text-meta">{value}</span> : null}
       </div>
       {children}
-      {hint ? (
-        <p className="mt-2 text-[11px] leading-snug text-[color:var(--muted)]">{hint}</p>
-      ) : null}
+      {hint ? <p className="mt-2 text-body text-muted">{hint}</p> : null}
     </div>
   )
 }
@@ -337,10 +325,8 @@ function Stepper({
           onClick={() => onChange(n)}
           aria-pressed={n === value}
           className={[
-            'num flex-1 rounded py-1.5 text-[14px] transition-colors duration-state',
-            n === value
-              ? 'bg-bolu text-kapur'
-              : 'border border-[color:var(--hairline)] hover:bg-[rgba(23,21,15,0.06)]',
+            'num flex-1 rounded py-1.5 text-body transition-colors duration-state',
+            n === value ? 'bg-bolu text-kapur' : 'border border-hairline hover:bg-wash',
           ].join(' ')}
         >
           {n}
@@ -367,13 +353,11 @@ function Toggle({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 h-4 w-4 shrink-0 accent-[color:var(--bolu)]"
+        className="mt-1 h-4 w-4 shrink-0 accent-bolu"
       />
       <span>
-        <span className="block text-[14px] leading-tight">{label}</span>
-        <span className="mt-0.5 block text-[11px] leading-snug text-[color:var(--muted)]">
-          {hint}
-        </span>
+        <span className="block text-body leading-tight">{label}</span>
+        <span className="mt-1 block text-body text-muted">{hint}</span>
       </span>
     </label>
   )

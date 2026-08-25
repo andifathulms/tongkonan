@@ -29,12 +29,25 @@ export function ProvenanceStrip({
   const pct = (n: number) => (split.total === 0 ? 0 : (n / split.total) * 100)
 
   const bands = [
-    { key: 'measured', n: split.measured, colour: 'var(--bolu)', label: COPY.provenance.measured },
-    { key: 'canon', n: split.canon, colour: 'var(--riri)', label: COPY.provenance.canon },
+    {
+      key: 'measured',
+      n: split.measured,
+      colour: 'var(--bolu)',
+      edge: 'var(--bolu)',
+      label: COPY.provenance.measured,
+    },
+    {
+      key: 'canon',
+      n: split.canon,
+      colour: 'var(--riri)',
+      edge: 'var(--riri-ink)',
+      label: COPY.provenance.canon,
+    },
     {
       key: 'interpolated',
       n: split.interpolated,
       colour: 'var(--rara)',
+      edge: 'var(--rara)',
       label: COPY.provenance.interpolated,
     },
   ] as const
@@ -59,22 +72,28 @@ export function ProvenanceStrip({
       <dl className="mt-3 flex flex-col gap-1.5">
         {bands.map((b) => (
           <div key={b.key} className="flex items-baseline gap-2">
+            {/*
+              Turmeric is 1.93:1 on the film — below the floor for a mark that
+              carries meaning — so the swatch is the pigment with its own ink
+              drawn round it. The class is legible; the pigment is still the
+              pigment.
+            */}
             <span
               aria-hidden
-              className="mt-1 inline-block h-2 w-2 shrink-0 rounded"
-              style={{ background: b.colour }}
+              className="mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded border"
+              style={{ background: b.colour, borderColor: b.edge }}
             />
             <dt className="micro text-bolu">{pick(b.label, locale)}</dt>
-            <dd className="num ml-auto text-[12px] text-bolu">
+            <dd className="num ml-auto text-meta text-bolu">
               {b.n}
-              <span className="text-[color:var(--muted)]">/{split.total}</span>
+              <span className="text-muted">/{split.total}</span>
             </dd>
           </div>
         ))}
       </dl>
 
       {!compact ? (
-        <p className="mt-3 text-[12px] leading-snug text-[color:var(--muted)]">
+        <p className="mt-3 text-body text-muted">
           {pick(COPY.provenance.renderWarning, locale)}{' '}
           {pick(COPY.provenance.line, locale)}
         </p>
@@ -97,12 +116,14 @@ export function ProvenanceTag({ dim, locale }: { dim: Dim; locale: Locale }) {
       : dim.class === 'canon'
         ? 'var(--riri)'
         : 'var(--rara)'
+  // Same reason as the legend swatch: turmeric needs its own ink round it.
+  const edge = dim.class === 'canon' ? 'var(--riri-ink)' : colour
   return (
     <span className="inline-flex items-baseline gap-1.5">
       <span
         aria-hidden
-        className="inline-block h-2 w-2 shrink-0 rounded"
-        style={{ background: colour }}
+        className="inline-block h-2.5 w-2.5 shrink-0 rounded border"
+        style={{ background: colour, borderColor: edge }}
       />
       <span className="micro">{pick(label, locale)}</span>
     </span>

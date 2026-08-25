@@ -97,18 +97,18 @@ export function BacaClient({ locale }: { locale: Locale }) {
       rail={
         <>
           <RailSection title={pick(COPY.read.heading, locale)}>
-            <p className="mb-4 text-[13px] leading-snug text-[color:var(--muted)]">
+            <p className="mb-4 text-body text-muted">
               {pick(COPY.read.intro, locale)}
             </p>
             <ol className="flex flex-col gap-4">
               {readings.map((r) => (
                 <li key={r.title}>
                   <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="text-[14px] font-medium leading-tight">{r.title}</h3>
-                    <span className="num shrink-0 text-[14px]">{r.value}</span>
+                    <h3 className="text-body font-medium leading-tight">{r.title}</h3>
+                    <span className="num shrink-0 text-body">{r.value}</span>
                   </div>
                   <p className="micro mt-0.5 text-right">{r.unit}</p>
-                  <p className="mt-1 text-[12px] leading-snug text-[color:var(--muted)]">
+                  <p className="mt-1 text-body text-muted">
                     {r.body}
                   </p>
                 </li>
@@ -117,19 +117,19 @@ export function BacaClient({ locale }: { locale: Locale }) {
           </RailSection>
 
           <RailSection title={pick(COPY.zones.heading, locale)}>
-            <p className="mb-3 text-[12px] leading-snug text-[color:var(--muted)]">
+            <p className="mb-3 text-body text-muted">
               {pick(COPY.read.sectionGloss, locale)}
             </p>
             <dl className="flex flex-col gap-3">
               {zones.map((z) => (
                 <div key={z.name}>
                   <div className="flex items-baseline justify-between gap-2">
-                    <dt className="text-[14px] leading-tight">{z.name}</dt>
-                    <dd className="num text-[12px]">
+                    <dt className="text-body leading-tight">{z.name}</dt>
+                    <dd className="num text-meta">
                       {z.from.toFixed(2)}–{z.to.toFixed(2)} m
                     </dd>
                   </div>
-                  <p className="mt-0.5 text-[11px] leading-snug text-[color:var(--muted)]">
+                  <p className="mt-0.5 text-body text-muted">
                     {z.gloss}
                   </p>
                 </div>
@@ -154,7 +154,7 @@ export function BacaClient({ locale }: { locale: Locale }) {
         section={section}
         reveal={null}
       >
-        <div className="absolute right-3 top-3 z-10 flex gap-px rounded border border-[color:var(--hairline)] bg-[color:var(--film)] p-px">
+        <div className="absolute right-3 top-3 z-10 flex gap-px rounded border border-hairline bg-film p-px">
           {[
             { on: false, label: pick(COPY.read.facade, locale) },
             { on: true, label: pick(COPY.read.section, locale) },
@@ -166,7 +166,7 @@ export function BacaClient({ locale }: { locale: Locale }) {
               aria-pressed={o.on === section}
               className={[
                 'micro rounded px-2 py-1.5 transition-colors duration-state',
-                o.on === section ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-[rgba(23,21,15,0.06)]',
+                o.on === section ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
               ].join(' ')}
             >
               {o.label}

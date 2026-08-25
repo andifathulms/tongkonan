@@ -96,7 +96,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
               <button
                 type="button"
                 onClick={() => (t >= 1 ? replay() : setPlaying(!playing))}
-                className="flex-1 rounded bg-bolu px-2 py-2 text-[14px] text-kapur transition-opacity duration-state hover:opacity-90"
+                className="flex-1 rounded bg-bolu px-2 py-2 text-body text-kapur transition-opacity duration-state hover:opacity-90"
               >
                 {t >= 1
                   ? pick(COPY.assembly.replay, locale)
@@ -115,7 +115,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
                 setT(Number(e.target.value) / 1000)
               }}
               aria-label={pick(COPY.assembly.heading, locale)}
-              className="w-full accent-[color:var(--bolu)]"
+              className="w-full accent-bolu"
             />
 
             <ol className="mt-4 flex flex-col gap-px">
@@ -136,19 +136,19 @@ export function RakitClient({ locale }: { locale: Locale }) {
                         'w-full rounded px-2 py-1.5 text-left transition-colors duration-state',
                         active
                           ? 'bg-bolu text-kapur'
-                          : 'hover:bg-[rgba(23,21,15,0.06)]',
+                          : 'hover:bg-wash',
                       ].join(' ')}
                     >
                       <span className="flex items-baseline justify-between gap-2">
                         <span
                           className={[
-                            'text-[14px] leading-tight',
-                            !active && !done ? 'text-[color:var(--muted)]' : '',
+                            'text-body leading-tight',
+                            !active && !done ? 'text-muted' : '',
                           ].join(' ')}
                         >
                           {info.title}
                         </span>
-                        <span className="num text-[11px] opacity-70">{span.partIds.length}</span>
+                        <span className="num text-meta opacity-70">{span.partIds.length}</span>
                       </span>
                     </button>
                   </li>
@@ -157,14 +157,14 @@ export function RakitClient({ locale }: { locale: Locale }) {
             </ol>
 
             {reducedMotion ? (
-              <p className="mt-3 text-[11px] leading-snug text-[color:var(--muted)]">
+              <p className="mt-3 text-body text-muted">
                 {pick(COPY.assembly.reducedMotion, locale)}
               </p>
             ) : null}
           </RailSection>
 
           <RailSection title={pick(COPY.joints.heading, locale)}>
-            <p className="mb-3 text-[13px] leading-snug">
+            <p className="mb-3 text-body">
               {pick(COPY.assembly.noNails, locale)}
             </p>
             <dl className="flex flex-col gap-3">
@@ -188,7 +188,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
             <div className="mt-5">
               <div className="mb-2 flex items-baseline justify-between">
                 <span className="micro">{pick(COPY.joints.explode, locale)}</span>
-                <span className="num text-[13px]">{Math.round(explode * 100)}%</span>
+                <span className="num text-meta">{Math.round(explode * 100)}%</span>
               </div>
               <input
                 type="range"
@@ -197,9 +197,9 @@ export function RakitClient({ locale }: { locale: Locale }) {
                 value={Math.round(explode * 100)}
                 onChange={(e) => setExplode(Number(e.target.value) / 100)}
                 aria-label={pick(COPY.joints.explode, locale)}
-                className="w-full accent-[color:var(--bolu)]"
+                className="w-full accent-bolu"
               />
-              <p className="mt-2 text-[11px] leading-snug text-[color:var(--muted)]">
+              <p className="mt-2 text-body text-muted">
                 {pick(COPY.joints.explodeGloss, locale)}
               </p>
             </div>
@@ -235,9 +235,9 @@ function StageCaption({ stage, locale }: { stage: Stage | null; locale: Locale }
   if (!stage) return null
   const info = stageInfo(stage)
   return (
-    <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 w-[min(30rem,calc(100%-6rem))] -translate-x-1/2 rounded border border-[color:var(--hairline)] bg-[rgba(216,215,205,0.9)] px-3 py-2.5 backdrop-blur-[2px]">
+    <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 w-[min(30rem,calc(100%-6rem))] -translate-x-1/2 rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px]">
       <p className="micro">{info.title}</p>
-      <p className="mt-1 text-[13px] leading-snug">
+      <p className="mt-1 text-body">
         {locale === 'id' ? info.glossId : info.glossEn}
       </p>
     </div>
@@ -248,10 +248,10 @@ function JointRow({ name, gloss, count }: { name: string; gloss: string; count: 
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
-        <dt className="text-[14px] leading-tight">{name}</dt>
-        <dd className="num text-[13px]">{count}</dd>
+        <dt className="text-body leading-tight">{name}</dt>
+        <dd className="num text-meta">{count}</dd>
       </div>
-      <p className="mt-0.5 text-[11px] leading-snug text-[color:var(--muted)]">{gloss}</p>
+      <p className="mt-0.5 text-body text-muted">{gloss}</p>
     </div>
   )
 }

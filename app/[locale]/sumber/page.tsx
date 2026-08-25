@@ -41,7 +41,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             <ProvenanceStrip dims={dims} locale={locale} />
           </RailSection>
           <RailSection title={pick(COPY.checks.heading, locale)}>
-            <p className="mb-3 text-[13px] leading-snug text-[color:var(--muted)]">
+            <p className="mb-3 text-body text-muted">
               {pick(COPY.checks.line, locale)}
             </p>
             <dl className="flex flex-col gap-1">
@@ -55,7 +55,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
     >
       <div className="sheet:h-full sheet:overflow-y-auto">
         <div className="mx-auto max-w-3xl px-5 py-8 sheet:px-8">
-          <h1 className="text-xl font-medium">{pick(COPY.sources.heading, locale)}</h1>
+          <h1 className="text-title font-medium">{pick(COPY.sources.heading, locale)}</h1>
           <p className="mt-2 max-w-prose text-body">{pick(COPY.sources.intro, locale)}</p>
 
           <hr className="rule my-8" />
@@ -64,7 +64,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[38rem] border-collapse text-left">
               <thead>
-                <tr className="border-b border-[color:var(--hairline)]">
+                <tr className="border-b border-hairline">
                   <Th>{pick(COPY.sources.dimension, locale)}</Th>
                   <Th right>{pick(COPY.sources.value, locale)}</Th>
                   <Th>{pick(COPY.sources.klass, locale)}</Th>
@@ -75,19 +75,19 @@ export default function Sumber({ params }: { params: { locale: string } }) {
                 {DIM_KEYS.map((key) => {
                   const dim: Dim = DIMS[key]
                   return (
-                    <tr key={key} className="border-b border-[color:var(--hairline)] align-top">
+                    <tr key={key} className="border-b border-hairline align-top">
                       <td className="py-3 pr-4">
-                        <span className="font-mono text-[12px]">{key}</span>
+                        <span className="font-mono text-meta">{key}</span>
                       </td>
-                      <td className="num whitespace-nowrap py-3 pr-4 text-[13px]">
+                      <td className="num whitespace-nowrap py-3 pr-4 text-meta">
                         {formatValue(dim)}
                       </td>
                       <td className="py-3 pr-4">
                         <ProvenanceTag dim={dim} locale={locale} />
                       </td>
-                      <td className="py-3 text-[13px] leading-snug">
+                      <td className="py-3 text-meta leading-snug">
                         {locale === 'id' ? dim.note : dim.noteEn}
-                        <span className="mt-1 block text-[11px] leading-snug text-[color:var(--muted)]">
+                        <span className="mt-1 block text-meta leading-snug text-muted">
                           {dim.source === 'none'
                             ? pick(COPY.sources.none, locale)
                             : sourceFor(dim.source).citation}
@@ -103,12 +103,12 @@ export default function Sumber({ params }: { params: { locale: string } }) {
           <hr className="rule my-8" />
 
           <h2 className="micro">{pick(COPY.checks.heading, locale)}</h2>
-          <p className="mt-2 max-w-prose text-[13px] leading-snug text-[color:var(--muted)]">
+          <p className="mt-2 max-w-prose text-body text-muted">
             {pick(COPY.checks.line, locale)}
           </p>
           <ul className="mt-4 flex flex-col">
             {results.map((r) => (
-              <li key={r.key} className="border-b border-[color:var(--hairline)] py-3">
+              <li key={r.key} className="border-b border-hairline py-3">
                 <div className="flex items-baseline gap-3">
                   <span
                     className="micro shrink-0 rounded px-1.5 py-0.5"
@@ -126,11 +126,11 @@ export default function Sumber({ params }: { params: { locale: string } }) {
                         ? pick(COPY.checks.fail, locale)
                         : pick(COPY.checks.skip, locale)}
                   </span>
-                  <span className="text-[14px] leading-snug">
+                  <span className="text-body leading-snug">
                     {locale === 'id' ? r.titleId : r.titleEn}
                   </span>
                 </div>
-                <p className="mt-1 pl-[3.6rem] text-[12px] leading-snug text-[color:var(--muted)]">
+                <p className="mt-1 pl-[3.6rem] text-body text-muted">
                   {r.detail}
                 </p>
               </li>
@@ -143,17 +143,17 @@ export default function Sumber({ params }: { params: { locale: string } }) {
           <ul className="mt-4 flex flex-col gap-4">
             {SOURCES.filter((s) => s.key !== 'none').map((s) => (
               <li key={s.key}>
-                <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[color:var(--muted)]">
+                <p className="micro">
                   {s.key} · {s.kind}
                 </p>
-                <p className="mt-1 max-w-prose text-[14px] leading-snug">{s.citation}</p>
+                <p className="mt-1 max-w-prose text-body leading-snug">{s.citation}</p>
               </li>
             ))}
           </ul>
 
           <hr className="rule my-8" />
 
-          <p className="max-w-prose text-[13px] leading-snug text-[color:var(--muted)]">
+          <p className="max-w-prose text-body text-muted">
             {pick(COPY.provenance.line, locale)}
           </p>
         </div>
@@ -179,7 +179,7 @@ function Tally({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
       <dt className="micro">{label}</dt>
-      <dd className="num text-[13px]">{value}</dd>
+      <dd className="num text-meta">{value}</dd>
     </div>
   )
 }

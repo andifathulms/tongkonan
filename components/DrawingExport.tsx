@@ -49,14 +49,14 @@ export function DrawingExport({
             key={v.key}
             type="button"
             onClick={() => download(v.key)}
-            className="rounded border border-[color:var(--hairline)] px-2 py-1.5 text-left text-[14px] transition-colors duration-state hover:bg-[rgba(23,21,15,0.06)]"
+            className="rounded border border-hairline px-2 py-1.5 text-left text-body transition-colors duration-state hover:bg-wash"
           >
             {v.label}
             <span className="micro ml-2">SVG</span>
           </button>
         ))}
       </div>
-      <p className="mt-2 text-[11px] leading-snug text-[color:var(--muted)]">
+      <p className="mt-2 text-body text-muted">
         {pick(COPY.draw.gloss, locale)}
       </p>
     </RailSection>
