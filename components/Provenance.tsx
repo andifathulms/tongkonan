@@ -81,23 +81,27 @@ export function ProvenanceStrip({
         )}
       </div>
 
-      {/* Legend contract: nothing on screen carries meaning only the code knows. */}
-      {parts ? (
-        /*
-          Two counts, two denominators, and they disagree: one canon rule can
-          govern a hundred parts while one invented metre governs three. Both
-          are true, so both are named rather than one standing in for the other.
-        */
-        <div className="mt-3 flex items-baseline gap-2">
-          <span className="micro ml-auto w-12 text-right">
-            {pick(COPY.provenance.byPart, locale)}
-          </span>
-          <span className="micro w-16 text-right">
-            {pick(COPY.provenance.byDimension, locale)}
-          </span>
-        </div>
-      ) : null}
-      <dl className={['flex flex-col gap-1.5', parts ? 'mt-1' : 'mt-3'].join(' ')}>
+      {/*
+        Legend contract: nothing on screen carries meaning only the code knows.
+
+        Two counts, two denominators, and they disagree: one canon rule can
+        govern a hundred parts while one invented metre governs three. Both are
+        true, so both are named rather than one standing in for the other.
+
+        Both columns are reserved whether or not the by-part count exists.
+        Inserting a column when the checkbox is ticked slid the whole legend
+        sideways at the exact moment the reader was looking at it, which reads
+        as a glitch rather than as an answer.
+      */}
+      <div className="mt-3 flex items-baseline gap-2">
+        <span className="micro ml-auto w-12 text-right">
+          {pick(COPY.provenance.byPart, locale)}
+        </span>
+        <span className="micro w-16 text-right">
+          {pick(COPY.provenance.byDimension, locale)}
+        </span>
+      </div>
+      <dl className="mt-1 flex flex-col gap-1.5">
         {bands.map((b) => (
           <div key={b.key} className="flex items-baseline gap-2">
             {/*
@@ -112,10 +116,18 @@ export function ProvenanceStrip({
               style={{ background: b.colour, borderColor: b.edge }}
             />
             <dt className="micro text-bolu">{pick(b.label, locale)}</dt>
-            {parts ? (
-              <dd className="num ml-auto w-12 text-meta text-bolu">{parts[b.key]}</dd>
-            ) : null}
-            <dd className={['num text-meta text-bolu', parts ? 'w-16' : 'ml-auto'].join(' ')}>
+            <dd className="num ml-auto w-12 text-meta text-bolu">
+              {parts ? (
+                parts[b.key]
+              ) : (
+                // An em dash, not a blank: the column exists and this house
+                // has not been counted that way yet.
+                <span className="text-muted" aria-label="—">
+                  —
+                </span>
+              )}
+            </dd>
+            <dd className="num w-16 text-meta text-bolu">
               {b.n}
               <span className="text-muted">/{split.total}</span>
             </dd>
