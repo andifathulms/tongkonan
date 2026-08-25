@@ -35,7 +35,13 @@
 
   --hairline: rgba(23, 21, 15, 0.16);
   --wash: rgba(23, 21, 15, 0.06); /* hover */
-  --veil: rgba(216, 215, 205, 0.9); /* panels floating over the model */
+  /*
+   * Panels floating over the model. The alpha is set by the worst case, not
+   * the usual one: over the darkest timber in the scene this composites to
+   * #CCCBC2, where muted ink is still 4.71:1. At 0.90 it was 4.37 and the
+   * readout became unreadable exactly when it was over the house.
+   */
+  --veil: rgba(216, 215, 205, 0.94);
 
   /*
    * ── Type scale ──────────────────────────────────────────────────────

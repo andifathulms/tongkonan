@@ -8,8 +8,9 @@ Working instructions for Claude Code. Read PRD.md for what is being built and DE
 
 - `lib/banua/` generates a complete house: 131 parts and 33 joints at the default rules. `lib/solar/` is validated against almanac values. `lib/draw/` emits plan, elevation and long section as SVG.
 - `pnpm check` type-checks and runs 34 tests, including the invariant suite over four rule combinations. All ten structural checks pass; `checkAgainstSurvey` reports **skipped** and must stay that way.
-- Provenance: 0 measured, 8 canon, 28 interpolated. That is 78% interpolated and it is shown on every screen. Moving that bar is the work.
+- Provenance: 0 measured, 7 canon, 27 interpolated. That is 79% interpolated and it is shown on every screen. Moving that bar is the work.
 - `/bangun`, `/rakit`, `/baca`, `/sumber` exist in Indonesian and English. The frame-raising sequence, the parameter-change rebuild, the day-of-sun, rain, the four view transitions, and the section cut through the three zones are all in.
+- **Interface tokens live in `app/globals.css` and nowhere else.** Six type steps, a 4px spacing scale, and a palette that states its contrast ratio beside every pair the interface uses. `tailwind.config.ts` maps utility names onto them and declares no values of its own. A bracketed size or colour in a component (`text-[13px]`, `bg-[rgba(...)]`) is a bug — it escapes the scale the same way a hardcoded dimension escapes provenance.
 
 Known gaps, all deliberate and none of them hidden:
 
@@ -24,7 +25,7 @@ Keep this section accurate. A stale "Current state" is worse than none — a pre
 
 - Next.js 14, App Router, `output: 'export'` — static, deploys to GitHub Pages, no server anywhere.
 - TypeScript, `strict: true`.
-- Tailwind. Design tokens from DESIGN.md only.
+- Tailwind. Design tokens from DESIGN.md only, written down once in `app/globals.css` and mapped to utility names in `tailwind.config.ts`.
 - pnpm.
 - Vitest for the generator and the solar engine.
 - **three.js is the one runtime dependency exception.** Justification: in the other apps the algorithm being hand-written *is* the subject, so no library. Here the subject is the rule→geometry generation, and rasterisation is not. Using three.js to draw a mesh we generated ourselves is like using a font rather than drawing glyphs. Do not let this reasoning expand — geometry generation, solar position, and the invariants stay hand-written with no library.
@@ -101,6 +102,8 @@ Use exact AABBs for rotated boxes (`|R| · halfExtents`), not a diagonal pad —
 
 - Indonesian is the default locale; English is second. Toraja terms are used as the names of the parts in both.
 - UI copy: sentence case, plain verbs, active voice. A control says what happens when it is used.
+- Prose is 16px. One-line glosses attached to a control and mono figures are 13px, because they are labels on a thing rather than sentences. Nothing else sits between them.
+- Text pairs clear 4.5:1 and interactive targets clear 24px. When a pigment has to carry meaning and cannot clear the floor as a fill, give it an ink variant for its stroke rather than changing the pigment.
 - Comments explain *why*, especially where a choice encodes something about the building. `// the eave oversails the posts so the drip line clears the post feet` is worth writing; `// set the eave` is not.
 - No `any`. No non-null assertions to silence the checker.
 - Commit messages state what changed in the model, not what changed in the code.
