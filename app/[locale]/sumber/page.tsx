@@ -70,9 +70,11 @@ export default function Sumber({ params }: { params: { locale: string } }) {
           <h1 className="text-title font-medium">{pick(COPY.sources.heading, locale)}</h1>
           <p className="mt-2 max-w-prose text-body">{pick(COPY.sources.intro, locale)}</p>
 
-          <hr className="rule my-8" />
+          <hr className="rule mb-7 mt-12" />
 
-          <h2 className="micro">{pick(COPY.sources.sensitivityHeading, locale)}</h2>
+          <h2 className="text-lead font-medium text-bolu">
+            {pick(COPY.sources.sensitivityHeading, locale)}
+          </h2>
           <p className="mt-2 max-w-prose text-body text-muted">
             {fill(pick(COPY.sources.sensitivityIntro, locale), { pct })}
           </p>
@@ -101,9 +103,11 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             {fill(pick(COPY.sources.sensitivityCaveat, locale), { pct })}
           </p>
 
-          <hr className="rule my-8" />
+          <hr className="rule mb-7 mt-12" />
 
-          <h2 className="micro">{pick(COPY.sources.tableHeading, locale)}</h2>
+          <h2 className="text-lead font-medium text-bolu">
+            {pick(COPY.sources.tableHeading, locale)}
+          </h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[38rem] border-collapse text-left">
               <thead>
@@ -150,9 +154,11 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             </table>
           </div>
 
-          <hr className="rule my-8" />
+          <hr className="rule mb-7 mt-12" />
 
-          <h2 className="micro">{pick(COPY.checks.heading, locale)}</h2>
+          <h2 className="text-lead font-medium text-bolu">
+            {pick(COPY.checks.heading, locale)}
+          </h2>
           <p className="mt-2 max-w-prose text-body text-muted">
             {pick(COPY.checks.line, locale)}
           </p>
@@ -187,9 +193,11 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             ))}
           </ul>
 
-          <hr className="rule my-8" />
+          <hr className="rule mb-7 mt-12" />
 
-          <h2 className="micro">{pick(COPY.checks.counterHeading, locale)}</h2>
+          <h2 className="text-lead font-medium text-bolu">
+            {pick(COPY.checks.counterHeading, locale)}
+          </h2>
           <p className="mt-2 max-w-prose text-body text-muted">
             {pick(COPY.checks.counterIntro, locale)}
           </p>
@@ -215,9 +223,11 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             {pick(COPY.checks.counterNote, locale)}
           </p>
 
-          <hr className="rule my-8" />
+          <hr className="rule mb-7 mt-12" />
 
-          <h2 className="micro">{pick(COPY.sources.sourceHeading, locale)}</h2>
+          <h2 className="text-lead font-medium text-bolu">
+            {pick(COPY.sources.sourceHeading, locale)}
+          </h2>
           <ul className="mt-4 flex flex-col gap-4">
             {SOURCES.filter((s) => s.key !== 'none').map((s) => (
               <li key={s.key}>
@@ -229,7 +239,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             ))}
           </ul>
 
-          <hr className="rule my-8" />
+          <hr className="rule mb-7 mt-12" />
 
           <p className="max-w-prose text-body text-muted">
             {pick(COPY.provenance.line, locale)}
