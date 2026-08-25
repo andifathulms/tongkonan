@@ -1,0 +1,319 @@
+/**
+ * The rule pack.
+ *
+ * A tongkonan is not a shape. It is a rule system, and this file is the
+ * system: what rank permits, what a bay count means, and every dimension the
+ * geometry is derived from — each one tagged with where it came from.
+ *
+ * On tagging honestly: the metric values here are almost all `interpolated`.
+ * The sources describe the building richly in words and photographs and very
+ * rarely in millimetres, so a number that sounds plausible is still the
+ * author's. What the sources *do* give is structure — that the house faces
+ * north, that the body divides into named bays, that the ridge sags and both
+ * prows rise, that the horns are a tally. Those are tagged `canon`. Nothing
+ * here is `measured`, because no survey has been wired in yet.
+ */
+
+import type { Dim, Layout, Rank, Rules, Source, SourceKey, StageInfo } from './types'
+
+/* ── The source table ─────────────────────────────────────────────────── */
+
+export const SOURCES: readonly Source[] = [
+  {
+    key: 'kis-jovak-1988',
+    citation:
+      "Kis-Jovak, J. I., Nooy-Palm, H., Schefold, R. & Schulz-Dornburg, U., " +
+      "Banua Toraja: Changing Patterns in Architecture and Symbolism among the Sa'dan Toraja " +
+      '(Royal Tropical Institute, Amsterdam, 1988).',
+    kind: 'survey',
+  },
+  {
+    key: 'waterson-1990',
+    citation:
+      'Waterson, R., The Living House: An Anthropology of Architecture in South-East Asia ' +
+      '(Oxford University Press, Singapore, 1990).',
+    kind: 'ethnography',
+  },
+  {
+    key: 'schefold-2003',
+    citation:
+      'Schefold, R., Domenig, G. & Nas, P. (eds), Indonesian Houses Vol. 1: Tradition and ' +
+      'Transformation in Vernacular Architecture (KITLV Press, Leiden, 2003).',
+    kind: 'reference',
+  },
+  {
+    key: 'nooy-palm-1979',
+    citation:
+      "Nooy-Palm, H., The Sa'dan-Toraja: A Study of Their Social Life and Religion, Vol. 1 " +
+      '(Martinus Nijhoff, The Hague, 1979).',
+    kind: 'ethnography',
+  },
+  {
+    key: 'depdikbud-sulsel',
+    citation:
+      'Departemen Pendidikan dan Kebudayaan, Arsitektur Tradisional Daerah Sulawesi Selatan ' +
+      '(Proyek Inventarisasi dan Dokumentasi Kebudayaan Daerah, Jakarta).',
+    kind: 'reference',
+  },
+  {
+    key: 'none',
+    citation: 'Tidak ada sumber. Nilai ini ditetapkan penulis untuk menutup celah.',
+    kind: 'none',
+  },
+]
+
+export function sourceFor(key: SourceKey): Source {
+  const found = SOURCES.find((s) => s.key === key)
+  // The table is exhaustive over SourceKey; this is the type-checker's price
+  // for `find` rather than a real branch.
+  if (!found) throw new Error(`unknown source key: ${key}`)
+  return found
+}
+
+/* ── Dimensions ───────────────────────────────────────────────────────── */
+
+function dim(
+  value: number,
+  unit: Dim['unit'],
+  cls: Dim['class'],
+  source: SourceKey,
+  note: string,
+): Dim {
+  return { value, unit, class: cls, source, note }
+}
+
+/**
+ * Base dimensions, before rank scales them. Keys are stable and are what
+ * /sumber lists.
+ */
+export const DIMS = {
+  /* body */
+  bayLength: dim(2.6, 'm', 'interpolated', 'none', 'Panjang satu ruang di sepanjang sumbu utara–selatan.'),
+  bodyWidth: dim(4.2, 'm', 'interpolated', 'none', 'Lebar badan rumah, dari dinding ke dinding.'),
+  postSection: dim(0.18, 'm', 'interpolated', 'none', "Sisi penampang a'riri, tiang persegi."),
+  padHeight: dim(0.22, 'm', 'interpolated', 'none', 'Tinggi batu umpak tempat tiang berdiri.'),
+  padDiameter: dim(0.42, 'm', 'interpolated', 'none', 'Lebar batu umpak.'),
+
+  /* the three vertical zones */
+  kolongHeight: dim(2.15, 'm', 'interpolated', 'none', 'Tinggi kolong (sulluk banua), dari tanah ke rangka lantai.'),
+  wallHeight: dim(1.95, 'm', 'interpolated', 'none', 'Tinggi dinding kale banua, dari lantai ke balok tumpuan.'),
+  floorFrameDepth: dim(0.24, 'm', 'interpolated', 'none', 'Tinggi balok rangka lantai.'),
+  deckThickness: dim(0.05, 'm', 'interpolated', 'none', 'Tebal papan lantai.'),
+  wallThickness: dim(0.06, 'm', 'interpolated', 'none', 'Tebal papan dinding.'),
+
+  /* roof */
+  ridgeRise: dim(3.4, 'm', 'interpolated', 'none', 'Tinggi punggung atap di atas balok tumpuan, di tengah bentang.'),
+  ridgeSag: dim(0.55, 'm', 'interpolated', 'none', 'Turunnya garis punggung di tengah bentang terhadap ujung.'),
+  frontProwRise: dim(3.05, 'm', 'interpolated', 'none', 'Naiknya haluan depan di atas titik terendah punggung.'),
+  rearProwRise: dim(2.45, 'm', 'interpolated', 'none', 'Naiknya haluan belakang; selalu lebih rendah dari depan.'),
+  prowOverhang: dim(3.1, 'm', 'interpolated', 'none', 'Julur haluan melewati ujung badan rumah.'),
+  eaveOversail: dim(1.15, 'm', 'interpolated', 'none', 'Julur atap melewati garis tiang terluar, agar tetesan air jatuh bebas.'),
+  eaveDrop: dim(0.35, 'm', 'interpolated', 'none', 'Turunnya tepi atap di bawah balok tumpuan.'),
+  ijukCourseDepth: dim(0.28, 'm', 'interpolated', 'none', 'Tinggi tampak satu lapis ijuk.'),
+  ijukThickness: dim(0.09, 'm', 'interpolated', 'none', 'Tebal satu lapis ijuk yang menonjol dari lapis di bawahnya.'),
+  ijukLap: dim(0.4, 'ratio', 'interpolated', 'none', 'Bagian lapis yang tertindih lapis di atasnya.'),
+
+  /* tulak somba and horns */
+  tulakSombaSection: dim(0.26, 'm', 'interpolated', 'none', 'Sisi penampang tulak somba, tiang penyangga haluan depan.'),
+  hornSpacing: dim(0.19, 'm', 'interpolated', 'none', 'Jarak vertikal antar tanduk pada tulak somba.'),
+  hornSpread: dim(0.52, 'm', 'interpolated', 'none', 'Rentang tanduk kerbau dari ujung ke ujung.'),
+
+  /* rules that are structure, not measurement */
+  orientation: dim(0, 'deg', 'canon', 'nooy-palm-1979', 'Rumah membujur utara–selatan; muka (ulunna banua) menghadap utara.'),
+  bayCountCommon: dim(3, 'count', 'canon', 'waterson-1990', "Pembagian umum badan rumah: tangdo', sali, sumbung."),
+  ridgeSags: dim(1, 'ratio', 'canon', 'kis-jovak-1988', 'Garis punggung melengkung turun di tengah, kedua haluan naik.'),
+  frontHigher: dim(1, 'ratio', 'canon', 'kis-jovak-1988', 'Haluan depan lebih tinggi daripada haluan belakang.'),
+  hornsAreTally: dim(1, 'count', 'canon', 'nooy-palm-1979', 'Tanduk kerbau adalah catatan jumlah upacara rambu solo yang pernah digelar.'),
+  noNails: dim(1, 'ratio', 'canon', 'schefold-2003', 'Sambungan pasak; rangka disusun tanpa paku.'),
+  raftersPerBay: dim(4, 'count', 'interpolated', 'none', 'Jumlah kasau tiap ruang, tiap sisi.'),
+  postsPerRow: dim(2, 'count', 'canon', 'depdikbud-sulsel', 'Tiang berpasangan melintang, simetris terhadap bidang punggung.'),
+} as const
+
+export type DimKey = keyof typeof DIMS
+
+export const DIM_KEYS = Object.keys(DIMS) as readonly DimKey[]
+
+export const ALL_DIMS: readonly Dim[] = DIM_KEYS.map((k) => DIMS[k])
+
+/** The provenance split, as counts. The rail draws this and it is the metric. */
+export function provenanceSplit(dims: readonly Dim[] = ALL_DIMS): {
+  measured: number
+  canon: number
+  interpolated: number
+  total: number
+} {
+  const total = dims.length
+  const count = (c: Dim['class']) => dims.filter((d) => d.class === c).length
+  return {
+    measured: count('measured'),
+    canon: count('canon'),
+    interpolated: count('interpolated'),
+    total,
+  }
+}
+
+/* ── Rank ─────────────────────────────────────────────────────────────── */
+
+export interface RankInfo {
+  readonly rank: Rank
+  readonly name: string
+  readonly glossId: string
+  readonly glossEn: string
+  /** linear scale on every dimension of the body */
+  readonly scale: Dim
+  /** how far the roof is permitted to be elaborated, 0–1 */
+  readonly elaboration: Dim
+  /** whether the front gable carries a full carved panel */
+  readonly carvedGable: boolean
+  /** the largest bay count this rank customarily reaches */
+  readonly maxBays: number
+}
+
+export const RANKS: readonly RankInfo[] = [
+  {
+    rank: 'layuk',
+    name: 'Tongkonan layuk',
+    glossId: 'Rumah asal satu keturunan; pusat adat, dan yang paling besar.',
+    glossEn: 'The origin house of a lineage; seat of custom, and the largest.',
+    scale: dim(1.15, 'ratio', 'canon', 'nooy-palm-1979', 'Tongkonan layuk berskala paling besar di antara tiga tingkat.'),
+    elaboration: dim(1, 'ratio', 'canon', 'waterson-1990', 'Ukiran penuh diizinkan pada tingkat ini.'),
+    carvedGable: true,
+    maxBays: 5,
+  },
+  {
+    rank: 'pekamberan',
+    name: 'Tongkonan pekamberan',
+    glossId: 'Rumah yang memegang jabatan adat; menengah.',
+    glossEn: 'A house holding customary office; the middle rank.',
+    scale: dim(1.0, 'ratio', 'canon', 'nooy-palm-1979', 'Skala acuan; dua tingkat lain diukur terhadap ini.'),
+    elaboration: dim(0.65, 'ratio', 'interpolated', 'none', 'Sebagian bidang berukir.'),
+    carvedGable: true,
+    maxBays: 4,
+  },
+  {
+    rank: 'batu-ariri',
+    name: "Tongkonan batu a'riri",
+    glossId: 'Rumah keluarga biasa; tanpa jabatan adat.',
+    glossEn: 'An ordinary family house, holding no customary office.',
+    scale: dim(0.88, 'ratio', 'canon', 'nooy-palm-1979', 'Tingkat terkecil; tanpa hak elaborasi.'),
+    elaboration: dim(0.25, 'ratio', 'interpolated', 'none', 'Ukiran terbatas atau tidak ada.'),
+    carvedGable: false,
+    maxBays: 3,
+  },
+]
+
+export function rankInfo(rank: Rank): RankInfo {
+  const found = RANKS.find((r) => r.rank === rank)
+  if (!found) throw new Error(`unknown rank: ${rank}`)
+  return found
+}
+
+/* ── Bay names ────────────────────────────────────────────────────────── */
+
+/**
+ * Bays run front (north) to rear (south). The three-bay case is the named
+ * one; larger houses extend the sali, the central working floor, because that
+ * is the room that absorbs additional length.
+ */
+export function bayNames(bays: number): readonly string[] {
+  switch (bays) {
+    case 2:
+      return ["tangdo'", 'sumbung']
+    case 3:
+      return ["tangdo'", 'sali', 'sumbung']
+    case 4:
+      return ["tangdo'", 'sali tangnga', 'sali', 'sumbung']
+    default:
+      return ["tangdo'", 'sali tangnga', 'sali', 'sali sumbung', 'sumbung']
+  }
+}
+
+/* ── Stages ───────────────────────────────────────────────────────────── */
+
+export const STAGES: readonly StageInfo[] = [
+  {
+    stage: 'batu',
+    title: 'Batu umpak',
+    glossId: 'Batu diletakkan lebih dahulu. Tiang berdiri di atasnya, tidak ditanam.',
+    glossEn: 'The pad stones go down first. The posts stand on them; they are not buried.',
+  },
+  {
+    stage: 'ariri',
+    title: "A'riri",
+    glossId: 'Tiang didirikan berpasangan, simetris terhadap bidang punggung.',
+    glossEn: 'The posts are raised in transverse pairs, symmetric about the ridge plane.',
+  },
+  {
+    stage: 'rangka-lantai',
+    title: 'Rangka lantai',
+    glossId: 'Balok memanjang dan melintang mengunci kepala tiang.',
+    glossEn: 'Sills and joists lock the post heads together.',
+  },
+  {
+    stage: 'lantai',
+    title: 'Lantai',
+    glossId: 'Papan lantai menutup rangka. Di sinilah kale banua bermula.',
+    glossEn: 'The deck closes the frame. The kale banua begins here.',
+  },
+  {
+    stage: 'dinding',
+    title: 'Dinding',
+    glossId: 'Papan dinding dipasang; bidang inilah yang kemudian diukir.',
+    glossEn: 'The wall boards go up; these are the surfaces that later carry carving.',
+  },
+  {
+    stage: 'tulak-somba',
+    title: 'Tulak somba',
+    glossId: 'Tiang muka menyangga haluan depan yang menjulur jauh ke luar.',
+    glossEn: 'The front post takes the load of the prow that cantilevers far beyond the body.',
+  },
+  {
+    stage: 'rangka-atap',
+    title: 'Rangka atap',
+    glossId: 'Punggung, kasau, dan gording. Bentuk atap muncul di sini, bukan digambar.',
+    glossEn: 'Ridge, rafters, purlins. The roof shape appears here; it is not drawn.',
+  },
+  {
+    stage: 'ijuk',
+    title: 'Ijuk',
+    glossId: 'Lapis ijuk dipasang dari tepi ke atas, tiap lapis menindih lapis di bawahnya.',
+    glossEn: 'The courses are laid from the eave upward, each lapping the one below.',
+  },
+  {
+    stage: 'tanduk',
+    title: 'Tanduk',
+    glossId: 'Tanduk dipasang terakhir, karena jumlahnya bertambah seiring umur rumah.',
+    glossEn: 'The horns go on last, because their number keeps growing as the house ages.',
+  },
+]
+
+export function stageInfo(stage: StageInfo['stage']): StageInfo {
+  const found = STAGES.find((s) => s.stage === stage)
+  if (!found) throw new Error(`unknown stage: ${stage}`)
+  return found
+}
+
+/* ── Input hygiene ────────────────────────────────────────────────────── */
+
+export const DEFAULT_RULES: Rules = { rank: 'pekamberan', bays: 3, horns: 6 }
+
+/** Clamp to the declared ranges. The generator refuses to invent a house. */
+export function normaliseRules(rules: Rules): Rules {
+  const bays = Math.min(5, Math.max(2, Math.round(rules.bays)))
+  const horns = Math.min(32, Math.max(0, Math.round(rules.horns)))
+  return { rank: rules.rank, bays, horns }
+}
+
+/**
+ * Whether a rule combination exceeds what the rank customarily reaches. This
+ * is not an error — a house can be unusual — but the UI says so, because the
+ * whole point is that these numbers mean something socially.
+ */
+export function bayCountIsUnusual(rules: Rules): boolean {
+  return rules.bays > rankInfo(rules.rank).maxBays
+}
+
+/** Every Dim that fed a given layout, deduplicated, for the provenance strip. */
+export function dimsForLayout(layout: Pick<Layout, 'rules'>): readonly Dim[] {
+  return [...ALL_DIMS, rankInfo(layout.rules.rank).scale, rankInfo(layout.rules.rank).elaboration]
+}
