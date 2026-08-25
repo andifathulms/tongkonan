@@ -8,7 +8,15 @@
  */
 
 import { DIMS, bayNames, rankInfo } from './rules'
-import { clamp01, lerp, mergeMeshes, mirrorZ, ridgeCurve, tubeMesh } from './geometry'
+import {
+  clamp01,
+  slopeLength,
+  lerp,
+  mergeMeshes,
+  mirrorZ,
+  ridgeCurve,
+  tubeMesh,
+} from './geometry'
 import type { MeshData } from './geometry'
 import type { BoxPart, Joint, Layout, MeshPart, Part, Rules, Stage, Vec3 } from './types'
 
@@ -47,6 +55,13 @@ export function resolveLayout(rules: Rules): Layout {
   const eaveOversail = DIMS.eaveOversail.value * s
   const eaveHalfWidth = bodyWidth / 2 + eaveOversail
   const eaveY = plateY - DIMS.eaveDrop.value * s
+  // The roof crosses the wall plate here. The rafters break at this line: one
+  // rank runs steeply from the ridge down to it, a second runs out from it to
+  // the eave, and the plate is what they meet on.
+  const outerPostZ = bodyWidth / 2 - postSection / 2
+  const breakFraction = outerPostZ / eaveHalfWidth
+  const kneeDrop = DIMS.roofKneeDrop.value
+  const knee = { at: breakFraction, drop: kneeDrop }
 
   // Bay boundaries run front (north, negative X) to rear (south).
   const bayEdges: number[] = []
@@ -60,12 +75,11 @@ export function resolveLayout(rules: Rules): Layout {
   // Two posts per transverse row, symmetric about the ridge plane. Their
   // centres sit inside the wall line by half a section, so the wall face and
   // the outer post face are flush.
-  const outerZ = bodyWidth / 2 - postSection / 2
-  const postZ = [-outerZ, outerZ]
+  const postZ = [-outerPostZ, outerPostZ]
 
   // How many ijuk courses it takes to clothe one slope at mid-span, given the
   // lap. Rounded up: a short last course is fine, a bare strip is not.
-  const slope = Math.hypot(eaveHalfWidth, ridgeY - eaveY)
+  const slope = slopeLength(eaveHalfWidth, ridgeY - eaveY, knee)
   const exposure = DIMS.ijukCourseDepth.value * s * (1 - DIMS.ijukLap.value)
   const ijukCourses = Math.max(4, Math.ceil(slope / exposure))
 
@@ -96,6 +110,8 @@ export function resolveLayout(rules: Rules): Layout {
     rearProwY,
     eaveHalfWidth,
     eaveY,
+    breakFraction,
+    kneeDrop,
     eaveOversail,
     ijukCourses,
     hornCount: rules.horns,
@@ -433,20 +449,25 @@ export function buildHorns(layout: Layout): readonly Part[] {
   if (layout.hornCount <= 0) return parts
 
   const s = rankInfo(layout.rules.rank).scale.value
-  const spacing = DIMS.hornSpacing.value * s
   const spread = DIMS.hornSpread.value * s
   const tsSec = DIMS.tulakSombaSection.value * s
-  const ridge = ridgeOf(layout)
-  const topY = ridge(sAtX(layout, layout.tulakSombaX)).y
-
-  // The tally hangs downward from just under the prow, so a house that has
-  // held many funerals carries the column further down the post.
-  const first = topY - spacing * 1.6
+  // The column hangs from the plate line downward. That is the band a person
+  // standing in the courtyard can actually read, and reading it is the whole
+  // function of the horns — a tally mounted out of sight would be a decoration.
+  const first = layout.plateY
+  const lowest = 0.6
+  const available = first - lowest
+  // Once the post runs out, the horns pack closer rather than being silently
+  // dropped: the count is the point of them.
+  const spacing = Math.min(
+    DIMS.hornSpacing.value * s,
+    available / Math.max(1, layout.hornCount),
+  )
   const faceX = layout.tulakSombaX - tsSec / 2
 
   for (let i = 0; i < layout.hornCount; i++) {
     const y = first - i * spacing
-    if (y < layout.padTop + spacing) break
+    if (y < lowest) break
     // Horns get slightly smaller down the column: the oldest are at the top.
     const scale = lerp(1, 0.78, clamp01(i / Math.max(1, layout.hornCount - 1)))
     const right = hornMesh(faceX, y, spread * scale)

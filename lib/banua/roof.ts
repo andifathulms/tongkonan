@@ -14,6 +14,7 @@ import {
   mergeMeshes,
   mirrorZ,
   prowTaper,
+  slopeDrop,
   sweepSurface,
   tubeMesh,
 } from './geometry'
@@ -24,8 +25,6 @@ import type { BoxPart, Joint, Layout, Part, Vec3 } from './types'
 const TIP_FRACTION = 0.055
 /** Stations along the ridge. Enough that the prow reads as a curve, not a fold. */
 const STATIONS = 96
-/** How far the slope bows out from the straight ridge-to-eave chord, metres. */
-const SLOPE_BOW = 0.16
 
 export interface RoofFrameResult {
   readonly parts: readonly Part[]
@@ -84,40 +83,61 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
     ),
   )
 
-  /* Kasau — the rafters. One set per bay per side, plus a pair carrying each
-     prow, so the cantilever is framed rather than implied by the surface. */
+  /* Kasau — the rafters, in two ranks.
+     The roof breaks where it crosses the wall plate: one rank runs steeply
+     from the ridge down to that line, a second runs out from it to the eave.
+     That break is the flare, and modelling it as two straight members rather
+     than one is both what the building does and what puts a rafter foot on
+     the plate for the joint to be real. */
   const perBay = DIMS.raftersPerBay.value
   const total = Math.max(6, perBay * layout.rules.bays + 4)
   const rafterW = 0.07 * s
   const rafterD = 0.11 * s
+  const brk = layout.breakFraction
+  const knee = { at: brk, drop: layout.kneeDrop }
   for (let i = 0; i < total; i++) {
     // Skip the very tips: there is no room for a full-depth rafter in a blade.
     const sParam = lerp(0.045, 0.955, i / (total - 1))
     const st = sampleStation(stations, sParam)
-    const dy = st.ridgeY - st.eaveY
-    const len = Math.hypot(st.halfWidth, dy)
-    if (len < 0.2) continue
-    const theta = Math.atan2(dy, st.halfWidth)
-    for (const side of [1, -1] as const) {
-      const cz = (side * st.halfWidth) / 2
-      const cy = (st.ridgeY + st.eaveY) / 2
-      parts.push(
-        rafter(
-          `kasau-${i}-${side > 0 ? 'kanan' : 'kiri'}`,
-          order++,
-          [st.x, cy, cz],
-          [rafterW, rafterD, len],
-          [side > 0 ? theta : Math.PI - theta, 0, 0],
-        ),
-      )
-    }
+    const depth = st.ridgeY - st.eaveY
+    if (st.halfWidth < 0.2) continue
+
+    const at = (f: number) => ({
+      z: st.halfWidth * f,
+      y: st.ridgeY - depth * slopeDrop(f, knee),
+    })
+    const ranks: [number, number][] = [
+      [0, brk],
+      [brk, 1],
+    ]
+
+    ranks.forEach(([f0, f1], rank) => {
+      const a = at(f0)
+      const b = at(f1)
+      const dz = b.z - a.z
+      const dy = a.y - b.y
+      const len = Math.hypot(dz, dy)
+      if (len < 0.15) return
+      const theta = Math.atan2(dy, dz)
+      for (const side of [1, -1] as const) {
+        parts.push(
+          rafter(
+            `kasau-${rank}-${i}-${side > 0 ? 'kanan' : 'kiri'}`,
+            order++,
+            [st.x, (a.y + b.y) / 2, (side * (a.z + b.z)) / 2],
+            [rafterW, rafterD, len],
+            [side > 0 ? theta : Math.PI - theta, 0, 0],
+          ),
+        )
+      }
+    })
     // Each rafter pair is pegged over the ridge beam. No nails anywhere in
     // the house, so the pegs are the structure and get checked as such.
     joints.push({
       id: `pasak-punggung-${i}`,
       kind: 'pasak',
       mortise: 'bubungan',
-      tenon: `kasau-${i}-kanan`,
+      tenon: `kasau-0-${i}-kanan`,
       at: [st.x, st.ridgeY - rafterD * 0.3, 0],
       halfExtents: [rafterW * 0.4, rafterD * 0.3, rafterW * 0.4],
     })
@@ -125,12 +145,14 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
 
   /* Gording — the purlins, running the length of each slope. These are what
      the courses actually bear on. */
-  const purlinFractions = [0.3, 0.58, 0.85]
+  // One purlin sits on the break line itself: that is where the two ranks of
+  // rafters meet, and it is the piece that makes the meeting a joint.
+  const purlinFractions = [brk * 0.5, brk, brk + (1 - brk) * 0.55]
   purlinFractions.forEach((f, i) => {
     for (const side of [1, -1] as const) {
       const path: Vec3[] = stations.map((st) => [
         st.x,
-        lerp(st.ridgeY, st.eaveY, f),
+        st.ridgeY - (st.ridgeY - st.eaveY) * slopeDrop(f, knee),
         side * st.halfWidth * f,
       ])
       parts.push(
@@ -156,7 +178,14 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
         'rangka-atap',
         order++,
         'papan',
-        sweepSurface(stations, { side, across: 6, bow: SLOPE_BOW, uvScale: 1.1 }),
+        sweepSurface(stations, {
+          side,
+          across: 8,
+          knee,
+          uvScale: 1.1,
+          // Sits on top of the rafters rather than through them.
+          offsetAt: () => rafterD * 0.6,
+        }),
       ),
     )
   }
@@ -245,6 +274,9 @@ export function buildIjuk(layout: Layout): readonly Part[] {
   const stations = roofStations(layout)
   const s = rankInfo(layout.rules.rank).scale.value
   const thickness = DIMS.ijukThickness.value * s
+  const knee = { at: layout.breakFraction, drop: layout.kneeDrop }
+  // The courses lie on the boarding, which lies on the rafters.
+  const bed = 0.11 * s * 0.6 + 0.02
   let order = 0
 
   for (const band of ijukBands(layout)) {
@@ -259,13 +291,13 @@ export function buildIjuk(layout: Layout): readonly Part[] {
         sweepSurface(stations, {
           side,
           across: 3,
-          bow: SLOPE_BOW,
+          knee,
           uvScale: 0.55,
           fFrom: Math.max(0, head),
           fTo: foot,
           // Flush at the head, standing proud at the foot: that step is the
           // shadow line, and it is why the roof reads as courses at all.
-          offsetAt: (f) => thickness * clamp01((f - head) / span),
+          offsetAt: (f) => bed + thickness * clamp01((f - head) / span),
         }),
       )
     }
@@ -290,11 +322,11 @@ export function buildIjuk(layout: Layout): readonly Part[] {
   const capRight = sweepSurface(stations, {
     side: 1,
     across: 3,
-    bow: SLOPE_BOW,
+    knee,
     uvScale: 0.55,
     fFrom: RIDGE_CAP_BAND.head,
     fTo: RIDGE_CAP_BAND.foot,
-    offsetAt: (f) => thickness * (1.1 + 0.9 * clamp01(f / RIDGE_CAP_BAND.foot)),
+    offsetAt: (f) => bed + thickness * (1.1 + 0.9 * clamp01(f / RIDGE_CAP_BAND.foot)),
   })
   parts.push(
     meshPart(

@@ -140,11 +140,12 @@ export interface SweepOptions {
   /** samples across the slope, ridge to eave */
   readonly across: number
   /**
-   * How far the slope bows out from the straight ridge-to-eave chord. The
-   * tongkonan roof is not a flat plane; the courses sit on a slightly convex
-   * surface and that is what catches the light along the length.
+   * Where the roof breaks and how far it has dropped by then. The knee is
+   * what lets the eave hang below the wall plate while the wall stays visible
+   * beneath it, and it is why a tongkonan roof reads as a saddle rather than
+   * as a tent.
    */
-  readonly bow: number
+  readonly knee: Knee
   /** metres of texture per metre of surface, so grain never stretches */
   readonly uvScale: number
   /** restrict the band across the slope; 0 is the ridge, 1 the eave */
@@ -157,6 +158,40 @@ export interface SweepOptions {
    * between courses — most of what makes the material read.
    */
   readonly offsetAt?: (f: number) => number
+}
+
+/**
+ * The transverse profile of the roof: where it breaks, and how much of its
+ * total drop has happened by then.
+ */
+export interface Knee {
+  /** across the slope; 0 is the ridge, 1 the eave */
+  readonly at: number
+  /** share of the total drop reached at the break, 0–1 */
+  readonly drop: number
+}
+
+/**
+ * How far the surface has dropped at position `f` across the slope, as a
+ * share of the total. 0 at the ridge, 1 at the eave.
+ *
+ * Two straight runs with a knee between them, not a curve. That is what the
+ * building does — one rank of rafters comes steeply off the ridge, a second
+ * runs out shallower to the eave — and modelling it as a curve would put the
+ * straight rafters through the thatch.
+ */
+export function slopeDrop(f: number, knee: Knee): number {
+  const t = clamp01(f)
+  if (t <= knee.at) return knee.at <= 0 ? knee.drop : (knee.drop * t) / knee.at
+  const rest = 1 - knee.at
+  return rest <= 0 ? 1 : knee.drop + ((1 - knee.drop) * (t - knee.at)) / rest
+}
+
+/** Length of one slope, measured along both runs. */
+export function slopeLength(halfWidth: number, depth: number, knee: Knee): number {
+  const upper = Math.hypot(halfWidth * knee.at, depth * knee.drop)
+  const lower = Math.hypot(halfWidth * (1 - knee.at), depth * (1 - knee.drop))
+  return upper + lower
 }
 
 /**
@@ -179,22 +214,25 @@ export function sweepSurface(stations: readonly Station[], o: SweepOptions): Mes
   for (let i = 0; i < cols; i++) {
     const st = stations[i]
     if (!st) continue
-    // The outward normal of this slope in the ZY plane. Courses are offset
-    // along it so a lap moves the surface off itself rather than straight up.
-    const dz = o.side * st.halfWidth
-    const dy = st.eaveY - st.ridgeY
-    const len = Math.hypot(dz, dy) || 1
-    const outY = Math.abs(dz) / len
-    const outZ = -dy * o.side / len
+    const depth = st.ridgeY - st.eaveY
 
     for (let j = 0; j <= rows; j++) {
       const f = lerp(fFrom, fTo, j / rows)
-      const chordY = lerp(st.ridgeY, st.eaveY, f)
-      const bowY = o.bow * Math.sin(Math.PI * f)
+      // The outward normal of the flared slope here. Courses are offset along
+      // it, so a lap moves the surface off itself rather than straight up —
+      // and on a flared slope that direction changes as you go down.
+      // Slope of whichever run this sample falls on.
+      const onUpper = f <= o.knee.at
+      const dzdf = st.halfWidth * (onUpper ? o.knee.at : 1 - o.knee.at)
+      const dydf = -depth * (onUpper ? o.knee.drop : 1 - o.knee.drop)
+      const len = Math.hypot(dzdf, dydf) || 1
+      const outY = dzdf / len
+      const outZ = (-dydf / len) * o.side
+
       const push = o.offsetAt ? o.offsetAt(f) : 0
       mesh.positions.push(
         st.x,
-        chordY + bowY + push * outY,
+        st.ridgeY - depth * slopeDrop(f, o.knee) + push * outY,
         o.side * st.halfWidth * f + push * outZ,
       )
       mesh.normals.push(0, 0, 0) // filled in by computeNormals below

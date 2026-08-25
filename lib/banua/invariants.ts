@@ -12,7 +12,7 @@
 
 import type { Bounds, House, Layout, Part, Vec3 } from './types'
 import { STAGE_ORDER } from './types'
-import { rotatedHalfExtents } from './geometry'
+import { rotatedHalfExtents, slopeDrop } from './geometry'
 import { ridgeOf } from './frame'
 import { RIDGE_CAP_BAND, ijukBands } from './roof'
 import { DIMS, rankInfo } from './rules'
@@ -475,8 +475,12 @@ export function checkEaveClearsPlate(layout: Layout): CheckResult {
   const plateZ = Math.max(...layout.postZ.map(Math.abs))
   const plateTop = layout.plateY + (DIMS.plateDepth.value * s) / 2
   const f = plateZ / layout.eaveHalfWidth
-  // Height of the roof soffit where it crosses the plate.
-  const roofY = layout.ridgeY + (layout.eaveY - layout.ridgeY) * f
+  // Height of the flared roof where it crosses the plate. Read from the same
+  // curve the surface was swept along, not from a straight chord.
+  const roofY =
+    layout.ridgeY -
+    (layout.ridgeY - layout.eaveY) *
+      slopeDrop(f, { at: layout.breakFraction, drop: layout.kneeDrop })
   const clearsAbove = roofY > layout.plateY - (DIMS.plateDepth.value * s) / 2 - TOL
   const outboard = layout.eaveHalfWidth > plateZ + TOL
   const ok = clearsAbove && outboard

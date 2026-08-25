@@ -246,6 +246,15 @@ export interface Layout {
   /** half-width of the roof at the eave, and the eave height at mid-span */
   readonly eaveHalfWidth: number
   readonly eaveY: number
+  /**
+   * Where the roof breaks, across the slope: 0 is the ridge, 1 the eave.
+   * The knee sits on the wall line, which is why the rafters come in two
+   * ranks and why the eave can hang below the plate while the wall stays
+   * visible beneath it.
+   */
+  readonly breakFraction: number
+  /** how much of the roof's total drop has happened at the knee, 0–1 */
+  readonly kneeDrop: number
   /** how far the eave oversails the outer post line, metres */
   readonly eaveOversail: number
 

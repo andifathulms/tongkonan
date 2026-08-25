@@ -88,7 +88,7 @@ function dim(
  */
 export const DIMS = {
   /* body */
-  bayLength: dim(2.6, 'm', 'interpolated', 'none', 'Panjang satu ruang di sepanjang sumbu utara–selatan.'),
+  bayLength: dim(3.0, 'm', 'interpolated', 'none', 'Panjang satu ruang di sepanjang sumbu utara–selatan.'),
   bodyWidth: dim(4.2, 'm', 'interpolated', 'none', 'Lebar badan rumah, dari dinding ke dinding.'),
   postSection: dim(0.18, 'm', 'interpolated', 'none', "Sisi penampang a'riri, tiang persegi."),
   padHeight: dim(0.22, 'm', 'interpolated', 'none', 'Tinggi batu umpak tempat tiang berdiri.'),
@@ -102,23 +102,24 @@ export const DIMS = {
   wallThickness: dim(0.06, 'm', 'interpolated', 'none', 'Tebal papan dinding.'),
 
   /* roof */
-  ridgeRise: dim(3.4, 'm', 'interpolated', 'none', 'Tinggi punggung atap di atas balok tumpuan, di tengah bentang.'),
+  ridgeRise: dim(2.95, 'm', 'interpolated', 'none', 'Tinggi punggung atap di atas balok tumpuan, di tengah bentang.'),
   ridgeSag: dim(0.55, 'm', 'interpolated', 'none', 'Turunnya garis punggung di tengah bentang terhadap ujung.'),
-  frontProwRise: dim(3.05, 'm', 'interpolated', 'none', 'Naiknya haluan depan di atas titik terendah punggung.'),
-  rearProwRise: dim(2.45, 'm', 'interpolated', 'none', 'Naiknya haluan belakang; selalu lebih rendah dari depan.'),
-  prowOverhang: dim(3.1, 'm', 'interpolated', 'none', 'Julur haluan melewati ujung badan rumah.'),
-  eaveOversail: dim(1.15, 'm', 'interpolated', 'none', 'Julur atap melewati garis tiang terluar, agar tetesan air jatuh bebas.'),
-  eaveDrop: dim(1.55, 'm', 'interpolated', 'none', 'Turunnya tepi atap di bawah balok tumpuan; atap turun rendah di sisi badan rumah.'),
-  plateDepth: dim(0.18, 'm', 'interpolated', 'none', 'Tinggi balok tumpuan tempat kasau bertumpu.'),
+  frontProwRise: dim(2.6, 'm', 'interpolated', 'none', 'Naiknya haluan depan di atas titik terendah punggung.'),
+  rearProwRise: dim(2.1, 'm', 'interpolated', 'none', 'Naiknya haluan belakang; selalu lebih rendah dari depan.'),
+  prowOverhang: dim(3.0, 'm', 'interpolated', 'none', 'Julur haluan melewati ujung badan rumah.'),
+  eaveOversail: dim(1.5, 'm', 'interpolated', 'none', 'Julur atap melewati garis tiang terluar, agar tetesan air jatuh bebas.'),
+  eaveDrop: dim(1.0, 'm', 'interpolated', 'none', 'Turunnya tepi atap di bawah balok tumpuan.'),
+  roofKneeDrop: dim(0.70, 'ratio', 'interpolated', 'none', 'Bagian dari seluruh turunnya atap yang sudah tercapai di garis dinding. Di sinilah atap berpatah: curam di atas, melandai ke tepi.'),
+  plateDepth: dim(0.24, 'm', 'interpolated', 'none', 'Tinggi balok tumpuan tempat kasau bertumpu.'),
   plateWidth: dim(0.16, 'm', 'interpolated', 'none', 'Lebar balok tumpuan.'),
-  ijukCourseDepth: dim(0.28, 'm', 'interpolated', 'none', 'Tinggi tampak satu lapis ijuk.'),
-  ijukThickness: dim(0.09, 'm', 'interpolated', 'none', 'Tebal satu lapis ijuk yang menonjol dari lapis di bawahnya.'),
+  ijukCourseDepth: dim(0.34, 'm', 'interpolated', 'none', 'Tinggi tampak satu lapis ijuk.'),
+  ijukThickness: dim(0.11, 'm', 'interpolated', 'none', 'Tebal satu lapis ijuk yang menonjol dari lapis di bawahnya.'),
   ijukLap: dim(0.4, 'ratio', 'interpolated', 'none', 'Bagian lapis yang tertindih lapis di atasnya.'),
 
   /* tulak somba and horns */
-  tulakSombaSection: dim(0.26, 'm', 'interpolated', 'none', 'Sisi penampang tulak somba, tiang penyangga haluan depan.'),
-  hornSpacing: dim(0.19, 'm', 'interpolated', 'none', 'Jarak vertikal antar tanduk pada tulak somba.'),
-  hornSpread: dim(0.52, 'm', 'interpolated', 'none', 'Rentang tanduk kerbau dari ujung ke ujung.'),
+  tulakSombaSection: dim(0.40, 'm', 'interpolated', 'none', 'Sisi penampang tulak somba, tiang penyangga haluan depan.'),
+  hornSpacing: dim(0.42, 'm', 'interpolated', 'none', 'Jarak vertikal antar tanduk pada tulak somba.'),
+  hornSpread: dim(0.62, 'm', 'interpolated', 'none', 'Rentang tanduk kerbau dari ujung ke ujung.'),
 
   /* rules that are structure, not measurement */
   orientation: dim(0, 'deg', 'canon', 'nooy-palm-1979', 'Rumah membujur utara–selatan; muka (ulunna banua) menghadap utara.'),

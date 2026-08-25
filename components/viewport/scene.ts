@@ -353,16 +353,14 @@ export class HouseScene {
     const target = new THREE.Vector3(0, 4, 0)
     let distance = 26
     if (house && layout) {
-      const minY = house.bounds.min[1]
-      const [maxX, maxY, maxZ] = house.bounds.max
-      target.set(0, (minY + maxY) / 2, 0)
-      distance = Math.max(maxX, maxY, maxZ) * 2.1
+      target.copy(boundsCentre(house))
+      distance = this.fitDistance(house)
     }
     switch (view) {
       case 'tampak':
         // Looking at the north face, from the north. Near-horizontal, so it
         // reads as an elevation rather than a three-quarter view.
-        return { azimuth: Math.PI, polar: Math.PI / 2 - 0.03, distance: distance * 1.25, target }
+        return { azimuth: Math.PI, polar: Math.PI / 2 - 0.03, distance: distance * 0.95, target }
       case 'kolong':
         // Drops under the floor into the sulluk banua and looks up.
         return {
@@ -374,6 +372,33 @@ export class HouseScene {
       default:
         return { azimuth: -2.25, polar: 1.13, distance, target }
     }
+  }
+
+  /**
+   * The distance that frames the whole house, from its bounding sphere and
+   * the narrower of the two field-of-view angles. A fixed multiple of the
+   * height crops the prow on a tall narrow viewport, and the prow is the
+   * thing the reader came to look at.
+   */
+  private fitDistance(house: House): number {
+    const centre = boundsCentre(house)
+    const [minX, minY, minZ] = house.bounds.min
+    const [maxX, maxY, maxZ] = house.bounds.max
+    // All eight corners: on a house this asymmetric the far corner is not
+    // always one of the two the bounds happen to name.
+    let radius = 0
+    for (const x of [minX, maxX]) {
+      for (const y of [minY, maxY]) {
+        for (const z of [minZ, maxZ]) {
+          radius = Math.max(radius, Math.hypot(x - centre.x, y - centre.y, z - centre.z))
+        }
+      }
+    }
+    const vfov = (this.camera.fov * Math.PI) / 180
+    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * this.camera.aspect)
+    // A little air around the model: this is a drawing on a sheet, not a
+    // photograph cropped to its subject.
+    return (radius / Math.sin(Math.min(vfov, hfov) / 2)) * 1.18
   }
 
   private fitCamera(): void {
@@ -405,9 +430,13 @@ export class HouseScene {
   /* ── Frame ──────────────────────────────────────────────────────────── */
 
   resize(width: number, height: number): void {
+    const unframed = this.camera.aspect === 1
     this.renderer.setSize(width, height, false)
     this.camera.aspect = width / Math.max(1, height)
     this.camera.updateProjectionMatrix()
+    // The first real measurement is the first one that can frame the house.
+    // Before it the aspect is a placeholder and any fit would be wrong.
+    if (unframed && this.house) this.fitCamera()
     this.needsRender = true
   }
 
@@ -639,6 +668,12 @@ function skyColour(altitude: number): THREE.Color {
   if (altitude <= -6) return night
   if (altitude < 6) return night.clone().lerp(dusk, (altitude + 6) / 12)
   return dusk.clone().lerp(day, clamp01((altitude - 6) / 40))
+}
+
+function boundsCentre(house: House): THREE.Vector3 {
+  const [minX, minY, minZ] = house.bounds.min
+  const [maxX, maxY, maxZ] = house.bounds.max
+  return new THREE.Vector3((minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2)
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
