@@ -147,6 +147,30 @@ export const COPY = {
     ),
   },
 
+  joints: {
+    heading: t('Sambungan', 'Joints'),
+    pasak: t('Pasak', 'Pegged mortise and tenon'),
+    pasakGloss: t(
+      'Pen masuk ke lubang, lalu dikunci pasak kayu yang menembus keduanya. Inilah sambungan utama rangka.',
+      'A tenon enters a mortise and a wooden peg driven through both locks it. This is the frame’s main joint.',
+    ),
+    takik: t('Takik', 'Lap'),
+    takikGloss: t(
+      'Dua balok bersilang saling ditakik agar rata dan tidak bergeser.',
+      'Two crossing members are each notched so they sit flush and cannot shift.',
+    ),
+    tumpu: t('Tumpu', 'Seat'),
+    tumpuGloss: t(
+      'Kaki tiang duduk di cekungan batu umpak. Tidak ditanam — karena itulah rumah bisa dibongkar dan dipindah.',
+      'A post foot seats in the dish of its pad stone. It is not buried — which is why the house can be taken down and moved.',
+    ),
+    explode: t('Urai', 'Explode'),
+    explodeGloss: t(
+      'Mengangkat tiap bagian sesuai urutan pendiriannya, agar sambungan di bawahnya terlihat.',
+      'Lifts each part by its place in the build order, so the joints beneath it can be seen.',
+    ),
+  },
+
   checks: {
     heading: t('Pemeriksaan', 'Invariants'),
     pass: t('lulus', 'pass'),
