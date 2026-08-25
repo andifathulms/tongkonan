@@ -208,11 +208,18 @@ export function buildFrame(layout: Layout): FrameResult {
     }
   }
 
-  /* A'riri — the posts. Raised in transverse pairs, symmetric about z = 0. */
+  /* A'riri — the posts. Raised in transverse pairs, symmetric about z = 0.
+     The foot seats into the dished top of the stone rather than balancing on
+     its face, so the post is located rather than merely resting. */
+  const seat = padH * 0.3
   let p = 0
   for (const x of layout.postX) {
     for (const z of layout.postZ) {
       const id = `ariri-${p}`
+      const foot = layout.padTop - seat
+      // The head runs up into the sill: a peg needs a tenon to pass through,
+      // and a post that stops at the underside has nothing to be pegged to.
+      const head = layout.floorFrameY + frameDepth * 0.7
       parts.push(
         box(
           id,
@@ -220,18 +227,18 @@ export function buildFrame(layout: Layout): FrameResult {
           'ariri',
           p,
           'kayu',
-          [x, layout.padTop + layout.kolongHeight / 2, z],
-          [sec, layout.kolongHeight, sec],
+          [x, (foot + head) / 2, z],
+          [sec, head - foot, sec],
         ),
       )
-      // The foot sits in the dished top of the stone. Not a peg — a seat.
+      // A seat, not a peg: the engagement is the depth of the dish.
       joints.push({
         id: `tumpu-${p}`,
         kind: 'tumpu',
         mortise: `batu-${p}`,
         tenon: id,
-        at: [x, layout.padTop, z],
-        halfExtents: [sec / 2, padH * 0.25, sec / 2],
+        at: [x, layout.padTop - seat / 2, z],
+        halfExtents: [sec / 2, seat / 2, sec / 2],
       })
       p++
     }
@@ -248,7 +255,9 @@ export function buildFrame(layout: Layout): FrameResult {
         i,
         'kayu',
         [0, layout.floorFrameY + frameDepth / 2, z],
-        [layout.bodyLength, frameDepth, sillW],
+        // Overruns the end posts by a section: a corner peg has to be inside
+        // timber on both sides of the joint, not right at the cut end.
+        [layout.bodyLength + sec, frameDepth, sillW],
       ),
     )
   })
@@ -265,7 +274,7 @@ export function buildFrame(layout: Layout): FrameResult {
         layout.postZ.length + i,
         'kayu',
         [x, layout.floorFrameY + frameDepth / 2, 0],
-        [sillW, frameDepth, layout.bodyWidth],
+        [sillW, frameDepth, layout.bodyWidth + sec],
       ),
     )
     layout.postZ.forEach((z, j) => {
@@ -275,7 +284,7 @@ export function buildFrame(layout: Layout): FrameResult {
         mortise: `roro-${j}`,
         tenon: `ariri-${i * layout.postZ.length + j}`,
         at: [x, layout.floorFrameY + frameDepth * 0.4, z],
-        halfExtents: [sec / 2, frameDepth * 0.3, sec / 2],
+        halfExtents: [sec / 2, frameDepth * 0.3, sillW / 2],
       })
     })
   })
@@ -325,7 +334,26 @@ export function buildFrame(layout: Layout): FrameResult {
       )
     })
   }
-  const endOrder = layout.rules.bays * 2
+  /* The wall plate. The rafters bear on this, so it is the piece that makes
+     the roof's load path real rather than implied — and it is what the eave
+     has to clear on its way past the body. */
+  const plateD = DIMS.plateDepth.value * s
+  const plateW = DIMS.plateWidth.value * s
+  layout.postZ.forEach((z, j) => {
+    parts.push(
+      box(
+        `tumpuan-${j}`,
+        { name: 'balok tumpuan', nameId: 'Balok tumpuan', nameEn: 'Wall plate' },
+        'dinding',
+        layout.rules.bays * 2 + j,
+        'kayu',
+        [0, layout.plateY, z],
+        [layout.bodyLength, plateD, plateW],
+      ),
+    )
+  })
+
+  const endOrder = layout.rules.bays * 2 + layout.postZ.length
   ;[-1, 1].forEach((side, i) => {
     parts.push(
       box(
@@ -351,13 +379,17 @@ export function buildFrame(layout: Layout): FrameResult {
   const ridge = ridgeOf(layout)
   const tsSec = DIMS.tulakSombaSection.value * s
   const tsTop = ridge(sAtX(layout, layout.tulakSombaX)).y
-  const tsH = tsTop - layout.padTop
+  const tsFoot = layout.padTop - seat
+  const tsH = tsTop - tsFoot
+  // Laid in this stage rather than with the house stones. The tulak somba goes
+  // up long after the body, and its stone is set when the post is raised — so
+  // the joint between them does not jump five stages.
   parts.push(
     box(
       'batu-tulak-somba',
       { name: 'batu umpak', nameId: 'Batu umpak tulak somba', nameEn: 'Tulak somba pad stone' },
-      'batu',
-      n,
+      'tulak-somba',
+      0,
       'batu',
       [layout.tulakSombaX, padH / 2, 0],
       [padD * 1.25, padH, padD * 1.25],
@@ -368,9 +400,9 @@ export function buildFrame(layout: Layout): FrameResult {
       'tulak-somba',
       { name: 'tulak somba', nameId: 'Tiang muka', nameEn: 'Front prow post' },
       'tulak-somba',
-      0,
+      1,
       rankInfo(layout.rules.rank).carvedGable ? 'ukiran' : 'kayu',
-      [layout.tulakSombaX, layout.padTop + tsH / 2, 0],
+      [layout.tulakSombaX, tsFoot + tsH / 2, 0],
       [tsSec, tsH, tsSec],
     ),
   )
@@ -379,8 +411,8 @@ export function buildFrame(layout: Layout): FrameResult {
     kind: 'tumpu',
     mortise: 'batu-tulak-somba',
     tenon: 'tulak-somba',
-    at: [layout.tulakSombaX, layout.padTop, 0],
-    halfExtents: [tsSec / 2, padH * 0.25, tsSec / 2],
+    at: [layout.tulakSombaX, layout.padTop - seat / 2, 0],
+    halfExtents: [tsSec / 2, seat / 2, tsSec / 2],
   })
 
   return { parts, joints }
