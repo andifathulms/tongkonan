@@ -42,6 +42,9 @@ const config: Config = {
         // The minimum pointer target, from the tokens.
         control: 'var(--control-target)',
       },
+      minHeight: {
+        control: 'var(--control-target)',
+      },
       spacing: {
         // 4px grid. Tailwind's default scale is already on it; this is the
         // rail width the surveyor's-sheet layout needs.

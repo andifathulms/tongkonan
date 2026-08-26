@@ -31,16 +31,17 @@ export function RuleControls({
   const unusual = bayCountIsUnusual(rules)
   return (
     <RailSection title={pick(COPY.controls.heading, locale)}>
-      <Field label={pick(COPY.controls.rank, locale)}>
+      <Choices legend={pick(COPY.controls.rank, locale)}>
         <div className="flex flex-col gap-px">
           {RANKS.map((r) => (
-            <button
+            <Choice
               key={r.rank}
-              type="button"
-              onClick={() => onChange({ ...rules, rank: r.rank })}
-              aria-pressed={rules.rank === r.rank}
-              className={[
-                'rounded px-2 py-1.5 text-left transition-colors duration-state',
+              name="pangkat"
+              value={r.rank}
+              checked={rules.rank === r.rank}
+              onSelect={() => onChange({ ...rules, rank: r.rank })}
+              face={[
+                'block rounded px-2 py-1.5 text-left transition-colors duration-state',
                 rules.rank === r.rank ? 'bg-bolu text-kapur' : 'hover:bg-wash',
               ].join(' ')}
             >
@@ -53,12 +54,13 @@ export function RuleControls({
               >
                 {locale === 'id' ? r.glossId : r.glossEn}
               </span>
-            </button>
+            </Choice>
           ))}
         </div>
-      </Field>
+      </Choices>
 
       <Field
+        group
         label={pick(COPY.controls.bays, locale)}
         value={String(rules.bays)}
         hint={
@@ -72,7 +74,6 @@ export function RuleControls({
           max={5}
           value={rules.bays}
           onChange={(bays) => onChange({ ...rules, bays })}
-          label={pick(COPY.controls.bays, locale)}
         />
         {unusual ? (
           <p className="mt-2 text-body text-rara">
@@ -146,18 +147,20 @@ export function SunControls({
   const active = presets.find((p) => p.key === presetKey) ?? presets[0]
   return (
     <RailSection title={pick(COPY.controls.sun, locale)}>
-      <div className="flex flex-col gap-px">
-        {presets.map((p) => (
-          <button
-            key={p.key}
-            type="button"
-            onClick={() => onPreset(p.key)}
-            aria-pressed={p.key === presetKey}
-            className={[
-              'rounded px-2 py-1.5 text-left transition-colors duration-state',
-              p.key === presetKey ? 'bg-bolu text-kapur' : 'hover:bg-wash',
-            ].join(' ')}
-          >
+      <Choices legend={pick(COPY.controls.date, locale)}>
+        <div className="flex flex-col gap-px">
+          {presets.map((p) => (
+            <Choice
+              key={p.key}
+              name="tanggal"
+              value={p.key}
+              checked={p.key === presetKey}
+              onSelect={() => onPreset(p.key)}
+              face={[
+                'block rounded px-2 py-1.5 text-left transition-colors duration-state',
+                p.key === presetKey ? 'bg-bolu text-kapur' : 'hover:bg-wash',
+              ].join(' ')}
+            >
             <span className="flex items-baseline justify-between gap-2 text-body leading-tight">
               {locale === 'id' ? p.labelId : p.labelEn}
               <span className="num text-meta">{p.noonAltitude.toFixed(1)}°</span>
@@ -169,10 +172,11 @@ export function SunControls({
               ].join(' ')}
             >
               {locale === 'id' ? p.glossId : p.glossEn}
-            </span>
-          </button>
-        ))}
-      </div>
+              </span>
+            </Choice>
+          ))}
+        </div>
+      </Choices>
 
       <div className="mt-4">
         <div className="mb-1 flex items-baseline justify-between">
@@ -270,22 +274,24 @@ export function ViewSwitch({
     { key: 'kolong', label: pick(COPY.views.kolong, locale) },
   ]
   return (
-    <div className="absolute right-3 top-3 z-10 flex gap-px rounded border border-hairline bg-film p-px">
+    <fieldset className="absolute right-3 top-3 z-10 flex gap-px rounded border border-hairline bg-film p-px">
+      <legend className="sr-only">{pick(COPY.views.legend, locale)}</legend>
       {views.map((v) => (
-        <button
+        <Choice
           key={v.key}
-          type="button"
-          onClick={() => onChange(v.key)}
-          aria-pressed={v.key === view}
-          className={[
-            'micro inline-flex min-h-[26px] items-center rounded px-2 transition-colors duration-state',
+          name="tampilan"
+          value={v.key}
+          checked={v.key === view}
+          onSelect={() => onChange(v.key)}
+          face={[
+            'micro inline-flex min-h-control items-center rounded px-2 transition-colors duration-state',
             v.key === view ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
           ].join(' ')}
         >
           {v.label}
-        </button>
+        </Choice>
       ))}
-    </div>
+    </fieldset>
   )
 }
 
@@ -294,27 +300,113 @@ export function fill(template: string, values: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole)
 }
 
+/**
+ * One option in a single-choice group.
+ *
+ * These were `<button aria-pressed>` — valid, but it made each option its own
+ * tab stop and announced five unrelated toggles where the reader is choosing
+ * one of a set. Fourteen tab stops to cross the rail. A radio group is one
+ * stop, arrow keys inside it, and a screen reader says "3 of 4".
+ *
+ * The input is the control and the span is its face, so the styling is
+ * unchanged from the buttons it replaces.
+ */
+export function Choice({
+  name,
+  value,
+  checked,
+  onSelect,
+  face,
+  children,
+}: {
+  name: string
+  value: string
+  checked: boolean
+  onSelect: () => void
+  /** classes for the visible face, including its selected state */
+  face: string
+  children: React.ReactNode
+}) {
+  return (
+    <label className="choice cursor-pointer">
+      <input
+        type="radio"
+        name={name}
+        value={value}
+        checked={checked}
+        onChange={onSelect}
+        className="sr-only"
+      />
+      <span className={`choice-face ${face}`}>{children}</span>
+    </label>
+  )
+}
+
 /* ── Primitives ───────────────────────────────────────────────────────── */
 
+/**
+ * A labelled group of choices.
+ *
+ * The same look as `Field`, but a real fieldset and legend, because the label
+ * of a radio group has to belong to the group rather than sit above it.
+ */
+function Choices({ legend, children }: { legend: string; children: React.ReactNode }) {
+  return (
+    <fieldset className="mb-5 last:mb-0">
+      <legend className="micro mb-2">{legend}</legend>
+      {children}
+    </fieldset>
+  )
+}
+
+/**
+ * A labelled control.
+ *
+ * `group` makes it a fieldset whose legend is the label you can already see.
+ * The alternative — a visible label beside the group and a hidden legend
+ * inside it — says the same word twice to anyone listening, which is how a
+ * group ends up worse off for having been made accessible.
+ */
 function Field({
   label,
   value,
   hint,
+  group = false,
   children,
 }: {
   label: string
   value?: string
   hint?: string
+  group?: boolean
   children: React.ReactNode
 }) {
-  return (
-    <div className="mb-5 last:mb-0">
-      <div className="mb-2 flex items-baseline justify-between gap-2">
-        <span className="micro">{label}</span>
-        {value ? <span className="num text-meta">{value}</span> : null}
-      </div>
+  const head = (
+    <>
+      <span className="micro">{label}</span>
+      {value ? <span className="num text-meta">{value}</span> : null}
+    </>
+  )
+  const body = (
+    <>
       {children}
       {hint ? <p className="mt-2 text-body text-muted">{hint}</p> : null}
+    </>
+  )
+
+  if (group) {
+    return (
+      <fieldset className="mb-5 last:mb-0">
+        <legend className="mb-2 flex w-full items-baseline justify-between gap-2">
+          {head}
+        </legend>
+        {body}
+      </fieldset>
+    )
+  }
+  return (
+    <div className="mb-5 last:mb-0">
+      <div className="mb-2 flex items-baseline justify-between gap-2">{head}</div>
+      {body}
     </div>
   )
 }
@@ -324,30 +416,31 @@ function Stepper({
   max,
   value,
   onChange,
-  label,
 }: {
   min: number
   max: number
   value: number
   onChange: (v: number) => void
-  label: string
 }) {
   const options = Array.from({ length: max - min + 1 }, (_, i) => min + i)
   return (
-    <div role="group" aria-label={label} className="flex gap-px">
+    // No fieldset here: the Field around this one is the group, and its
+    // visible label is the legend.
+    <div className="flex gap-px">
       {options.map((n) => (
-        <button
+        <Choice
           key={n}
-          type="button"
-          onClick={() => onChange(n)}
-          aria-pressed={n === value}
-          className={[
-            'num flex-1 rounded py-1.5 text-body transition-colors duration-state',
+          name="ruang"
+          value={String(n)}
+          checked={n === value}
+          onSelect={() => onChange(n)}
+          face={[
+            'num block flex-1 rounded py-1.5 text-center text-body transition-colors duration-state',
             n === value ? 'bg-bolu text-kapur' : 'border border-hairline hover:bg-wash',
           ].join(' ')}
         >
           {n}
-        </button>
+        </Choice>
       ))}
     </div>
   )

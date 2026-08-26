@@ -156,6 +156,20 @@ body {
     color: var(--muted);
   }
 
+  /*
+   * A radio whose input is visually hidden and whose face is a styled span.
+   *
+   * The face has to draw the focus ring, because the input that receives
+   * focus is not the thing anyone can see. :has(:focus-visible) rather than
+   * :focus-within, so the ring appears for keyboard arrows and not for a
+   * pointer press.
+   */
+  .choice:has(input:focus-visible) .choice-face {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--focus-contrast);
+  }
+
   .num {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-variant-numeric: tabular-nums;

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { RailSection, Sheet } from './Sheet'
 import { Viewport } from './viewport/Viewport'
 import { ProvenanceStrip } from './Provenance'
+import { Choice } from './Controls'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { buildHouse } from '@/lib/banua/assembly'
@@ -154,25 +155,27 @@ export function BacaClient({ locale }: { locale: Locale }) {
         section={section}
         reveal={null}
       >
-        <div className="absolute right-3 top-3 z-10 flex gap-px rounded border border-hairline bg-film p-px">
+        <fieldset className="absolute right-3 top-3 z-10 flex gap-px rounded border border-hairline bg-film p-px">
+          <legend className="sr-only">{pick(COPY.read.sectionLegend, locale)}</legend>
           {[
             { on: false, label: pick(COPY.read.facade, locale) },
             { on: true, label: pick(COPY.read.section, locale) },
           ].map((o) => (
-            <button
+            <Choice
               key={o.label}
-              type="button"
-              onClick={() => setSection(o.on)}
-              aria-pressed={o.on === section}
-              className={[
-                'micro rounded px-2 py-1.5 transition-colors duration-state',
+              name="potongan"
+              value={String(o.on)}
+              checked={o.on === section}
+              onSelect={() => setSection(o.on)}
+              face={[
+                'micro inline-flex min-h-control items-center rounded px-2 transition-colors duration-state',
                 o.on === section ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
               ].join(' ')}
             >
               {o.label}
-            </button>
+            </Choice>
           ))}
-        </div>
+        </fieldset>
       </Viewport>
     </Sheet>
   )

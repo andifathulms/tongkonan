@@ -201,7 +201,7 @@ function LocaleSwitch({ locale, route }: { locale: Locale; route: Route }) {
           title={pick(COPY.openIn, l)}
           aria-current={l === locale ? 'true' : undefined}
           className={[
-            'micro flex min-h-[26px] items-center px-2 transition-colors duration-state',
+            'micro flex min-h-control items-center px-2 transition-colors duration-state',
             i > 0 ? 'border-l border-hairline' : '',
             l === locale ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
           ].join(' ')}

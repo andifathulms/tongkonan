@@ -174,6 +174,8 @@ export const COPY = {
   legend: t('Keterangan', 'Legend'),
 
   views: {
+    /* Names the group of camera presets for a screen reader; not drawn. */
+    legend: t('Tampilan', 'View'),
     perspektif: t('Perspektif', 'Perspective'),
     tampak: t('Tampak muka', 'Elevation'),
     kolong: t('Kolong', 'Underfloor'),
@@ -229,6 +231,8 @@ export const COPY = {
       'Pa\u2019ssura menutup papan muka, bukan seluruh rumah. Yang digambar di sini hanya motif yang jelas-jelas geometris; motif yang penggunaannya terbatas tidak dirender.',
       'Pa\u2019ssura covers the front board, not the whole house. Only the plainly geometric motifs are drawn here; motifs whose use is restricted are not rendered.',
     ),
+    /* Names the façade/section pair for a screen reader; not drawn. */
+    sectionLegend: t('Tampilan rumah', 'How the house is shown'),
     facade: t('Muka', 'Façade'),
     section: t('Potongan', 'Section'),
     sectionGloss: t(
