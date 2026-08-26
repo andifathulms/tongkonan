@@ -116,16 +116,28 @@ describe('the gonjong is the roof', () => {
   it('lifts the roof edge past the ridge instead of standing on it', () => {
     const { layout } = buildHouse(DEFAULT_RULES)
     const stations = roofStations(layout)
-    const half = layout.bodyLength / 2
-    const overBody = stations.filter((s) => Math.abs(s.x) <= half)
-    const overEnds = stations.filter((s) => Math.abs(s.x) > half)
+    const middle = stations.filter((s) => Math.abs(s.x) < layout.bodyLength * 0.25)
 
-    // Level along the house...
-    for (const s of overBody) expect(s.eaveY).toBeCloseTo(layout.eaveY, 9)
-    // ...and past its own ridge at the ends.
-    expect(Math.max(...overEnds.map((s) => s.eaveY))).toBeGreaterThan(layout.ridgeEndY)
+    // Level over the middle of the house...
+    for (const s of middle) expect(s.eaveY).toBeCloseTo(layout.eaveY, 9)
+    // ...and past its own ridge by the end.
+    expect(Math.max(...stations.map((s) => s.eaveY))).toBeGreaterThan(layout.ridgeEndY)
     // The tips sit above the ridge end, which is what makes the hollow.
     for (const tip of layout.gonjongTips) expect(tip[1]).toBeGreaterThan(layout.ridgeEndY)
+  })
+
+  it('gives the sweep room to be a curve rather than a cliff', () => {
+    // It rose ten metres over nine hundred millimetres once — eleven to one,
+    // which renders as a flat sail welded to the end of the roof.
+    const { layout } = buildHouse(DEFAULT_RULES)
+    const stations = roofStations(layout)
+    const lifted = stations.filter((s) => s.eaveY > layout.eaveY + 1e-6)
+    const run = layout.ridgeEndZ - Math.min(...lifted.map((s) => Math.abs(s.x)))
+    const rise = Math.max(...lifted.map((s) => s.eaveY)) - layout.eaveY
+    expect(rise / run).toBeLessThan(4)
+    expect(run).toBeGreaterThan(layout.bodyLength * 0.15)
+    // And enough stations across it to describe a curve at all.
+    expect(lifted.length).toBeGreaterThan(8)
   })
 
   it('narrows toward the tips rather than ending square', () => {
@@ -153,9 +165,17 @@ describe('the gonjong is the roof', () => {
   it('makes the roof the dominant mass, as it is in the building', () => {
     const { layout } = buildHouse(DEFAULT_RULES)
     const roof = Math.max(...layout.gonjongTips.map((t) => t[1])) - layout.plateY
-    // A rumah gadang is a low box under an enormous roof. It was 1.04 when
-    // the gonjong were rods and the roof was a shed.
-    expect(roof / layout.plateY).toBeGreaterThan(1.6)
+    /*
+     * Measured against the wall and not against the plate, because the kolong
+     * is air. What reads as the box of the house is the walled storey; the
+     * posts under it read as the ground the house stands off. Comparing the
+     * roof to the whole height above ground flatters a house on tall stilts
+     * and says nothing about how the building looks.
+     */
+    expect(roof / layout.wallHeight).toBeGreaterThan(2.5)
+    // And not so tall that the body disappears under it: it hit 3.0 times the
+    // full height once, which is a spire with a house at the bottom.
+    expect(Math.max(...layout.gonjongTips.map((t) => t[1])) / layout.plateY).toBeLessThan(2.6)
   })
 })
 

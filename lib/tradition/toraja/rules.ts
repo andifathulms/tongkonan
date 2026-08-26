@@ -137,7 +137,7 @@ export const DIMS = {
   /* tulak somba and horns */
   tulakSombaSection: dim(0.40, 'm', 'interpolated', 'none', 'Sisi penampang tulak somba, tiang penyangga haluan depan.', 'Section of the tulak somba, the post carrying the front prow.'),
   hornSpacing: dim(0.42, 'm', 'interpolated', 'none', 'Jarak vertikal antar tanduk pada tulak somba.', 'Vertical spacing between horns on the tulak somba.'),
-  hornSpread: dim(0.62, 'm', 'interpolated', 'none', 'Rentang tanduk kerbau dari ujung ke ujung.', 'Spread of a buffalo horn, tip to tip.'),
+  hornSpread: dim(0.95, 'm', 'interpolated', 'none', 'Rentang tanduk kerbau dari ujung ke ujung. Angka sebelumnya, 0,62 m, ada di ujung bawah kisaran seekor tedong dan terlalu kecil untuk dihitung dari halaman — padahal dapat dihitung itulah seluruh fungsinya. Tetap perkiraan penulis; yang berubah adalah alasannya.', 'Spread of a buffalo horn, tip to tip. The previous figure, 0.62 m, sat at the small end of the range for a tedong and was too small to count from the courtyard — and being countable is the whole function. Still the author’s figure; what changed is the reasoning behind it.'),
 
   /*
    * Members and engagements.

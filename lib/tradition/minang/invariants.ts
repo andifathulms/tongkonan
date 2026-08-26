@@ -251,31 +251,49 @@ export function checkGonjongCount(house: House, layout: Layout): CheckResult {
 }
 
 /**
- * The roof edge is level over the house and rises over the overhangs.
+ * The roof edge holds its line, then climbs past the ridge into the gonjong.
  *
- * The other half of the same lesson. A roof with a dead-level eave from end to
- * end is a shed, and the check above could be satisfied by bolting the tips on
- * afterwards; this one says the surface has to get there by itself.
+ * The other half of the same lesson, and it has been wrong twice. First the
+ * edge was dead level from end to end and the tips were rods, so the check did
+ * not exist. Then the edge rose, but only across the nine hundred millimetres
+ * of overhang — an eleven-to-one slope that rendered as a flat sail. So this
+ * checks the sweep has room as well as direction: level over the middle, and
+ * a rise that takes at least a fifth of the roof's length to happen in.
  */
 export function checkEaveRises(layout: Layout): CheckResult {
   const stations = roofStations(layout)
   const half = layout.bodyLength / 2
-  const overBody = stations.filter((s) => Math.abs(s.x) <= half + 1e-9)
-  const level = overBody.every((s) => Math.abs(s.eaveY - layout.eaveY) < 1e-6)
-  const ends = stations.filter((s) => Math.abs(s.x) > half)
-  const highest = ends.length ? Math.max(...ends.map((s) => s.eaveY)) : layout.eaveY
-  const narrowest = ends.length
-    ? Math.min(...ends.map((s) => s.halfWidth))
+  const from = half * (1 - DIMS.gonjongReach.value)
+
+  const level = stations
+    .filter((s) => Math.abs(s.x) <= from + 1e-9)
+    .every((s) => Math.abs(s.eaveY - layout.eaveY) < 1e-6)
+
+  const lifted = stations.filter((s) => s.eaveY > layout.eaveY + 1e-6)
+  const highest = lifted.length ? Math.max(...lifted.map((s) => s.eaveY)) : layout.eaveY
+  const narrowest = lifted.length
+    ? Math.min(...lifted.map((s) => s.halfWidth))
     : layout.eaveHalfDepth
-  const ok = level && highest > layout.ridgeEndY + TOL && narrowest < layout.eaveHalfDepth - TOL
+  // Run and rise of one upsweep, so the verdict states the slope rather than
+  // leaving a reader to work out whether it is a curve or a cliff.
+  const run = layout.ridgeEndZ - from
+  const rise = highest - layout.eaveY
+  const slope = rise / Math.max(1e-6, run)
+
+  const ok =
+    level &&
+    highest > layout.ridgeEndY + TOL &&
+    narrowest < layout.eaveHalfDepth - TOL &&
+    run > layout.bodyLength * 0.1 &&
+    slope < 4
 
   return {
     key: 'eave-rises',
-    titleId: 'Tepi atap mendatar di sepanjang badan rumah, lalu naik melewati bubungan di kedua ujungnya',
-    titleEn: 'The roof edge runs level along the body, then rises past the ridge at both ends',
+    titleId: 'Tepi atap menahan garisnya, lalu naik melewati bubungan menjadi gonjong',
+    titleEn: 'The roof edge holds its line, then climbs past the ridge into the gonjong',
     status: ok ? 'pass' : 'fail',
-    detail: `tepi mendatar di ${layout.eaveY.toFixed(2)} m sepanjang badan; naik sampai ${highest.toFixed(2)} m, melewati ujung bubungan ${layout.ridgeEndY.toFixed(2)} m, sambil menyempit dari ${layout.eaveHalfDepth.toFixed(2)} m ke ${narrowest.toFixed(2)} m.`,
-    detailEn: `edge level at ${layout.eaveY.toFixed(2)} m along the body; rises to ${highest.toFixed(2)} m, past the ridge end at ${layout.ridgeEndY.toFixed(2)} m, narrowing from ${layout.eaveHalfDepth.toFixed(2)} m to ${narrowest.toFixed(2)} m.`,
+    detail: `mendatar di ${layout.eaveY.toFixed(2)} m sampai z=${from.toFixed(2)} m, lalu naik ${rise.toFixed(2)} m sepanjang ${run.toFixed(2)} m — kemiringan ${slope.toFixed(1)} : 1 — sampai ${highest.toFixed(2)} m, melewati ujung bubungan ${layout.ridgeEndY.toFixed(2)} m, sambil menyempit ke ${narrowest.toFixed(2)} m.`,
+    detailEn: `level at ${layout.eaveY.toFixed(2)} m as far as z=${from.toFixed(2)} m, then rising ${rise.toFixed(2)} m over ${run.toFixed(2)} m — a slope of ${slope.toFixed(1)} : 1 — to ${highest.toFixed(2)} m, past the ridge end at ${layout.ridgeEndY.toFixed(2)} m, narrowing to ${narrowest.toFixed(2)} m.`,
   }
 }
 

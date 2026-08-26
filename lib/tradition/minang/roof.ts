@@ -33,7 +33,13 @@ import type { DimKey } from './rules'
 import { DIMS } from './rules'
 import { meshPart, ridgeOf, sAtZ } from './frame'
 
-const STATIONS = 41
+/**
+ * More stations than the other house needs, because the curvature here is
+ * concentrated: the roof is straight for its middle and does all its bending
+ * in the last third, and a grid coarse enough for the straight part turns the
+ * bend into a fold.
+ */
+const STATIONS = 61
 
 /**
  * A quarter turn about Y, applied to a finished mesh.
@@ -82,18 +88,29 @@ export function swapXZ(mesh: MeshData): MeshData {
 export function roofStations(layout: Layout, count = STATIONS): readonly Station[] {
   const ridge = ridgeOf(layout)
   const half = layout.bodyLength / 2
-  const overhang = Math.max(1e-6, layout.ridgeEndZ - half)
   const tipY = layout.ridgeEndY + DIMS.gonjongRise.value
   const sweep = DIMS.gonjongSweep.value
+  /*
+   * Where the lift begins, and it is not the end of the house.
+   *
+   * The first version measured the sweep across the overhang alone — nine
+   * hundred millimetres of run for ten metres of rise, an eleven to one slope
+   * that is a wall rather than a curve. It rendered as four flat sails welded
+   * to the ends. A gonjong needs the length of the last third of the roof to
+   * develop in, so the lift starts well inside the body and the eave along the
+   * long façade is already climbing before it reaches the gable.
+   */
+  const from = half * (1 - DIMS.gonjongReach.value)
+  const run = Math.max(1e-6, layout.ridgeEndZ - from)
   const out: Station[] = []
 
   for (let i = 0; i < count; i++) {
     const s = i / (count - 1)
     const { z, y } = ridge(s)
-    // 0 anywhere over the body, 1 at the tip. Raised to a power so the eave
-    // stays level almost to the end of the house and then lifts hard, which
-    // is what makes the gonjong read as a point rather than as a ramp.
-    const u = clamp01((Math.abs(z) - half) / overhang) ** sweep
+    // 0 over the level middle, 1 at the tip. Raised to a power so the eave
+    // holds its line and then lifts hard, which is what makes the gonjong read
+    // as a point rather than as a ramp.
+    const u = clamp01((Math.abs(z) - from) / run) ** sweep
     out.push({
       x: z,
       ridgeY: y,
@@ -441,10 +458,13 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
 export function buildGonjong(layout: Layout): readonly Part[] {
   const parts: Part[] = []
   const stations = roofStations(layout)
-  const half = layout.bodyLength / 2
+  // The member runs the whole raised part of the edge, which starts inside
+  // the body — not at the gable, where the lift used to start and did not fit.
+  const from = (layout.bodyLength / 2) * (1 - DIMS.gonjongReach.value)
   const dims: readonly DimKey[] = [
     'gonjongRise',
     'gonjongSplay',
+    'gonjongReach',
     'gonjongSweep',
     'gonjongSparRadius',
     'gonjongSparTaper',
@@ -469,7 +489,7 @@ export function buildGonjong(layout: Layout): readonly Part[] {
     // Only the raised part of the edge: the member starts where the eave
     // leaves the body and runs to the tip.
     const path: Vec3[] = stations
-      .filter((st) => st.x >= half - 1e-9)
+      .filter((st) => st.x >= from - 1e-9)
       .sort((a, b) => a.x - b.x)
       .map((st) => [splay * st.halfWidth, st.eaveY, st.x] as Vec3)
     if (path.length < 2) continue
