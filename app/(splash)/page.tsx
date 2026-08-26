@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { COPY, LOCALES, LOCALE_NAMES, pick } from '@/lib/i18n'
+import { COPY, LOCALES, LOCALE_NAMES, href, pick } from '@/lib/i18n'
+import { DEFAULT_TRADITION, TRADITIONS, tradition } from '@/lib/tradition/registry'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
@@ -15,6 +16,7 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
  * says, in both languages, rather than being a bare pair of links.
  */
 export default function Index() {
+  const first = tradition(DEFAULT_TRADITION)
   return (
     <main className="mx-auto flex min-h-full max-w-xl flex-col justify-center gap-6 px-6 py-24">
       <p className="micro text-bolu">{pick(COPY.appName, 'id')}</p>
@@ -31,7 +33,7 @@ export default function Index() {
             key={l}
             lang={l}
             hrefLang={l}
-            href={`/${l}/bangun/`}
+            href={`${href(l, first.slug, 'bangun')}/`}
             className="text-body underline underline-offset-4"
           >
             {pick(COPY.openIn, l)} <span aria-hidden>→</span>
@@ -39,7 +41,17 @@ export default function Index() {
           </Link>
         ))}
       </nav>
-      <meta httpEquiv="refresh" content={`0; url=${BASE}/id/bangun/`} />
+      {/*
+        Both houses are named here, under the language links, because the
+        root is where someone arrives knowing nothing and the app is two
+        buildings rather than one. The refresh still goes to the first: a
+        splash nobody reads should not become a decision everybody has to
+        make.
+      */}
+      <p className="text-body text-muted">
+        {TRADITIONS.map((t) => t.house.id).join(' · ')}
+      </p>
+      <meta httpEquiv="refresh" content={`${BASE}${href('id', first.slug, 'bangun')}/`.replace(/^/, '0; url=')} />
     </main>
   )
 }

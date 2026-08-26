@@ -7,23 +7,21 @@ import type { ViewKey } from './viewport/scene'
 import {
   OrientationNote,
   PlaceNote,
-  RuleControls,
   SceneToggles,
   SunControls,
   ViewSwitch,
 } from './Controls'
+import { RuleControlsFor } from './rules'
 import { ProvenanceStrip } from './Provenance'
 import { Derivation } from './Derivation'
 import { DrawingExport } from './DrawingExport'
 import { RailSection } from './Sheet'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { buildHouse, buildTimeline } from '@/lib/tradition/toraja/assembly'
-import { DEFAULT_RULES, partSplit, rankInfo, provenanceSplit } from '@/lib/tradition/toraja/rules'
-import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/tradition/toraja/address'
+import { tradition } from '@/lib/tradition/registry'
+import type { Built, TraditionKey } from '@/lib/tradition/registry'
 import { flag, readChoice, readFlag, readInt, unless } from '@/lib/reader'
 import { useReaderState } from './useReaderState'
-import type { Rules } from '@/lib/tradition/toraja/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import type { DatePreset } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
@@ -56,7 +54,7 @@ function decodeBangun(p: ReadonlyMap<string, string>): BangunVantage {
     marking: readFlag(p.get('tanda'), BANGUN_DEFAULTS.marking),
     presetKey: readChoice(
       p.get('tanggal'),
-      datePresets().map((d) => d.key),
+      ['ekuinoks', 'solstis-juni', 'kulminasi'] as const,
       BANGUN_DEFAULTS.presetKey,
     ),
     minutes: readInt(p.get('waktu'), 0, 1439, BANGUN_DEFAULTS.minutes),
@@ -80,10 +78,16 @@ function encodeBangun(v: BangunVantage): readonly (readonly [string, string | nu
  *
  * Change a socially meaningful number and the house rebuilds in place. That
  * is the thesis of the whole project, so it is the landing route and it is
- * the only screen where all three rules are on the page at once.
+ * the only screen where all of a house's rules are on the page at once.
+ *
+ * Which house is a path segment, and everything below it comes from the
+ * registry entry that segment names. Nothing in this file knows what a rank
+ * or a laras is: the rules live in the query string, the controls that edit
+ * them belong to the tradition, and what arrives back is a built house.
  */
-export function BangunClient({ locale }: { locale: Locale }) {
-  const [rules, setRules, addressReady] = useRuleAddress()
+export function BangunClient({ locale, tradisi }: { locale: Locale; tradisi: TraditionKey }) {
+  const t = useMemo(() => tradition(tradisi), [tradisi])
+  const [query, setQuery, addressReady] = useRuleAddress(t.defaultQuery)
   /*
     Everything the reader is doing, in the fragment: which way the camera
     points, what time it is, what is switched on. None of it is a fact about
@@ -93,93 +97,87 @@ export function BangunClient({ locale }: { locale: Locale }) {
   */
   const [vantage, setVantage] = useReaderState(BANGUN_DEFAULTS, decodeBangun, encodeBangun)
   const { view, figure, rain, marking, presetKey } = vantage
-  const setView = (v: ViewKey) => setVantage({ view: v })
-  const setFigure = (v: boolean) => setVantage({ figure: v })
-  const setRain = (v: boolean) => setVantage({ rain: v })
-  const setMarking = (v: boolean) => setVantage({ marking: v })
-  const setPresetKey = (v: DatePreset['key']) => setVantage({ presetKey: v })
   const minutes = vantage.minutes
-  const setMinutes = (v: number) => setVantage({ minutes: v })
 
-  const presets = useMemo(() => datePresets(), [])
-  const { house, layout } = useMemo(() => buildHouse(rules), [rules])
-  const timeline = useMemo(() => buildTimeline(house), [house])
-  const rebuild = useRebuildTransition(rules, usePrefersReducedMotion(), addressReady)
+  const presets = useMemo(() => datePresets(t.site), [t])
+  const built: Built = useMemo(() => t.build(query), [t, query])
+  const rebuild = useRebuildTransition(built.query, usePrefersReducedMotion(), addressReady)
 
   const sun = useMemo(() => {
     const preset = presets.find((p) => p.key === presetKey) ?? presets[0]
     if (!preset) throw new Error('no date presets')
-    return solarPosition(presetInstant(preset, minutes))
-  }, [presets, presetKey, minutes])
-
-  const rank = rankInfo(rules.rank)
+    return solarPosition(presetInstant(preset, minutes, t.site), t.site)
+  }, [presets, presetKey, minutes, t])
 
   return (
     <Sheet
       locale={locale}
       route="bangun"
+      tradition={t}
       rail={
         <>
           {/*
             Order is hierarchy in a rail that scrolls. The rules come first
             because they are what the reader changes, and provenance comes
-            second because it is what the house they just changed is worth —
-            it was last, under an export control, which put the project's one
-            argument six screens down on a phone. Everything below is a
-            control or a note, and the export is last because taking the
-            drawing away is the last thing anyone does.
+            second because it is what the house they just changed is worth.
+            Everything below is a control or a note, and the export is last
+            because taking the drawing away is the last thing anyone does.
           */}
-          <PlaceNote locale={locale} />
-          <RuleControls rules={rules} onChange={setRules} locale={locale} />
+          <PlaceNote locale={locale} tradition={t} />
+          <RuleControlsFor
+            tradition={t.key}
+            query={built.query}
+            onChange={setQuery}
+            locale={locale}
+          />
           {/*
-            Directly under the rules, because it explains the rules. It is the
-            worked example a newcomer needs before touching anything, so it is
-            filled in on arrival rather than waiting to be asked for.
+            Directly under the rules, because it explains the rules. Only one
+            house has one written: see the note on `Derivation`.
           */}
-          <Derivation rules={rules} locale={locale} />
+          <Derivation tradition={t.key} query={built.query} locale={locale} />
           <RailSection title={pick(COPY.provenance.heading, locale)}>
             <ProvenanceStrip
-              split={provenanceSplit(layout.dims)}
+              split={built.split}
               locale={locale}
               marking={marking}
-              onMarking={setMarking}
-              parts={marking ? partSplit(house.parts) : undefined}
+              onMarking={(v) => setVantage({ marking: v })}
+              parts={marking ? built.parts : undefined}
             />
           </RailSection>
           <SunControls
             presets={presets}
             presetKey={presetKey}
             minutes={minutes}
-            onPreset={setPresetKey}
-            onMinutes={setMinutes}
+            onPreset={(v) => setVantage({ presetKey: v })}
+            onMinutes={(v) => setVantage({ minutes: v })}
             altitude={sun.altitude}
+            site={t.site}
             locale={locale}
           />
           <SceneToggles
             figure={figure}
             rain={rain}
-            onFigure={setFigure}
-            onRain={setRain}
+            onFigure={(v) => setVantage({ figure: v })}
+            onRain={(v) => setVantage({ rain: v })}
             locale={locale}
           />
-          <OrientationNote locale={locale} />
-          <DrawingExport house={house} layout={layout} locale={locale} />
+          <OrientationNote locale={locale} tradition={t} />
+          <DrawingExport tradition={t.key} query={built.query} locale={locale} />
         </>
       }
     >
       <Viewport
         locale={locale}
-        house={house}
-        layout={layout}
+        built={built}
         sun={sun}
         view={view}
         figure={figure}
         rain={rain}
         provenance={marking}
-        reveal={rebuild < 1 ? { timeline, t: rebuild } : null}
+        reveal={rebuild < 1 ? { timeline: built.timeline, t: rebuild } : null}
       >
-        <ViewSwitch view={view} onChange={setView} locale={locale} />
-        <Readout locale={locale} rules={rules} rankName={rank.name} layout={layout} />
+        <ViewSwitch view={view} onChange={(v) => setVantage({ view: v })} locale={locale} />
+        <Readout locale={locale} built={built} />
       </Viewport>
     </Sheet>
   )
@@ -204,9 +202,8 @@ const REBUILD_MS = 850
  *   not a change they made, so it arrives built rather than being raised in
  *   front of them.
  */
-function useRebuildTransition(rules: Rules, reducedMotion: boolean, settled: boolean): number {
+function useRebuildTransition(signature: string, reducedMotion: boolean, settled: boolean): number {
   const [t, setT] = useState(1)
-  const signature = `${rules.rank}|${rules.bays}|${rules.horns}`
   const shown = useRef<string | null>(null)
 
   useEffect(() => {
@@ -236,7 +233,12 @@ function useRebuildTransition(rules: Rules, reducedMotion: boolean, settled: boo
 }
 
 /**
- * Rules held in the address bar.
+ * Rules held in the address bar, as the query string itself.
+ *
+ * The query string is already the canonical description of a house, so it is
+ * the state rather than a serialisation of the state — which means this hook
+ * does not need to know what a rank or a laras is, and there is one
+ * representation instead of two that can disagree.
  *
  * The page is prerendered with the defaults, so the address is read after
  * mount rather than during render — a client that read it during render would
@@ -248,18 +250,17 @@ function useRebuildTransition(rules: Rules, reducedMotion: boolean, settled: boo
  * being edited, not a place being visited, and thirty pushes would make Back
  * useless for leaving the page.
  */
-function useRuleAddress(): [Rules, (next: Rules) => void, boolean] {
-  const [rules, setRules] = useState<Rules>(DEFAULT_RULES)
+function useRuleAddress(fallback: string): [string, (next: string) => void, boolean] {
+  const [query, setQuery] = useState(fallback)
   const [settled, setSettled] = useState(false)
 
   useEffect(() => {
-    setRules(rulesFromQuery(window.location.search))
+    setQuery(window.location.search.replace(/^\?/, '') || fallback)
     setSettled(true)
-  }, [])
+  }, [fallback])
 
   useEffect(() => {
     if (!settled) return
-    const query = rulesToQuery(rules)
     if (query === window.location.search.replace(/^\?/, '')) return
     // Preserves the fragment: the two halves of the address are owned by
     // different hooks and neither may clobber the other.
@@ -268,74 +269,48 @@ function useRuleAddress(): [Rules, (next: Rules) => void, boolean] {
       '',
       `${window.location.pathname}?${query}${window.location.hash}`,
     )
-  }, [rules, settled])
+  }, [query, settled])
 
-  const change = (next: Rules) => setRules((prev) => (rulesEqual(prev, next) ? prev : next))
-  return [rules, change, settled]
+  return [query, setQuery, settled]
 }
 
 /**
  * The computed dimensions, over the viewport.
  *
  * Numbers are mono, right-aligned, and carry their unit. These are outputs of
- * the rule pack, not inputs: there is nothing here to drag.
+ * the rule pack, not inputs: there is nothing here to drag. Which figures are
+ * worth showing is the tradition's own answer — a rumah gadang has no prow
+ * and a tongkonan has no anjuang — so the rows arrive already chosen.
  */
-function Readout({
-  locale,
-  rules,
-  rankName,
-  layout,
-}: {
-  locale: Locale
-  rules: Rules
-  rankName: string
-  layout: ReturnType<typeof buildHouse>['layout']
-}) {
-  const rows: [string, string][] = [
-    [locale === 'id' ? 'Panjang badan' : 'Body length', `${layout.bodyLength.toFixed(2)} m`],
-    [locale === 'id' ? 'Lebar badan' : 'Body width', `${layout.bodyWidth.toFixed(2)} m`],
-    [locale === 'id' ? 'Tinggi kolong' : 'Underfloor height', `${layout.kolongHeight.toFixed(2)} m`],
-    [
-      locale === 'id' ? 'Puncak haluan depan' : 'Front prow tip',
-      `${layout.frontProwY.toFixed(2)} m`,
-    ],
-    [locale === 'id' ? 'Julur atap' : 'Eave oversail', `${layout.eaveOversail.toFixed(2)} m`],
-    [locale === 'id' ? 'Lapis ijuk' : 'Ijuk courses', String(layout.ijukCourses)],
-  ]
-
+function Readout({ locale, built }: { locale: Locale; built: Built }) {
   return (
-    // Below the view switch on a narrow screen, beside it on a wide one:
-    // at 390px the two would otherwise sit on top of each other.
     /*
       Announced when it changes, because it is the answer to every rule the
       reader sets. A sighted reader watches the house rebuild and the figures
-      follow; without this a screen reader user presses a rank button and is
-      told nothing at all.
+      follow; without this a screen reader user presses a control and is told
+      nothing at all.
 
       polite and not atomic on purpose: only the figures that moved are read,
-      rather than all eight rows every time a slider steps.
+      rather than every row each time a slider steps.
     */
     <div
       aria-live="polite"
       className="pointer-events-none absolute left-3 top-14 z-10 max-w-[15rem] rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px] sheet:top-3"
     >
       {/*
-        Without this line the six figures read as the specifications of a real
-        building. They are outputs of the three rules in the rail, and saying
-        so is what connects the controls to the model.
+        Without this line the figures read as the specifications of a real
+        building. They are outputs of the rules in the rail, and saying so is
+        what connects the controls to the model.
       */}
       <p className="micro">{pick(COPY.computed, locale)}</p>
-      <p className="mt-1 text-body font-medium leading-tight">{rankName}</p>
-      <p className="mt-0.5 text-meta text-muted">
-        {layout.bayNames.join(' · ')} — {rules.horns}{' '}
-        {pick(COPY.controls.horns, locale).toLowerCase()}
-      </p>
+      <p className="mt-1 text-body font-medium leading-tight">{built.headline[locale]}</p>
+      <p className="mt-0.5 text-meta text-muted">{built.subhead[locale]}</p>
       <hr className="rule my-2" />
       <dl className="flex flex-col gap-0.5">
-        {rows.map(([label, value]) => (
-          <div key={label} className="flex items-baseline justify-between gap-3">
-            <dt className="text-meta text-muted">{label}</dt>
-            <dd className="num text-meta">{value}</dd>
+        {built.readout.map((row) => (
+          <div key={row.label.en} className="flex items-baseline justify-between gap-3">
+            <dt className="text-meta text-muted">{row.label[locale]}</dt>
+            <dd className="num text-meta">{row.value}</dd>
           </div>
         ))}
       </dl>

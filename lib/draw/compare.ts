@@ -18,7 +18,7 @@
 
 import { buildHouse } from '../tradition/toraja/assembly'
 import { withDimValue } from '../tradition/toraja/whatif'
-import { DIMS } from '../tradition/toraja/rules'
+import { DEFAULT_RULES, DIMS } from '../tradition/toraja/rules'
 import type { DimKey } from '../tradition/toraja/rules'
 import type { Rules } from '../tradition/toraja/types'
 import { MARGIN, PIGMENT, linesForRoof } from './orthographic'
@@ -34,7 +34,7 @@ export interface Comparison {
 export function compareDimension(
   key: DimKey,
   factor: number,
-  rules: Rules,
+  rules: Rules = DEFAULT_RULES,
   view: Projection = 'potongan',
 ): Comparison {
   const from = DIMS[key].value

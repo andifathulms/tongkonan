@@ -23,8 +23,17 @@ export const LOCALE_NAMES: Record<Locale, string> = {
 export const ROUTES = ['bangun', 'rakit', 'baca', 'sumber'] as const
 export type Route = (typeof ROUTES)[number]
 
-export function href(locale: Locale, route: Route): string {
-  return `/${locale}/${route}`
+/**
+ * A page address: locale, then tradition, then route.
+ *
+ * The tradition is a path segment and not a query parameter. The query string
+ * is the house — a complete description of one building, in that tradition's
+ * own parameter names — and a tradition selects which rule pack those names
+ * belong to. Putting it in the query would make one string mean two kinds of
+ * thing at once.
+ */
+export function href(locale: Locale, tradition: string, route: Route): string {
+  return `/${locale}/${tradition}/${route}`
 }
 
 type Dict = Record<Locale, string>
@@ -32,7 +41,17 @@ type Dict = Record<Locale, string>
 const t = (id: string, en: string): Dict => ({ id, en })
 
 export const COPY = {
-  appName: t('Tongkonan', 'Tongkonan'),
+  /*
+   * The project is named for the peg, not for either house.
+   *
+   * It was called Tongkonan while there was one, which stopped being a name
+   * and became a claim the moment there were two. A pasak is the wooden peg
+   * that pins a mortise and tenon; it is ordinary Indonesian, it belongs to no
+   * one tradition, and both of these houses go up without a nail in them. It
+   * names the join rather than the building, which is the right size for what
+   * this is.
+   */
+  appName: t('Pasak', 'Pasak'),
   tagline: t(
     'Rumah yang dihitung dari aturannya, bukan digambar.',
     'A house generated from its rules, not drawn.',
@@ -45,8 +64,8 @@ export const COPY = {
    * handsome model and no argument, which is the opposite of the point.
    */
   thesis: t(
-    'Ubah pangkat, jumlah ruang, atau jumlah tanduk — rumah dihitung ulang dari aturan itu.',
-    'Change the rank, the bay count, or the horns — the house is recomputed from those rules.',
+    'Ubah salah satu aturan sosial rumah ini — rumah dihitung ulang dari aturan itu.',
+    'Change one of this house’s social rules — the house is recomputed from it.',
   ),
   /*
    * Says both ways of doing it, in one line, so it is not two pieces of copy
@@ -108,22 +127,16 @@ export const COPY = {
 
   place: {
     heading: t('Rumah siapa ini', 'Whose house this is'),
-    body: t(
-      'Tongkonan adalah rumah keluarga orang Toraja, di dataran tinggi Sulawesi Selatan, Indonesia. Nama setiap bagian pada layar ini — tulak somba, a’riri, kale banua, ijuk, pa’ssura — adalah kata Toraja, dan dipakai sebagaimana adanya karena itulah nama benda-benda itu, bukan hiasan. Matahari pada model ini dihitung untuk Rantepao, 2,97° LS dan 119,90° BT.',
-      'A tongkonan is the family house of the Toraja people, in the highlands of South Sulawesi, Indonesia. Every part named on this screen — tulak somba, a’riri, kale banua, ijuk, pa’ssura — is named in Toraja, and the words are used as they are because they are the names of the things rather than decoration. The sun in this model is computed for Rantepao, 2.97° S and 119.90° E.',
-    ),
-    caution: t(
-      'Tidak ada satu bentuk tongkonan yang baku. Ragam antardaerah dan antargaris keturunan itu nyata, dan model ini satu rumah yang mungkin — bukan rumah itu.',
-      'There is no single canonical tongkonan. Regional and lineage variation is real, and this model is one house the rules permit — not the house.',
-    ),
+    /*
+     * The prose lives with the house it describes, in that tradition's facade
+     * module, not here. Copy about the interface is shared; copy about a
+     * building is that building's, or it drifts the moment there are two.
+     */
   },
 
   orientation: {
     heading: t('Arah hadap', 'Orientation'),
-    body: t(
-      'Rumah membujur utara–selatan, muka (ulunna banua) menghadap utara. Arah ini aturan, bukan pilihan, jadi tidak ada kendali untuk memutar bangunan. Yang bisa diputar hanyalah kamera.',
-      'The house lies north–south with the front, ulunna banua, facing north. That is a rule, not a choice, so there is no control that turns the building. Only the camera rotates.',
-    ),
+    /* The rule itself is per tradition: one is a compass bearing, one is not. */
   },
 
   derivation: {
@@ -219,23 +232,25 @@ export const COPY = {
     kolong: t('Kolong', 'Underfloor'),
   },
 
+  tradition: {
+    /* Names the group for a screen reader; the labels are the house names. */
+    legend: t('Rumah adat', 'Tradition'),
+    heading: t('Rumah yang lain', 'The other house'),
+    /*
+     * Said where the switch is, because a reader who has just watched one
+     * house rebuild from its rules will assume the other is the same house
+     * with different numbers. It is not, and the app would be lying by layout
+     * if it did not say so.
+     */
+    note: t(
+      'Dua tradisi, dua pak aturan, dua tabel sumber. Keduanya tidak pernah digabung dan tidak ada di antaranya yang berubah menjadi yang lain.',
+      'Two traditions, two rule packs, two source tables. They are never merged, and neither one turns into the other.',
+    ),
+  },
+
   zones: {
     heading: t('Tiga tingkat', 'The three zones'),
-    sulluk: t('sulluk banua', 'sulluk banua'),
-    sullukGloss: t(
-      'Kolong. Dunia bawah: ternak, kayu bakar, dan bayang-bayang dalam yang membuat badan rumah tampak melayang.',
-      'The underfloor. The lower world: livestock, firewood, and the deep shadow that makes the body appear to float.',
-    ),
-    kale: t('kale banua', 'kale banua'),
-    kaleGloss: t(
-      'Lantai hunian. Dunia tengah: tempat manusia tinggal, dibagi menjadi ruang-ruang bernama.',
-      'The living floor. The middle world: where people live, divided into named bays.',
-    ),
-    rattiang: t('rattiang banua', 'rattiang banua'),
-    rattiangGloss: t(
-      'Loteng di bawah atap. Dunia atas: penyimpanan padi dan pusaka.',
-      'The attic under the roof. The upper world: rice and heirlooms are kept here.',
-    ),
+    /* The names and glosses are vocabulary, so they live in each scene model. */
   },
 
   read: {
@@ -243,31 +258,6 @@ export const COPY = {
     intro: t(
       'Rumah ini menyatakan dirinya kepada siapa pun yang berjalan mendekat. Tidak satu pun dari keterangan berikut tertulis; semuanya terbaca dari bentuk.',
       'The house states itself to anyone walking up to it. None of the following is written down; all of it is read off the form.',
-    ),
-    hornsTitle: t('Berapa kali rumah ini berduka', 'How many times this house has mourned'),
-    hornsBody: t(
-      'Hitung tanduk pada tulak somba. Tiap satu adalah satu upacara rambu solo yang pernah digelar keluarga ini — catatan, bukan hiasan.',
-      'Count the horns on the tulak somba. Each one is a funeral this family has held — a record, not an ornament.',
-    ),
-    rankTitle: t('Kedudukan keluarga', 'Where the family stands'),
-    rankBody: t(
-      'Skala badan rumah dan seberapa jauh ukiran diizinkan menutup bidangnya. Pangkat tidak diumumkan; ia terlihat dari ukuran dan hak menghias.',
-      'The scale of the body, and how far carving is permitted to cover it. Rank is not announced; it is visible in size and in the right to decorate.',
-    ),
-    baysTitle: t('Berapa ruang di dalamnya', 'How many rooms are inside'),
-    baysBody: t(
-      'Hitung baris tiang di kolong. Tiap ruang menambah satu baris, jadi pembagian di dalam bisa dibaca dari luar tanpa masuk.',
-      'Count the post rows in the underfloor. Each bay adds one, so the division inside can be read from outside without entering.',
-    ),
-    facingTitle: t('Mana muka rumah', 'Which way the house faces'),
-    facingBody: t(
-      'Haluan yang lebih tinggi adalah muka, dan muka selalu menghadap utara. Sekali diketahui, satu rumah cukup untuk menentukan arah seluruh halaman.',
-      'The higher prow is the front, and the front always faces north. Once that is known, one house is enough to orient the whole courtyard.',
-    ),
-    carvingTitle: t('Di mana ukiran diletakkan', 'Where the carving goes'),
-    carvingBody: t(
-      'Pa\u2019ssura menutup papan muka, bukan seluruh rumah. Yang digambar di sini hanya motif yang jelas-jelas geometris; motif yang penggunaannya terbatas tidak dirender.',
-      'Pa\u2019ssura covers the front board, not the whole house. Only the plainly geometric motifs are drawn here; motifs whose use is restricted are not rendered.',
     ),
     /* Names the façade/section pair for a screen reader; not drawn. */
     sectionLegend: t('Tampilan rumah', 'How the house is shown'),
@@ -299,21 +289,6 @@ export const COPY = {
 
   joints: {
     heading: t('Sambungan', 'Joints'),
-    pasak: t('Pasak', 'Pegged mortise and tenon'),
-    pasakGloss: t(
-      'Pen masuk ke lubang, lalu dikunci pasak kayu yang menembus keduanya. Inilah sambungan utama rangka.',
-      'A tenon enters a mortise and a wooden peg driven through both locks it. This is the frame’s main joint.',
-    ),
-    takik: t('Takik', 'Lap'),
-    takikGloss: t(
-      'Dua balok bersilang saling ditakik agar rata dan tidak bergeser.',
-      'Two crossing members are each notched so they sit flush and cannot shift.',
-    ),
-    tumpu: t('Tumpu', 'Seat'),
-    tumpuGloss: t(
-      'Kaki tiang duduk di cekungan batu umpak. Tidak ditanam — karena itulah rumah bisa dibongkar dan dipindah.',
-      'A post foot seats in the dish of its pad stone. It is not buried — which is why the house can be taken down and moved.',
-    ),
     explode: t('Urai', 'Explode'),
     explodeValue: t('terurai {pct}%', '{pct}% exploded'),
     explodeGloss: t(
@@ -337,13 +312,8 @@ export const COPY = {
       'Sepuluh baris hijau tidak memberi alasan untuk percaya. Jadi satu pemeriksaan dijalankan pada rumah yang sengaja dibuat gagal, dan yang tercetak di bawah adalah putusan pemeriksaan itu sendiri, bukan uraian penulis.',
       'Ten green rows are not a reason to believe anything. So one check is run against a house built to break it, and what is printed below is that check\u2019s own verdict rather than a description of it.',
     ),
-    counterWhy: t(
-      'Haluan depan berdiri lebih tinggi daripada haluan belakang. Itu pernyataan sumber, bukan hasil hitungan \u2014 dan itulah yang membuat satu rumah cukup untuk menentukan arah seluruh halaman. Naikkan haluan belakang melewati depan dan rumah kehilangan kemampuan menyatakan mana mukanya.',
-      'The front prow stands higher than the rear. That is a claim a source makes, not something the arithmetic guarantees \u2014 and it is what makes one house enough to orient a whole courtyard. Raise the rear prow past the front and the house loses the ability to say which end is its face.',
-    ),
     counterSound: t('Rumah seperti dibangun', 'The house as built'),
     counterBroken: t('Haluan belakang dinaikkan ke {value} m', 'Rear prow raised to {value} m'),
-    counterProws: t('depan / belakang', 'front / rear'),
     counterNote: t(
       'Rumah kedua ini tidak pernah dirender. Ia dibangun saat build, dinyatakan gagal, lalu dibuang.',
       'The second house is never rendered. It is built during the build, failed, and thrown away.',
@@ -401,8 +371,8 @@ export function pick(dict: Dict, locale: Locale): string {
  * apart. The route name comes first because that is what distinguishes the
  * tab; the app name follows because that is what groups them.
  */
-export function pageTitle(route: Route, locale: Locale): string {
-  return `${pick(COPY.nav[route], locale)} — ${pick(COPY.appName, locale)}`
+export function pageTitle(route: Route, locale: Locale, house: string): string {
+  return `${pick(COPY.nav[route], locale)} — ${house} — ${pick(COPY.appName, locale)}`
 }
 
 /**
@@ -413,8 +383,8 @@ export function pageTitle(route: Route, locale: Locale): string {
  * written separately is a description free to drift from the page it
  * describes, and a stale one is worse than none.
  */
-export function pageDescription(route: Route, locale: Locale): string {
-  return `${pick(COPY.navGloss[route], locale)} ${pick(COPY.tagline, locale)}`
+export function pageDescription(route: Route, locale: Locale, house: string): string {
+  return `${house}. ${pick(COPY.navGloss[route], locale)} ${pick(COPY.tagline, locale)}`
 }
 
 /**
@@ -432,8 +402,8 @@ export const SITE_ORIGIN = (
 export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '/tongkonan'
 
 /** The absolute, canonical address of a route. */
-export function pageUrl(route: Route, locale: Locale): string {
-  return `${SITE_ORIGIN}${BASE_PATH}/${locale}/${route}/`
+export function pageUrl(route: Route, locale: Locale, tradition: string): string {
+  return `${SITE_ORIGIN}${BASE_PATH}/${locale}/${tradition}/${route}/`
 }
 
 /** OpenGraph's locale format, which is not the one in our URLs. */
@@ -447,16 +417,20 @@ const OG_LOCALE: Record<Locale, string> = { id: 'id_ID', en: 'en_US' }
  * generated together — the failure mode is adding one of them and forgetting
  * the rest.
  */
-export function routeMetadata(route: Route, locale: Locale) {
-  const title = pageTitle(route, locale)
-  const description = pageDescription(route, locale)
-  const url = pageUrl(route, locale)
+export function routeMetadata(
+  route: Route,
+  locale: Locale,
+  tradition: { slug: string; house: string },
+) {
+  const title = pageTitle(route, locale, tradition.house)
+  const description = pageDescription(route, locale, tradition.house)
+  const url = pageUrl(route, locale, tradition.slug)
   return {
     title,
     description,
     alternates: {
       canonical: url,
-      languages: Object.fromEntries(LOCALES.map((l) => [l, pageUrl(route, l)])),
+      languages: Object.fromEntries(LOCALES.map((l) => [l, pageUrl(route, l, tradition.slug)])),
     },
     openGraph: {
       type: 'website' as const,

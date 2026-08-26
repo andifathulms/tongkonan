@@ -7,23 +7,30 @@ import { Viewport, usePrefersReducedMotion } from './viewport/Viewport'
 import { ProvenanceStrip } from './Provenance'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { SEQUENCE_SECONDS, buildHouse, buildTimeline } from '@/lib/tradition/toraja/assembly'
-import { DEFAULT_RULES, stageInfo, provenanceSplit } from '@/lib/tradition/toraja/rules'
-import type { Stage } from '@/lib/tradition/toraja/types'
+import { SEQUENCE_SECONDS } from '@/lib/core/assembly'
+import { tradition } from '@/lib/tradition/registry'
+import type { StageView, Tradition, TraditionKey } from '@/lib/tradition/registry'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
 import { useReaderState } from './useReaderState'
 import { readInt, unless } from '@/lib/reader'
-import { STAGE_ORDER } from '@/lib/tradition/toraja/types'
 
-const RAKIT_DEFAULTS = { stage: '' as Stage | '', explode: 0 }
+const RAKIT_DEFAULTS = { stage: '', explode: 0 }
 type RakitVantage = typeof RAKIT_DEFAULTS
 
-function decodeRakit(p: ReadonlyMap<string, string>): RakitVantage {
-  const raw = p.get('tahap') ?? ''
-  return {
-    stage: (STAGE_ORDER as readonly string[]).includes(raw) ? (raw as Stage) : '',
-    explode: readInt(p.get('urai'), 0, 100, 0) / 100,
+/**
+ * The stage is validated against the tradition on screen, not against a
+ * union. Two houses have two sets of stage names and neither one's are the
+ * other's, so a `?tahap=ijuk` arriving at the wrong house has to fall back to
+ * no stage rather than to a name that happens to be shared.
+ */
+function decodeRakit(stages: readonly string[]) {
+  return (p: ReadonlyMap<string, string>): RakitVantage => {
+    const raw = p.get('tahap') ?? ''
+    return {
+      stage: stages.includes(raw) ? raw : '',
+      explode: readInt(p.get('urai'), 0, 100, 0) / 100,
+    }
   }
 }
 
@@ -41,10 +48,12 @@ function encodeRakit(v: RakitVantage): readonly (readonly [string, string | null
  * is generated data rather than an animation curve someone drew. Nothing else
  * on this screen may compete with it.
  */
-export function RakitClient({ locale }: { locale: Locale }) {
+export function RakitClient({ locale, tradisi }: { locale: Locale; tradisi: TraditionKey }) {
   const reducedMotion = usePrefersReducedMotion()
-  const { house, layout } = useMemo(() => buildHouse(DEFAULT_RULES), [])
-  const timeline = useMemo(() => buildTimeline(house), [house])
+  const t0 = useMemo(() => tradition(tradisi), [tradisi])
+  const built = useMemo(() => t0.build(t0.defaultQuery), [t0])
+  const { house, timeline } = built
+  const stageInfo = useMemo(() => stageLookup(t0), [t0])
 
   const [t, setT] = useState(1)
   const [playing, setPlaying] = useState(false)
@@ -58,7 +67,8 @@ export function RakitClient({ locale }: { locale: Locale }) {
     that is what travels. Playing is deliberately not carried: a link that
     starts animating at someone is a link nobody wants twice.
   */
-  const [vantage, setVantage, settled] = useReaderState(RAKIT_DEFAULTS, decodeRakit, encodeRakit)
+  const decode = useMemo(() => decodeRakit(t0.stageOrder), [t0])
+  const [vantage, setVantage, settled] = useReaderState(RAKIT_DEFAULTS, decode, encodeRakit)
   const explode = vantage.explode
   const setExplode = (v: number) => setVantage({ explode: v })
 
@@ -120,11 +130,17 @@ export function RakitClient({ locale }: { locale: Locale }) {
   }, [playing, reducedMotion, timeline])
 
   const activeStage = timeline.stages.find((s) => t >= s.start && t < s.end) ?? null
-  const jointCounts = useMemo(() => {
-    const counts = { pasak: 0, takik: 0, tumpu: 0 }
-    for (const j of house.joints) counts[j.kind] += 1
-    return counts
-  }, [house])
+  /*
+   * Counted rather than declared, because the joinery is not the same in the
+   * two houses: one seats a post foot in the dish of a pad stone and calls
+   * that a tumpu, the other calls it a sandi. A fixed tally would have shown
+   * three names to a house that uses two of them and none of its third.
+   */
+  const jointRows = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const j of house.joints) counts.set(j.kind, (counts.get(j.kind) ?? 0) + 1)
+    return t0.joints.map((j) => ({ ...j, count: counts.get(j.kind) ?? 0 }))
+  }, [house, t0])
 
   const replay = () => {
     setT(0)
@@ -135,6 +151,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
     <Sheet
       locale={locale}
       route="rakit"
+      tradition={t0}
       rail={
         <>
           <RailSection title={pick(COPY.assembly.heading, locale)}>
@@ -234,21 +251,14 @@ export function RakitClient({ locale }: { locale: Locale }) {
               {pick(COPY.assembly.noNails, locale)}
             </p>
             <dl className="flex flex-col gap-3">
-              <JointRow
-                name={pick(COPY.joints.pasak, locale)}
-                gloss={pick(COPY.joints.pasakGloss, locale)}
-                count={jointCounts.pasak}
-              />
-              <JointRow
-                name={pick(COPY.joints.takik, locale)}
-                gloss={pick(COPY.joints.takikGloss, locale)}
-                count={jointCounts.takik}
-              />
-              <JointRow
-                name={pick(COPY.joints.tumpu, locale)}
-                gloss={pick(COPY.joints.tumpuGloss, locale)}
-                count={jointCounts.tumpu}
-              />
+              {jointRows.map((j) => (
+                <JointRow
+                  key={j.kind}
+                  name={j.name[locale]}
+                  gloss={j.gloss[locale]}
+                  count={j.count}
+                />
+              ))}
             </dl>
 
             <div className="mt-5">
@@ -277,22 +287,21 @@ export function RakitClient({ locale }: { locale: Locale }) {
           </RailSection>
 
           <RailSection title={pick(COPY.provenance.heading, locale)}>
-            <ProvenanceStrip split={provenanceSplit(layout.dims)} locale={locale} compact />
+            <ProvenanceStrip split={built.split} locale={locale} compact />
           </RailSection>
         </>
       }
     >
       <Viewport
         locale={locale}
-        house={house}
-        layout={layout}
+        built={built}
         sun={sun}
         view="perspektif"
         figure
         rain={false}
         explode={explode}
         reveal={t >= 1 ? null : { timeline, t }}
-        caption={<StageCaption stage={activeStage?.stage ?? null} locale={locale} />}
+        caption={<StageCaption info={activeStage ? stageInfo(activeStage.stage) : null} locale={locale} />}
       />
     </Sheet>
   )
@@ -302,19 +311,23 @@ export function RakitClient({ locale }: { locale: Locale }) {
  * The stage name and its gloss, over the viewport while that stage is active.
  * It is a caption on the act being performed, not a progress indicator.
  */
-function StageCaption({ stage, locale }: { stage: Stage | null; locale: Locale }) {
-  if (!stage) return null
-  const info = stageInfo(stage)
+function StageCaption({ info, locale }: { info: StageView | null; locale: Locale }) {
+  if (!info) return null
   return (
     // Clear of the masthead band under 860px, by the height that band reserves.
     // Same collision the scale bar had, and missed here at the time.
     <div className="pointer-events-none absolute bottom-[calc(var(--masthead-h)+0.75rem)] left-1/2 z-10 w-[min(30rem,calc(100%-6rem))] -translate-x-1/2 rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px] sheet:bottom-3">
       <p className="micro">{info.title}</p>
-      <p className="mt-1 text-body">
-        {locale === 'id' ? info.glossId : info.glossEn}
-      </p>
+      <p className="mt-1 text-body">{info.gloss[locale]}</p>
     </div>
   )
+}
+
+/** Stage names come from the tradition, so a lookup rather than an import. */
+function stageLookup(t: Tradition): (stage: string) => StageView {
+  const byKey = new Map(t.stages.map((s) => [s.stage, s]))
+  return (stage) =>
+    byKey.get(stage) ?? { stage, title: stage, gloss: { id: '', en: '' } }
 }
 
 function JointRow({ name, gloss, count }: { name: string; gloss: string; count: number }) {

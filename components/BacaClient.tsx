@@ -9,9 +9,8 @@ import { flag, readFlag, unless } from '@/lib/reader'
 import { Choice } from './Controls'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { buildHouse } from '@/lib/tradition/toraja/assembly'
-import { rankInfo, provenanceSplit } from '@/lib/tradition/toraja/rules'
-import type { Rules } from '@/lib/tradition/toraja/types'
+import { tradition } from '@/lib/tradition/registry'
+import type { TraditionKey } from '@/lib/tradition/registry'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
 
@@ -25,10 +24,16 @@ import { solarPosition } from '@/lib/solar/position'
  * shape is carrying information, and this route spends it.
  */
 
-/** A specific house with a history, rather than a neutral default. */
-const HOUSE: Rules = { rank: 'layuk', bays: 4, horns: 14 }
-
-export function BacaClient({ locale }: { locale: Locale }) {
+export function BacaClient({ locale, tradisi }: { locale: Locale; tradisi: TraditionKey }) {
+  /*
+   * A specific house with a history, rather than a neutral default.
+   *
+   * Which one is the tradition's own choice: what a façade says depends on
+   * what it has to say, and a house with no funerals held or no daughters
+   * married would be a blank page on the route whose whole subject is what
+   * can be read off a building.
+   */
+  const t0 = useMemo(() => tradition(tradisi), [tradisi])
   /* The one thing a reader chooses here: façade, or cut open. */
   const [vantage, setVantage] = useReaderState(
     { section: false },
@@ -37,73 +42,19 @@ export function BacaClient({ locale }: { locale: Locale }) {
   )
   const section = vantage.section
   const setSection = (v: boolean) => setVantage({ section: v })
-  const { house, layout } = useMemo(() => buildHouse(HOUSE), [])
+  const built = useMemo(() => t0.build(t0.showcaseQuery), [t0])
 
   const sun = useMemo(() => {
-    const preset = datePresets()[0]
+    const preset = datePresets(t0.site)[0]
     if (!preset) throw new Error('no date presets')
-    return solarPosition(presetInstant(preset, 10 * 60))
-  }, [])
-
-  const rank = rankInfo(HOUSE.rank)
-  const readings = [
-    {
-      title: pick(COPY.read.hornsTitle, locale),
-      body: pick(COPY.read.hornsBody, locale),
-      value: `${layout.hornCount}`,
-      unit: locale === 'id' ? 'upacara' : 'funerals',
-    },
-    {
-      title: pick(COPY.read.rankTitle, locale),
-      body: pick(COPY.read.rankBody, locale),
-      value: rank.name,
-      unit: `${(rank.elaboration.value * 100).toFixed(0)}% ${locale === 'id' ? 'berukir' : 'carved'}`,
-    },
-    {
-      title: pick(COPY.read.baysTitle, locale),
-      body: pick(COPY.read.baysBody, locale),
-      value: `${HOUSE.bays}`,
-      unit: `${layout.postX.length} ${locale === 'id' ? 'baris tiang' : 'post rows'}`,
-    },
-    {
-      title: pick(COPY.read.facingTitle, locale),
-      body: pick(COPY.read.facingBody, locale),
-      value: locale === 'id' ? 'Utara' : 'North',
-      unit: `${layout.frontProwY.toFixed(1)} m ▲ ${layout.rearProwY.toFixed(1)} m`,
-    },
-    {
-      title: pick(COPY.read.carvingTitle, locale),
-      body: pick(COPY.read.carvingBody, locale),
-      value: locale === 'id' ? "Indo' para" : 'Front board',
-      unit: locale === 'id' ? 'muka utara' : 'north face',
-    },
-  ]
-
-  const zones = [
-    {
-      name: pick(COPY.zones.sulluk, locale),
-      gloss: pick(COPY.zones.sullukGloss, locale),
-      from: 0,
-      to: layout.floorFrameY,
-    },
-    {
-      name: pick(COPY.zones.kale, locale),
-      gloss: pick(COPY.zones.kaleGloss, locale),
-      from: layout.deckY,
-      to: layout.plateY,
-    },
-    {
-      name: pick(COPY.zones.rattiang, locale),
-      gloss: pick(COPY.zones.rattiangGloss, locale),
-      from: layout.plateY,
-      to: house.bounds.max[1],
-    },
-  ]
+    return solarPosition(presetInstant(preset, 10 * 60, t0.site), t0.site)
+  }, [t0])
 
   return (
     <Sheet
       locale={locale}
       route="baca"
+      tradition={t0}
       rail={
         <>
           <RailSection title={pick(COPY.read.heading, locale)}>
@@ -111,16 +62,14 @@ export function BacaClient({ locale }: { locale: Locale }) {
               {pick(COPY.read.intro, locale)}
             </p>
             <ol className="flex flex-col gap-4">
-              {readings.map((r) => (
-                <li key={r.title}>
+              {built.readings.map((r) => (
+                <li key={r.key}>
                   <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="text-body font-medium leading-tight">{r.title}</h3>
-                    <span className="num shrink-0 text-body">{r.value}</span>
+                    <h3 className="text-body font-medium leading-tight">{r.title[locale]}</h3>
+                    <span className="num shrink-0 text-body">{r.value[locale]}</span>
                   </div>
-                  <p className="micro mt-0.5 text-right">{r.unit}</p>
-                  <p className="mt-1 text-body text-muted">
-                    {r.body}
-                  </p>
+                  <p className="micro mt-0.5 text-right">{r.unit[locale]}</p>
+                  <p className="mt-1 text-body text-muted">{r.body[locale]}</p>
                 </li>
               ))}
             </ol>
@@ -131,16 +80,18 @@ export function BacaClient({ locale }: { locale: Locale }) {
               {pick(COPY.read.sectionGloss, locale)}
             </p>
             <dl className="flex flex-col gap-3">
-              {zones.map((z) => (
-                <div key={z.name}>
+              {built.scene.zones.map((z) => (
+                <div key={z.key}>
                   <div className="flex items-baseline justify-between gap-2">
-                    <dt className="text-body leading-tight">{z.name}</dt>
+                    <dt className="text-body leading-tight">
+                      {locale === 'id' ? z.nameId : z.nameEn}
+                    </dt>
                     <dd className="num text-meta">
-                      {z.from.toFixed(2)}–{z.to.toFixed(2)} m
+                      {z.fromY.toFixed(2)}–{z.toY.toFixed(2)} m
                     </dd>
                   </div>
                   <p className="mt-0.5 text-body text-muted">
-                    {z.gloss}
+                    {locale === 'id' ? z.glossId : z.glossEn}
                   </p>
                 </div>
               ))}
@@ -148,15 +99,14 @@ export function BacaClient({ locale }: { locale: Locale }) {
           </RailSection>
 
           <RailSection title={pick(COPY.provenance.heading, locale)}>
-            <ProvenanceStrip split={provenanceSplit(layout.dims)} locale={locale} />
+            <ProvenanceStrip split={built.split} locale={locale} />
           </RailSection>
         </>
       }
     >
       <Viewport
         locale={locale}
-        house={house}
-        layout={layout}
+        built={built}
         sun={sun}
         view={section ? 'potongan' : 'tampak'}
         figure

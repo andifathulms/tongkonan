@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { COPY, LOCALES, LOCALE_NAMES, ROUTES, href, pick } from '@/lib/i18n'
 import type { Locale, Route } from '@/lib/i18n'
+import { TRADITIONS } from '@/lib/tradition/registry'
+import type { Tradition } from '@/lib/tradition/registry'
 
 /**
  * The surveyor's sheet: title block on the left, drawing on the right.
@@ -12,12 +14,15 @@ import type { Locale, Route } from '@/lib/i18n'
 export function Sheet({
   locale,
   route,
+  tradition,
   rail,
   variant = 'viewport',
   children,
 }: {
   locale: Locale
   route: Route
+  /** which house this sheet is showing; every link in the shell needs it */
+  tradition: Tradition
   rail: React.ReactNode
   /**
    * `viewport` puts a drawing in the drawing area. `document` puts prose and
@@ -59,7 +64,7 @@ export function Sheet({
             : 'border-b border-hairline sheet:border-b-0',
         ].join(' ')}
       >
-        <TitleBlock locale={locale} route={route} />
+        <TitleBlock locale={locale} route={route} tradition={tradition} />
         <div className="flex flex-col">{rail}</div>
       </aside>
       {/*
@@ -78,7 +83,7 @@ export function Sheet({
       >
         <div className={isViewport ? 'relative h-full w-full' : 'relative sheet:h-full'}>
           {children}
-          {isViewport ? <Masthead locale={locale} route={route} /> : null}
+          {isViewport ? <Masthead locale={locale} route={route} tradition={tradition} /> : null}
         </div>
       </main>
     </div>
@@ -94,13 +99,23 @@ export function Sheet({
  * put where they are unavoidable. Above 860px the rail is already beside the
  * drawing and the band would be saying it twice, so it is not rendered.
  */
-function Masthead({ locale, route }: { locale: Locale; route: Route }) {
+function Masthead({
+  locale,
+  route,
+  tradition,
+}: {
+  locale: Locale
+  route: Route
+  tradition: Tradition
+}) {
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex min-h-[var(--masthead-h)] flex-col justify-center border-t border-hairline bg-veil px-3 py-2 backdrop-blur-[2px] sheet:hidden">
       <div className="flex items-center justify-between gap-3">
-        <span className="micro text-bolu">{pick(COPY.appName, locale)}</span>
+        <span className="micro text-bolu">
+          {pick(COPY.appName, locale)} · {tradition.house[locale]}
+        </span>
         <div className="pointer-events-auto">
-          <LocaleSwitch locale={locale} route={route} />
+          <LocaleSwitch locale={locale} route={route} tradition={tradition} />
         </div>
       </div>
       {/* Two lines is the contract --masthead-h is sized for. */}
@@ -111,7 +126,15 @@ function Masthead({ locale, route }: { locale: Locale; route: Route }) {
   )
 }
 
-function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
+function TitleBlock({
+  locale,
+  route,
+  tradition,
+}: {
+  locale: Locale
+  route: Route
+  tradition: Tradition
+}) {
   return (
     <header className="px-4 pb-4 pt-4">
       {/*
@@ -126,10 +149,10 @@ function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
       */}
       <div className="hidden sheet:block">
         <div className="flex items-baseline justify-between gap-3">
-          <Link href={href(locale, 'bangun')} className="micro text-bolu">
+          <Link href={href(locale, tradition.slug, 'bangun')} className="micro text-bolu">
             {pick(COPY.appName, locale)}
           </Link>
-          <LocaleSwitch locale={locale} route={route} />
+          <LocaleSwitch locale={locale} route={route} tradition={tradition} />
         </div>
         {/*
           The tagline is the largest thing in the rail and the wordmark is the
@@ -138,6 +161,8 @@ function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
         */}
         <p className="mt-2 text-lead text-bolu">{pick(COPY.tagline, locale)}</p>
       </div>
+
+      <TraditionSwitch locale={locale} route={route} tradition={tradition} />
 
       {/* The thesis is wanted on both, and the masthead has no room for it. */}
       <p className="mt-2 text-body text-muted sheet:mt-2">{pick(COPY.thesis, locale)}</p>
@@ -151,7 +176,7 @@ function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
             return (
               <li key={r}>
                 <Link
-                  href={href(locale, r)}
+                  href={href(locale, tradition.slug, r)}
                   aria-current={active ? 'page' : undefined}
                   className={[
                     'block rounded px-2 py-1.5 transition-colors duration-state',
@@ -188,13 +213,21 @@ function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
  * thumb. The label of each side is written in its own language, because a
  * reader looking for English is looking for the word English.
  */
-function LocaleSwitch({ locale, route }: { locale: Locale; route: Route }) {
+function LocaleSwitch({
+  locale,
+  route,
+  tradition,
+}: {
+  locale: Locale
+  route: Route
+  tradition: Tradition
+}) {
   return (
     <div className="flex items-stretch overflow-hidden rounded border border-hairline">
       {LOCALES.map((l, i) => (
         <Link
           key={l}
-          href={href(l, route)}
+          href={href(l, tradition.slug, route)}
           hrefLang={l}
           lang={l}
           aria-label={`${LOCALE_NAMES[l]} — ${pick(COPY.openIn, l)}`}
@@ -210,6 +243,60 @@ function LocaleSwitch({ locale, route }: { locale: Locale; route: Route }) {
         </Link>
       ))}
     </div>
+  )
+}
+
+/**
+ * Which house you are looking at, and the way to the other one.
+ *
+ * It sits directly under the tagline, above the route navigation, because it
+ * is a bigger move than changing route: the routes are four views of one
+ * building and this is a different building, with its own rule pack, its own
+ * sources and its own bar. Putting it in the same list as the routes would say
+ * they were the same kind of choice.
+ *
+ * The link keeps the route and drops the query. A `?pangkat=layuk` means
+ * nothing to a rumah gadang, and carrying it across would hand the reader an
+ * address that silently described a different house from the one they left.
+ */
+function TraditionSwitch({
+  locale,
+  route,
+  tradition,
+}: {
+  locale: Locale
+  route: Route
+  tradition: Tradition
+}) {
+  return (
+    <fieldset className="mt-4">
+      <legend className="micro mb-2">{pick(COPY.tradition.legend, locale)}</legend>
+      <div className="flex items-stretch overflow-hidden rounded border border-hairline">
+        {TRADITIONS.map((t, i) => (
+          <Link
+            key={t.key}
+            href={`${href(locale, t.slug, route)}/`}
+            aria-current={t.key === tradition.key ? 'page' : undefined}
+            className={[
+              'flex min-h-control flex-1 flex-col justify-center px-2 py-1 transition-colors duration-state',
+              i > 0 ? 'border-l border-hairline' : '',
+              t.key === tradition.key ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
+            ].join(' ')}
+          >
+            <span className="text-body leading-tight">{t.house[locale]}</span>
+            <span
+              className={[
+                'mt-0.5 text-meta',
+                t.key === tradition.key ? 'text-muted-on-ink' : 'text-muted',
+              ].join(' ')}
+            >
+              {t.place[locale]}
+            </span>
+          </Link>
+        ))}
+      </div>
+      <p className="mt-2 text-body text-muted">{pick(COPY.tradition.note, locale)}</p>
+    </fieldset>
   )
 }
 
