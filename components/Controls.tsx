@@ -154,6 +154,29 @@ export function OrientationNote({ locale }: { locale: Locale }) {
   )
 }
 
+/**
+ * Who builds these, and where.
+ *
+ * The interface was dense with Toraja vocabulary used confidently as the names
+ * of things — tulak somba, a'riri, kale banua, rattiang banua, pa'ssura, ijuk,
+ * tangdo', sali, sumbung — and the words Toraja, Sulawesi and Indonesia
+ * appeared nowhere a reader could see. Rantepao appeared once, as a pair of
+ * coordinates, which tells someone who already knows the place that it is that
+ * place and tells everyone else nothing.
+ *
+ * It sits above the rules rather than on a separate page, because it is the
+ * frame for everything below it and a reader should not have to go looking for
+ * the answer to "whose house is this".
+ */
+export function PlaceNote({ locale }: { locale: Locale }) {
+  return (
+    <RailSection title={pick(COPY.place.heading, locale)}>
+      <p className="text-body">{pick(COPY.place.body, locale)}</p>
+      <p className="mt-3 text-body text-muted">{pick(COPY.place.caution, locale)}</p>
+    </RailSection>
+  )
+}
+
 export function SunControls({
   presets,
   presetKey,

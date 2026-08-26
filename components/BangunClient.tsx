@@ -6,6 +6,7 @@ import { Viewport, usePrefersReducedMotion } from './viewport/Viewport'
 import type { ViewKey } from './viewport/scene'
 import {
   OrientationNote,
+  PlaceNote,
   RuleControls,
   SceneToggles,
   SunControls,
@@ -71,6 +72,7 @@ export function BangunClient({ locale }: { locale: Locale }) {
             control or a note, and the export is last because taking the
             drawing away is the last thing anyone does.
           */}
+          <PlaceNote locale={locale} />
           <RuleControls rules={rules} onChange={setRules} locale={locale} />
           {/*
             Directly under the rules, because it explains the rules. It is the

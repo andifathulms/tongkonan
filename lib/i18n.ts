@@ -106,6 +106,18 @@ export const COPY = {
     ),
   },
 
+  place: {
+    heading: t('Rumah siapa ini', 'Whose house this is'),
+    body: t(
+      'Tongkonan adalah rumah keluarga orang Toraja, di dataran tinggi Sulawesi Selatan, Indonesia. Nama setiap bagian pada layar ini — tulak somba, a’riri, kale banua, ijuk, pa’ssura — adalah kata Toraja, dan dipakai sebagaimana adanya karena itulah nama benda-benda itu, bukan hiasan. Matahari pada model ini dihitung untuk Rantepao, 2,97° LS dan 119,90° BT.',
+      'A tongkonan is the family house of the Toraja people, in the highlands of South Sulawesi, Indonesia. Every part named on this screen — tulak somba, a’riri, kale banua, ijuk, pa’ssura — is named in Toraja, and the words are used as they are because they are the names of the things rather than decoration. The sun in this model is computed for Rantepao, 2.97° S and 119.90° E.',
+    ),
+    caution: t(
+      'Tidak ada satu bentuk tongkonan yang baku. Ragam antardaerah dan antargaris keturunan itu nyata, dan model ini satu rumah yang mungkin — bukan rumah itu.',
+      'There is no single canonical tongkonan. Regional and lineage variation is real, and this model is one house the rules permit — not the house.',
+    ),
+  },
+
   orientation: {
     heading: t('Arah hadap', 'Orientation'),
     body: t(
