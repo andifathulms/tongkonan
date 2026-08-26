@@ -61,6 +61,17 @@ app/[locale]/       bangun, rakit, baca, sumber
 
 This split is what makes the geometry testable. It is not a style preference.
 
+## The address
+
+The URL has two halves and they mean different things.
+
+- **The query string is the house.** `?pangkat=…&ruang=…&tanduk=…`, all three always written, defaults included — it is a complete description anyone can cite, and a description that omits its defaults is a diff instead. `lib/banua/address.ts`.
+- **The fragment is the reader.** Camera, date, time, toggles, explode, stage, section. Written only where it differs from the default, so an untouched page has no fragment at all. Never reaches a server, never reloads. `lib/reader.ts`.
+
+Rules go in the query string, vantage goes in the fragment, and nothing crosses. The two writers each preserve the other half, read live at write time; a test holds that. Vantage writes are debounced 250ms because a dragged slider would otherwise hit the browser's history rate limit.
+
+Playing state is deliberately not in the address. A link that starts animating at someone is a link nobody wants twice.
+
 ## Coordinates and units
 
 - Metres throughout. No arbitrary units, no scaling factors in the renderer.
