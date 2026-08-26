@@ -8,7 +8,7 @@ Working instructions for Claude Code. Read PRD.md for what is being built and DE
 
 - `lib/banua/` generates a complete house: 155 parts and 33 joints at the default rules. `lib/solar/` is validated against almanac values. `lib/draw/` emits plan, elevation and long section as SVG.
 - `pnpm check` type-checks and runs 34 tests, including the invariant suite over four rule combinations. All eleven structural checks pass; `checkAgainstSurvey` reports **skipped** and must stay that way.
-- Provenance: 0 measured, 7 canon, 27 interpolated. That is 79% interpolated and it is shown on every screen. Moving that bar is the work.
+- Provenance: 0 measured, 7 canon, 46 interpolated. That is 87% interpolated and it is shown on every screen. Moving that bar is the work. It got worse before it got better: the pedagogy pass found a dozen dimensional numbers sitting as bare literals in `frame.ts` and `roof.ts` — the ridge upsweep and the rafter section among them — which the bar had never counted. Declaring them was the fix; the higher number is the honest one.
 - **Counted by part rather than by dimension it is 100% interpolated**, and `/bangun` can mark the model to show it. Every canon rule in the pack states structure — faces north, ridge sags, horns are a tally, posts in transverse pairs — and none of them sets a length, so every part depends on at least one invented metre. The shape's logic is sourced; its sizes are not. Do not resolve this by retagging a plausible number as canon.
 - `/bangun`, `/rakit`, `/baca`, `/sumber` exist in Indonesian and English. The frame-raising sequence, the parameter-change rebuild, the day-of-sun, rain, the four view transitions, and the section cut through the three zones are all in.
 - **Interface tokens live in `app/globals.css` and nowhere else.** Six type steps, a 4px spacing scale, and a palette that states its contrast ratio beside every pair the interface uses. `tailwind.config.ts` maps utility names onto them and declares no values of its own. A bracketed size or colour in a component (`text-[13px]`, `bg-[rgba(...)]`) is a bug — it escapes the scale the same way a hardcoded dimension escapes provenance.
@@ -85,6 +85,8 @@ Every part carries `stage` and `order`. Together they are the build sequence, wh
 Every dimension in `rules.ts` is wrapped with its class (`measured` / `canon` / `interpolated`) and a source key. This is not optional metadata — the UI reads it, `/sumber` lists it, and a test prints the interpolated share.
 
 When adding a dimension, tag it honestly. If you invented the number, it is `interpolated` with source `none`. Do not tag a plausible guess as `canon` because a source discusses the feature qualitatively.
+
+**A number is a dimension if changing it changes the size, position or shape of something the reader can see.** Those go in `DIMS` — never inline in a builder, however small or however obviously right. Mesh tessellation counts and UV scales are not dimensions and stay as literals. A test greps the builders for decimals multiplied by the rank scale, because the failure mode is reaching for a number inline when declaring it is slower.
 
 Replacing an interpolated value with a measured one should be a two-line edit: change the value, change the class, point at the survey. Nothing downstream may need to know.
 

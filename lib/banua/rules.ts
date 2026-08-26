@@ -132,6 +132,43 @@ export const DIMS = {
   hornSpacing: dim(0.42, 'm', 'interpolated', 'none', 'Jarak vertikal antar tanduk pada tulak somba.', 'Vertical spacing between horns on the tulak somba.'),
   hornSpread: dim(0.62, 'm', 'interpolated', 'none', 'Rentang tanduk kerbau dari ujung ke ujung.', 'Spread of a buffalo horn, tip to tip.'),
 
+  /*
+   * Members and engagements.
+   *
+   * These were bare literals in frame.ts and roof.ts until the pedagogy pass
+   * found them. Every one of them sizes or places something a reader can see,
+   * which is the test for whether a number is a dimension — and a dimension
+   * that is not declared here does not appear on /sumber, is not counted in
+   * the provenance bar, and is therefore a guess the app was making while
+   * telling the reader it declares all of them.
+   *
+   * They are all interpolated with no source, because that is what they are.
+   * Declaring them makes the bar worse, which is the correct direction.
+   */
+  rafterWidth: dim(0.07, 'm', 'interpolated', 'none', 'Lebar penampang kasau.', 'Width of a rafter in section.'),
+  rafterDepth: dim(0.11, 'm', 'interpolated', 'none', 'Tinggi penampang kasau.', 'Depth of a rafter in section.'),
+  raftersAtProws: dim(4, 'count', 'interpolated', 'none', 'Tambahan kasau di luar hitungan per ruang, untuk kedua haluan.', 'Rafters added beyond the per-bay count, for the two prows.'),
+  ridgeBeamRadius: dim(0.075, 'm', 'interpolated', 'none', 'Jari-jari balok punggung.', 'Radius of the ridge beam.'),
+  purlinRadius: dim(0.045, 'm', 'interpolated', 'none', 'Jari-jari gording bambu.', 'Radius of a bamboo purlin.'),
+  purlinAboveKnee: dim(0.5, 'ratio', 'interpolated', 'none', 'Letak gording atas, sebagai bagian dari jarak punggung ke patahan atap.', 'Position of the upper purlin, as a share of the run from ridge to the roof break.'),
+  purlinBelowKnee: dim(0.55, 'ratio', 'interpolated', 'none', 'Letak gording bawah, sebagai bagian dari jarak patahan ke tepi atap.', 'Position of the lower purlin, as a share of the run from the break to the eave.'),
+  sheathingOffset: dim(0.6, 'ratio', 'interpolated', 'none', 'Tinggi papan atap di atas sumbu kasau, sebagai bagian dari tinggi kasau.', 'How far the roof boarding sits above the rafter axis, as a share of rafter depth.'),
+  ijukBedClearance: dim(0.02, 'm', 'interpolated', 'none', 'Jarak bebas antara papan atap dan lapis ijuk pertama.', 'Clearance between the roof boarding and the first ijuk course.'),
+  deckBoardWidth: dim(0.26, 'm', 'interpolated', 'none', 'Lebar satu papan lantai.', 'Width of one floor board.'),
+  sillWidth: dim(0.9, 'ratio', 'interpolated', 'none', 'Lebar balok rangka lantai, sebagai bagian dari sisi tiang.', 'Width of a floor-frame member, as a share of the post section.'),
+  postSeat: dim(0.3, 'ratio', 'interpolated', 'none', 'Dalamnya cekungan batu umpak tempat kaki tiang duduk, sebagai bagian dari tinggi batu.', 'Depth of the dish in the pad stone that the post foot seats into, as a share of stone height.'),
+  tenonRun: dim(0.7, 'ratio', 'interpolated', 'none', 'Sejauh mana kepala tiang masuk ke dalam rangka lantai, sebagai bagian dari tinggi rangka. Pen harus menembus cukup dalam agar pasak punya kayu di kedua sisi.', 'How far a post head runs up into the floor frame, as a share of frame depth. The tenon has to run deep enough that the peg has timber on both sides of it.'),
+  jointEngagement: dim(0.3, 'ratio', 'interpolated', 'none', 'Dalamnya pertautan sambungan yang diuji, sebagai bagian dari ukuran bagian terkecil.', 'Depth of the tested joint engagement, as a share of the smaller member.'),
+
+  /* the ridge curve and the prows */
+  ridgeUpsweep: dim(0.17, 'ratio', 'interpolated', 'none', 'Seberapa jauh lengkung punggung melampaui titik kendali sebelum naik ke haluan. Inilah yang membuat garis punggung melengkung, bukan patah.', 'How far the ridge curve overshoots its control point before rising to the prow. This is what makes the ridge line a curve rather than a kink.'),
+  tipFraction: dim(0.055, 'ratio', 'interpolated', 'none', 'Bagian ujung haluan yang meruncing menjadi bilah.', 'The share of each prow that tapers into a blade.'),
+  tulakSombaSet: dim(0.45, 'ratio', 'interpolated', 'none', "Letak tulak somba di sepanjang julur haluan. Tiang berdiri di tempat momen kantilever memerlukannya, bukan di ujungnya.", 'Where the tulak somba stands along the prow overhang. The post goes where the cantilever needs it, not at the tip.'),
+
+  /* horns */
+  hornColumnFoot: dim(0.6, 'm', 'interpolated', 'none', 'Tinggi terendah tanduk terbawah di atas tanah.', 'How low the bottom horn hangs above the ground.'),
+  hornTaper: dim(0.78, 'ratio', 'interpolated', 'none', 'Ukuran tanduk terbawah dibanding yang teratas; yang tertua di atas.', 'Size of the lowest horn relative to the topmost; the oldest are at the top.'),
+
   /* rules that are structure, not measurement */
   orientation: dim(0, 'deg', 'canon', 'nooy-palm-1979', 'Rumah membujur utara–selatan; muka (ulunna banua) menghadap utara.', 'The house lies north–south; the front, ulunna banua, faces north.'),
   bayCountCommon: dim(3, 'count', 'canon', 'waterson-1990', "Pembagian umum badan rumah: tangdo', sali, sumbung.", "The common division of the body: tangdo', sali, sumbung."),

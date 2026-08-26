@@ -22,7 +22,7 @@ import type { MeshData, Station } from './geometry'
 import type { BoxPart, Joint, Layout, Part, Vec3 } from './types'
 
 /** How narrow the roof closes to at a prow tip, as a fraction of full width. */
-const TIP_FRACTION = 0.055
+// The prow tip taper is a declared dimension; see DIMS.tipFraction.
 /** Stations along the ridge. Enough that the prow reads as a curve, not a fold. */
 const STATIONS = 96
 
@@ -48,7 +48,7 @@ export function roofStations(layout: Layout, count = STATIONS): readonly Station
   for (let i = 0; i < count; i++) {
     const s = i / (count - 1)
     const { x, y } = ridge(s)
-    const taper = prowTaper(s, bodyStart, bodyEnd, TIP_FRACTION)
+    const taper = prowTaper(s, bodyStart, bodyEnd, DIMS.tipFraction.value)
     stations.push({
       x,
       ridgeY: y,
@@ -79,8 +79,19 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
       'rangka-atap',
       order++,
       'kayu',
-      ['ridgeRise', 'ridgeSag', 'frontProwRise', 'rearProwRise', 'prowOverhang', 'ridgeSags', 'frontHigher'],
-      tubeMesh(ridgePath, () => 0.075 * s, 8, 0.5),
+      [
+        'ridgeRise',
+        'ridgeSag',
+        'ridgeUpsweep',
+        'ridgeBeamRadius',
+        'frontProwRise',
+        'rearProwRise',
+        'prowOverhang',
+        'tipFraction',
+        'ridgeSags',
+        'frontHigher',
+      ],
+      tubeMesh(ridgePath, () => DIMS.ridgeBeamRadius.value * s, 8, 0.5),
     ),
   )
 
@@ -91,9 +102,9 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
      than one is both what the building does and what puts a rafter foot on
      the plate for the joint to be real. */
   const perBay = DIMS.raftersPerBay.value
-  const total = Math.max(6, perBay * layout.rules.bays + 4)
-  const rafterW = 0.07 * s
-  const rafterD = 0.11 * s
+  const total = Math.max(6, perBay * layout.rules.bays + DIMS.raftersAtProws.value)
+  const rafterW = DIMS.rafterWidth.value * s
+  const rafterD = DIMS.rafterDepth.value * s
   const brk = layout.breakFraction
   const knee = { at: brk, drop: layout.kneeDrop }
   for (let i = 0; i < total; i++) {
@@ -139,8 +150,12 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
       kind: 'pasak',
       mortise: 'bubungan',
       tenon: `kasau-0-${i}-kanan`,
-      at: [st.x, st.ridgeY - rafterD * 0.3, 0],
-      halfExtents: [rafterW * 0.4, rafterD * 0.3, rafterW * 0.4],
+      at: [st.x, st.ridgeY - rafterD * DIMS.jointEngagement.value, 0],
+      halfExtents: [
+        rafterW * 0.4,
+        rafterD * DIMS.jointEngagement.value,
+        rafterW * 0.4,
+      ],
     })
   }
 
@@ -148,7 +163,11 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
      the courses actually bear on. */
   // One purlin sits on the break line itself: that is where the two ranks of
   // rafters meet, and it is the piece that makes the meeting a joint.
-  const purlinFractions = [brk * 0.5, brk, brk + (1 - brk) * 0.55]
+  const purlinFractions = [
+    brk * DIMS.purlinAboveKnee.value,
+    brk,
+    brk + (1 - brk) * DIMS.purlinBelowKnee.value,
+  ]
   purlinFractions.forEach((f, i) => {
     for (const side of [1, -1] as const) {
       const path: Vec3[] = stations.map((st) => [
@@ -163,8 +182,16 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
           'rangka-atap',
           order++,
           'bambu',
-          ['roofKneeDrop', 'eaveOversail', 'ridgeRise', 'bodyWidth'],
-          tubeMesh(path, () => 0.045 * s, 6, 0.3),
+          [
+            'purlinRadius',
+            'purlinAboveKnee',
+            'purlinBelowKnee',
+            'roofKneeDrop',
+            'eaveOversail',
+            'ridgeRise',
+            'bodyWidth',
+          ],
+          tubeMesh(path, () => DIMS.purlinRadius.value * s, 6, 0.3),
         ),
       )
     }
@@ -180,14 +207,14 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
         'rangka-atap',
         order++,
         'papan',
-        ['roofKneeDrop', 'eaveOversail', 'eaveDrop', 'ridgeRise', 'ridgeSag'],
+        ['sheathingOffset', 'rafterDepth', 'roofKneeDrop', 'eaveOversail', 'eaveDrop', 'ridgeRise', 'ridgeSag'],
         sweepSurface(stations, {
           side,
           across: 8,
           knee,
           uvScale: 1.1,
           // Sits on top of the rafters rather than through them.
-          offsetAt: () => rafterD * 0.6,
+          offsetAt: () => rafterD * DIMS.sheathingOffset.value,
         }),
       ),
     )
@@ -206,7 +233,17 @@ function rafter(id: string, order: number, center: Vec3, size: Vec3, rotation: V
     stage: 'rangka-atap',
     order,
     material: 'kayu',
-    dims: ['raftersPerBay', 'ridgeRise', 'roofKneeDrop', 'eaveOversail', 'eaveDrop', 'bodyWidth'],
+    dims: [
+      'raftersPerBay',
+      'raftersAtProws',
+      'rafterWidth',
+      'rafterDepth',
+      'ridgeRise',
+      'roofKneeDrop',
+      'eaveOversail',
+      'eaveDrop',
+      'bodyWidth',
+    ],
     center,
     size,
     rotation,
@@ -280,7 +317,8 @@ export function buildIjuk(layout: Layout): readonly Part[] {
   const thickness = DIMS.ijukThickness.value * s
   const knee = { at: layout.breakFraction, drop: layout.kneeDrop }
   // The courses lie on the boarding, which lies on the rafters.
-  const bed = 0.11 * s * 0.6 + 0.02
+  const bed =
+    DIMS.rafterDepth.value * s * DIMS.sheathingOffset.value + DIMS.ijukBedClearance.value
   let order = 0
 
   for (const band of ijukBands(layout)) {
@@ -316,7 +354,15 @@ export function buildIjuk(layout: Layout): readonly Part[] {
         'ijuk',
         order++,
         'ijuk',
-        ['ijukCourseDepth', 'ijukThickness', 'ijukLap', 'roofKneeDrop', 'eaveOversail'],
+        [
+          'ijukCourseDepth',
+          'ijukThickness',
+          'ijukLap',
+          'ijukBedClearance',
+          'sheathingOffset',
+          'roofKneeDrop',
+          'eaveOversail',
+        ],
         mergeMeshes(meshes),
       ),
     )
@@ -340,7 +386,7 @@ export function buildIjuk(layout: Layout): readonly Part[] {
       'ijuk',
       order++,
       'ijuk',
-      ['ijukThickness', 'ijukLap', 'ridgeRise', 'ridgeSag'],
+      ['ijukThickness', 'ijukLap', 'ijukBedClearance', 'ridgeRise', 'ridgeSag'],
       mergeMeshes([capRight, mirrorZ(capRight)]),
     ),
   )

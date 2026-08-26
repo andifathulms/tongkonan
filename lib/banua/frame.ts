@@ -27,7 +27,7 @@ import type { BoxPart, Joint, Layout, MeshPart, Part, Rules, Stage, Vec3 } from 
  * How much of the ridge's rise has happened by quarter-span. Kept low so the
  * belly stays long and shallow and the upsweep sits out at the prows.
  */
-const RIDGE_UPSWEEP = 0.17
+// The ridge upsweep is a declared dimension; see DIMS.ridgeUpsweep.
 
 export function resolveLayout(rules: Rules): Layout {
   const rank = rankInfo(rules.rank)
@@ -86,7 +86,7 @@ export function resolveLayout(rules: Rules): Layout {
 
   // The tulak somba stands out under the front prow, roughly where the
   // cantilever's moment needs it rather than at the tip.
-  const tulakSombaX = frontProwX + prowOverhang * 0.45
+  const tulakSombaX = frontProwX + prowOverhang * DIMS.tulakSombaSet.value
 
   return {
     rules,
@@ -133,7 +133,7 @@ export function ridgeOf(layout: Layout): (s: number) => { x: number; y: number }
     lowY: layout.ridgeY,
     frontTipY: layout.frontProwY,
     rearTipY: layout.rearProwY,
-    upsweep: RIDGE_UPSWEEP,
+    upsweep: DIMS.ridgeUpsweep.value,
   })
 }
 
@@ -238,7 +238,7 @@ export function buildFrame(layout: Layout): FrameResult {
   /* A'riri — the posts. Raised in transverse pairs, symmetric about z = 0.
      The foot seats into the dished top of the stone rather than balancing on
      its face, so the post is located rather than merely resting. */
-  const seat = padH * 0.3
+  const seat = padH * DIMS.postSeat.value
   let p = 0
   for (const x of layout.postX) {
     for (const z of layout.postZ) {
@@ -246,7 +246,7 @@ export function buildFrame(layout: Layout): FrameResult {
       const foot = layout.padTop - seat
       // The head runs up into the sill: a peg needs a tenon to pass through,
       // and a post that stops at the underside has nothing to be pegged to.
-      const head = layout.floorFrameY + frameDepth * 0.7
+      const head = layout.floorFrameY + frameDepth * DIMS.tenonRun.value
       parts.push(
         box(
           id,
@@ -258,7 +258,9 @@ export function buildFrame(layout: Layout): FrameResult {
             'postSection',
             'kolongHeight',
             'padHeight',
+            'postSeat',
             'floorFrameDepth',
+            'tenonRun',
             'bayLength',
             'bodyWidth',
             'postsPerRow',
@@ -281,7 +283,7 @@ export function buildFrame(layout: Layout): FrameResult {
   }
 
   /* Roro — the longitudinal sills, carried on the post heads. */
-  const sillW = sec * 0.9
+  const sillW = sec * DIMS.sillWidth.value
   layout.postZ.forEach((z, i) => {
     parts.push(
       box(
@@ -290,7 +292,7 @@ export function buildFrame(layout: Layout): FrameResult {
         'rangka-lantai',
         i,
         'kayu',
-        ['floorFrameDepth', 'postSection', 'bayLength', 'bodyWidth'],
+        ['floorFrameDepth', 'sillWidth', 'postSection', 'bayLength', 'bodyWidth'],
         [0, layout.floorFrameY + frameDepth / 2, z],
         // Overruns the end posts by a section: a corner peg has to be inside
         // timber on both sides of the joint, not right at the cut end.
@@ -310,7 +312,7 @@ export function buildFrame(layout: Layout): FrameResult {
         'rangka-lantai',
         layout.postZ.length + i,
         'kayu',
-        ['floorFrameDepth', 'postSection', 'bayLength', 'bodyWidth'],
+        ['floorFrameDepth', 'sillWidth', 'postSection', 'bayLength', 'bodyWidth'],
         [x, layout.floorFrameY + frameDepth / 2, 0],
         [sillW, frameDepth, layout.bodyWidth + sec],
       ),
@@ -322,13 +324,13 @@ export function buildFrame(layout: Layout): FrameResult {
         mortise: `roro-${j}`,
         tenon: `ariri-${i * layout.postZ.length + j}`,
         at: [x, layout.floorFrameY + frameDepth * 0.4, z],
-        halfExtents: [sec / 2, frameDepth * 0.3, sillW / 2],
+        halfExtents: [sec / 2, frameDepth * DIMS.jointEngagement.value, sillW / 2],
       })
     })
   })
 
   /* The deck. Boards run north–south, the way you walk the house. */
-  const boardW = 0.26 * s
+  const boardW = DIMS.deckBoardWidth.value * s
   const boards = Math.max(4, Math.round(layout.bodyWidth / boardW))
   for (let i = 0; i < boards; i++) {
     const z = -layout.bodyWidth / 2 + (layout.bodyWidth * (i + 0.5)) / boards
@@ -339,7 +341,7 @@ export function buildFrame(layout: Layout): FrameResult {
         'lantai',
         i,
         'papan',
-        ['deckThickness', 'bodyWidth', 'bayLength'],
+        ['deckThickness', 'deckBoardWidth', 'bodyWidth', 'bayLength'],
         [0, layout.deckY - deckT / 2, z],
         [layout.bodyLength, deckT, layout.bodyWidth / boards],
       ),
@@ -433,7 +435,7 @@ export function buildFrame(layout: Layout): FrameResult {
       'tulak-somba',
       0,
       'batu',
-      ['padHeight', 'padDiameter', 'prowOverhang', 'bayLength'],
+      ['padHeight', 'padDiameter', 'prowOverhang', 'tulakSombaSet', 'bayLength'],
       [layout.tulakSombaX, padH / 2, 0],
       [padD * 1.25, padH, padD * 1.25],
     ),
@@ -448,8 +450,10 @@ export function buildFrame(layout: Layout): FrameResult {
       [
         'tulakSombaSection',
         'prowOverhang',
+        'tulakSombaSet',
         'ridgeRise',
         'ridgeSag',
+        'ridgeUpsweep',
         'frontProwRise',
         'kolongHeight',
         'padHeight',
@@ -491,7 +495,7 @@ export function buildHorns(layout: Layout): readonly Part[] {
   // standing in the courtyard can actually read, and reading it is the whole
   // function of the horns — a tally mounted out of sight would be a decoration.
   const first = layout.plateY
-  const lowest = 0.6
+  const lowest = DIMS.hornColumnFoot.value * s
   const available = first - lowest
   // Once the post runs out, the horns pack closer rather than being silently
   // dropped: the count is the point of them.
@@ -505,7 +509,7 @@ export function buildHorns(layout: Layout): readonly Part[] {
     const y = first - i * spacing
     if (y < lowest) break
     // Horns get slightly smaller down the column: the oldest are at the top.
-    const scale = lerp(1, 0.78, clamp01(i / Math.max(1, layout.hornCount - 1)))
+    const scale = lerp(1, DIMS.hornTaper.value, clamp01(i / Math.max(1, layout.hornCount - 1)))
     const right = hornMesh(faceX, y, spread * scale)
     parts.push(
       meshPart(
@@ -518,7 +522,15 @@ export function buildHorns(layout: Layout): readonly Part[] {
         'tanduk',
         i,
         'tanduk',
-        ['hornSpread', 'hornSpacing', 'hornsAreTally', 'tulakSombaSection', 'wallHeight'],
+        [
+          'hornSpread',
+          'hornSpacing',
+          'hornTaper',
+          'hornColumnFoot',
+          'hornsAreTally',
+          'tulakSombaSection',
+          'wallHeight',
+        ],
         mergeMeshes([right, mirrorZ(right)]),
       ),
     )

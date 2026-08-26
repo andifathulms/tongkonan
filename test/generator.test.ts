@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { buildHouse, buildTimeline, placedAt } from '@/lib/banua/assembly'
 import {
   ALL_DIMS,
@@ -191,5 +192,43 @@ describe('provenance, per part', () => {
     // survey lands, these verdicts move without anything here changing.
     const classes = new Set(house.parts.map((p) => partClass(p)))
     expect(classes.has('interpolated')).toBe(true)
+  })
+})
+
+describe('the provenance layer covers what the geometry actually uses', () => {
+  /*
+   * The bar claims every dimension declares its source. That claim is only
+   * true if the generator has no dimensional numbers outside the pack, and it
+   * was not true — a dozen sat as bare literals in frame.ts and roof.ts,
+   * including the ridge upsweep and the rafter section.
+   *
+   * A grep is a blunt guard, but the failure it catches is exactly the one
+   * that happened: someone reaches for a number inline because it is faster
+   * than declaring it, and the honesty layer quietly stops being honest.
+   */
+  it('declares the numbers that size and place what the reader can see', () => {
+    const sources = ['lib/banua/frame.ts', 'lib/banua/roof.ts'].map((f) =>
+      readFileSync(new URL(`../${f}`, import.meta.url), 'utf8'),
+    )
+    const offenders: string[] = []
+    for (const src of sources) {
+      for (const line of src.split('\n')) {
+        const code = line.split('//')[0] ?? ''
+        // A decimal multiplied by the rank scale, or by another dimension, is
+        // a dimension. Mesh tessellation arguments are whole numbers and are
+        // deliberately not caught.
+        if (/\b0\.\d+\s*\*\s*s\b/.test(code) && !code.includes('DIMS.')) {
+          offenders.push(line.trim())
+        }
+      }
+    }
+    expect(offenders, `undeclared dimensions:\n${offenders.join('\n')}`).toEqual([])
+  })
+
+  it('every part cites only declared dimensions, and the pack has grown', () => {
+    expect(DIM_KEYS.length).toBeGreaterThanOrEqual(53)
+    const { house } = buildHouse(DEFAULT_RULES)
+    const cited = new Set(house.parts.flatMap((p) => p.dims))
+    for (const key of cited) expect(DIM_KEYS).toContain(key)
   })
 })
