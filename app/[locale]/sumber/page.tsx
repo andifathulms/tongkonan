@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { RailSection, Sheet } from '@/components/Sheet'
 import { ProvenanceStrip, ProvenanceTag } from '@/components/Provenance'
-import { COPY, DEFAULT_LOCALE, LOCALES, isLocale, pageTitle, pick } from '@/lib/i18n'
+import { COPY, DEFAULT_LOCALE, LOCALES, isLocale, pick, routeMetadata } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { DIMS, DIM_KEYS, SOURCES, dimsForLayout, sourceFor } from '@/lib/banua/rules'
 import { DEFAULT_RULES } from '@/lib/banua/rules'
@@ -17,7 +17,7 @@ import type { CheckResult } from '@/lib/banua/invariants'
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale = isLocale(params.locale) ? params.locale : DEFAULT_LOCALE
-  return { title: pageTitle('sumber', locale) }
+  return routeMetadata('sumber', locale)
 }
 
 export function generateStaticParams() {

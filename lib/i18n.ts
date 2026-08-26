@@ -404,3 +404,73 @@ export function pick(dict: Dict, locale: Locale): string {
 export function pageTitle(route: Route, locale: Locale): string {
   return `${pick(COPY.nav[route], locale)} — ${pick(COPY.appName, locale)}`
 }
+
+/**
+ * The description for a route, built from what the route actually says.
+ *
+ * Both halves are on the page: the gloss is printed under the route's own nav
+ * item, and the tagline is the largest line in the title block. A description
+ * written separately is a description free to drift from the page it
+ * describes, and a stale one is worse than none.
+ */
+export function pageDescription(route: Route, locale: Locale): string {
+  return `${pick(COPY.navGloss[route], locale)} ${pick(COPY.tagline, locale)}`
+}
+
+/**
+ * Where this is deployed, for canonical and share URLs.
+ *
+ * GitHub Pages serves a project site from a subpath, so the base path is
+ * already threaded through the build; this is the origin in front of it. Both
+ * fall back to the repository's own Pages address so a local build produces
+ * the same absolute URLs the deployed one will.
+ */
+export const SITE_ORIGIN = (
+  process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'https://andifathulms.github.io'
+).replace(/\/$/, '')
+
+export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '/tongkonan'
+
+/** The absolute, canonical address of a route. */
+export function pageUrl(route: Route, locale: Locale): string {
+  return `${SITE_ORIGIN}${BASE_PATH}/${locale}/${route}/`
+}
+
+/** OpenGraph's locale format, which is not the one in our URLs. */
+const OG_LOCALE: Record<Locale, string> = { id: 'id_ID', en: 'en_US' }
+
+/**
+ * Everything a route needs in its head, from one call.
+ *
+ * Kept in one place so the four routes cannot describe themselves four
+ * different ways, and so canonical, alternates and the share card are always
+ * generated together — the failure mode is adding one of them and forgetting
+ * the rest.
+ */
+export function routeMetadata(route: Route, locale: Locale) {
+  const title = pageTitle(route, locale)
+  const description = pageDescription(route, locale)
+  const url = pageUrl(route, locale)
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+      languages: Object.fromEntries(LOCALES.map((l) => [l, pageUrl(route, l)])),
+    },
+    openGraph: {
+      type: 'website' as const,
+      title,
+      description,
+      url,
+      siteName: pick(COPY.appName, locale),
+      locale: OG_LOCALE[locale],
+      alternateLocale: LOCALES.filter((l) => l !== locale).map((l) => OG_LOCALE[l]),
+    },
+    twitter: {
+      card: 'summary' as const,
+      title,
+      description,
+    },
+  }
+}

@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { BASE_PATH, SITE_ORIGIN } from '@/lib/i18n'
 
+/*
+ * Only what is genuinely shared. Every route generates its own title,
+ * description, canonical and share card from its own on-page copy, so nothing
+ * here may restate them — a description written once at the root is a
+ * description that describes one page and mislabels the other seven.
+ */
 export const metadata: Metadata = {
-  title: 'Tongkonan',
-  description:
-    'Rumah tongkonan yang dihitung dari aturannya — pangkat, jumlah ruang, dan jumlah tanduk — bukan digambar.',
+  metadataBase: new URL(`${SITE_ORIGIN}${BASE_PATH}/`),
+  title: { default: 'Tongkonan', template: '%s' },
 }
 
 export const viewport: Viewport = {
