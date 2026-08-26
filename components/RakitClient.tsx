@@ -12,6 +12,27 @@ import { DEFAULT_RULES, stageInfo, provenanceSplit } from '@/lib/banua/rules'
 import type { Stage } from '@/lib/banua/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
+import { useReaderState } from './useReaderState'
+import { readInt, unless } from '@/lib/reader'
+import { STAGE_ORDER } from '@/lib/banua/types'
+
+const RAKIT_DEFAULTS = { stage: '' as Stage | '', explode: 0 }
+type RakitVantage = typeof RAKIT_DEFAULTS
+
+function decodeRakit(p: ReadonlyMap<string, string>): RakitVantage {
+  const raw = p.get('tahap') ?? ''
+  return {
+    stage: (STAGE_ORDER as readonly string[]).includes(raw) ? (raw as Stage) : '',
+    explode: readInt(p.get('urai'), 0, 100, 0) / 100,
+  }
+}
+
+function encodeRakit(v: RakitVantage): readonly (readonly [string, string | null])[] {
+  return [
+    ['tahap', v.stage === '' ? null : v.stage],
+    ['urai', unless(Math.round(v.explode * 100), 0, String)],
+  ]
+}
 
 /**
  * The frame-raising sequence — the one orchestrated moment in this app.
@@ -27,7 +48,31 @@ export function RakitClient({ locale }: { locale: Locale }) {
 
   const [t, setT] = useState(1)
   const [playing, setPlaying] = useState(false)
-  const [explode, setExplode] = useState(0)
+
+  /*
+    The stage, not the clock.
+    
+    `t` moves sixty times a second during playback and writing it would churn
+    the address for no one's benefit. What is worth sharing is where in the
+    sequence you stopped, which is a stage — a discrete thing with a name — so
+    that is what travels. Playing is deliberately not carried: a link that
+    starts animating at someone is a link nobody wants twice.
+  */
+  const [vantage, setVantage, settled] = useReaderState(RAKIT_DEFAULTS, decodeRakit, encodeRakit)
+  const explode = vantage.explode
+  const setExplode = (v: number) => setVantage({ explode: v })
+
+  // Arriving at a stage means standing at the end of it, which is what
+  // clicking that stage in the list does. Once only: after this the reader is
+  // driving and the address follows them rather than the other way round.
+  const arrived = useRef(false)
+  useEffect(() => {
+    if (!settled || arrived.current) return
+    arrived.current = true
+    if (vantage.stage === '') return
+    const span = timeline.stages.find((sp) => sp.stage === vantage.stage)
+    if (span) setT(span.end)
+  }, [settled, vantage.stage, timeline])
 
   const sun = useMemo(() => {
     const preset = datePresets()[0]
@@ -116,8 +161,13 @@ export function RakitClient({ locale }: { locale: Locale }) {
               max={1000}
               value={Math.round(t * 1000)}
               onChange={(e) => {
+                const next = Number(e.target.value) / 1000
                 setPlaying(false)
-                setT(Number(e.target.value) / 1000)
+                setT(next)
+                // The stage the scrubber has landed in, so a link made from a
+                // hand-dragged position still opens somewhere nameable.
+                const span = timeline.stages.find((sp) => next <= sp.end)
+                setVantage({ stage: span ? span.stage : '' })
               }}
               /*
                 The scrubber runs 0–1000 and announced "500", which names
@@ -145,6 +195,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
                       onClick={() => {
                         setPlaying(false)
                         setT(span.end)
+                        setVantage({ stage: span.stage })
                       }}
                       aria-current={active ? 'step' : undefined}
                       className={[

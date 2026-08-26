@@ -21,10 +21,59 @@ import type { Locale } from '@/lib/i18n'
 import { buildHouse, buildTimeline } from '@/lib/banua/assembly'
 import { DEFAULT_RULES, partSplit, rankInfo, provenanceSplit } from '@/lib/banua/rules'
 import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/banua/address'
+import { flag, readChoice, readFlag, readInt, unless } from '@/lib/reader'
+import { useReaderState } from './useReaderState'
 import type { Rules } from '@/lib/banua/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import type { DatePreset } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
+
+/**
+ * The vantage this route offers, and how it is written down.
+ *
+ * Mid-morning by default: raking enough to read the form, and a short drag of
+ * the time control to noon shows the shadow all but disappear.
+ */
+const VIEWS: readonly ViewKey[] = ['perspektif', 'tampak', 'kolong']
+
+const BANGUN_DEFAULTS = {
+  view: 'perspektif' as ViewKey,
+  // On by default: it is the scale bar.
+  figure: true,
+  rain: false,
+  marking: false,
+  presetKey: 'kulminasi' as DatePreset['key'],
+  minutes: 9 * 60,
+}
+
+type BangunVantage = typeof BANGUN_DEFAULTS
+
+function decodeBangun(p: ReadonlyMap<string, string>): BangunVantage {
+  return {
+    view: readChoice(p.get('tampilan'), VIEWS, BANGUN_DEFAULTS.view),
+    figure: readFlag(p.get('sosok'), BANGUN_DEFAULTS.figure),
+    rain: readFlag(p.get('hujan'), BANGUN_DEFAULTS.rain),
+    marking: readFlag(p.get('tanda'), BANGUN_DEFAULTS.marking),
+    presetKey: readChoice(
+      p.get('tanggal'),
+      datePresets().map((d) => d.key),
+      BANGUN_DEFAULTS.presetKey,
+    ),
+    minutes: readInt(p.get('waktu'), 0, 1439, BANGUN_DEFAULTS.minutes),
+  }
+}
+
+function encodeBangun(v: BangunVantage): readonly (readonly [string, string | null])[] {
+  const d = BANGUN_DEFAULTS
+  return [
+    ['tampilan', unless(v.view, d.view, String)],
+    ['tanggal', unless(v.presetKey, d.presetKey, String)],
+    ['waktu', unless(v.minutes, d.minutes, String)],
+    ['sosok', unless(v.figure, d.figure, flag)],
+    ['hujan', unless(v.rain, d.rain, flag)],
+    ['tanda', unless(v.marking, d.marking, flag)],
+  ]
+}
 
 /**
  * The generator.
@@ -35,14 +84,22 @@ import { solarPosition } from '@/lib/solar/position'
  */
 export function BangunClient({ locale }: { locale: Locale }) {
   const [rules, setRules, addressReady] = useRuleAddress()
-  const [view, setView] = useState<ViewKey>('perspektif')
-  const [figure, setFigure] = useState(true) // on by default: it is the scale bar
-  const [rain, setRain] = useState(false)
-  const [marking, setMarking] = useState(false)
-  const [presetKey, setPresetKey] = useState<DatePreset['key']>('kulminasi')
-  // Mid-morning by default: raking enough to read the form, and a short drag
-  // of the time control to noon shows the shadow all but disappear.
-  const [minutes, setMinutes] = useState(9 * 60)
+  /*
+    Everything the reader is doing, in the fragment: which way the camera
+    points, what time it is, what is switched on. None of it is a fact about
+    the building — the building is the query string — but all of it survives a
+    refresh and travels in a link, which is what it means to be able to show
+    someone what you were looking at.
+  */
+  const [vantage, setVantage] = useReaderState(BANGUN_DEFAULTS, decodeBangun, encodeBangun)
+  const { view, figure, rain, marking, presetKey } = vantage
+  const setView = (v: ViewKey) => setVantage({ view: v })
+  const setFigure = (v: boolean) => setVantage({ figure: v })
+  const setRain = (v: boolean) => setVantage({ rain: v })
+  const setMarking = (v: boolean) => setVantage({ marking: v })
+  const setPresetKey = (v: DatePreset['key']) => setVantage({ presetKey: v })
+  const minutes = vantage.minutes
+  const setMinutes = (v: number) => setVantage({ minutes: v })
 
   const presets = useMemo(() => datePresets(), [])
   const { house, layout } = useMemo(() => buildHouse(rules), [rules])
@@ -204,7 +261,13 @@ function useRuleAddress(): [Rules, (next: Rules) => void, boolean] {
     if (!settled) return
     const query = rulesToQuery(rules)
     if (query === window.location.search.replace(/^\?/, '')) return
-    window.history.replaceState(null, '', `${window.location.pathname}?${query}`)
+    // Preserves the fragment: the two halves of the address are owned by
+    // different hooks and neither may clobber the other.
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}?${query}${window.location.hash}`,
+    )
   }, [rules, settled])
 
   const change = (next: Rules) => setRules((prev) => (rulesEqual(prev, next) ? prev : next))

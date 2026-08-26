@@ -1,9 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { RailSection, Sheet } from './Sheet'
 import { Viewport } from './viewport/Viewport'
 import { ProvenanceStrip } from './Provenance'
+import { useReaderState } from './useReaderState'
+import { flag, readFlag, unless } from '@/lib/reader'
 import { Choice } from './Controls'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
@@ -27,7 +29,14 @@ import { solarPosition } from '@/lib/solar/position'
 const HOUSE: Rules = { rank: 'layuk', bays: 4, horns: 14 }
 
 export function BacaClient({ locale }: { locale: Locale }) {
-  const [section, setSection] = useState(false)
+  /* The one thing a reader chooses here: façade, or cut open. */
+  const [vantage, setVantage] = useReaderState(
+    { section: false },
+    (p) => ({ section: readFlag(p.get('potongan'), false) }),
+    (v) => [['potongan', unless(v.section, false, flag)]],
+  )
+  const section = vantage.section
+  const setSection = (v: boolean) => setVantage({ section: v })
   const { house, layout } = useMemo(() => buildHouse(HOUSE), [])
 
   const sun = useMemo(() => {
