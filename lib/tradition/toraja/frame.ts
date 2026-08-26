@@ -15,10 +15,10 @@ import {
   lerp,
   mergeMeshes,
   mirrorZ,
-  ridgeCurve,
   tubeMesh,
-} from './geometry'
-import type { MeshData } from './geometry'
+} from '@/lib/core/geometry'
+import { ridgeCurve } from './ridge'
+import type { MeshData } from '@/lib/core/geometry'
 import type { BoxPart, Joint, Layout, MeshPart, Part, Rules, Stage, Vec3 } from './types'
 
 /* ── Layout ───────────────────────────────────────────────────────────── */

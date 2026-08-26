@@ -3,9 +3,9 @@
 import { useMemo } from 'react'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { derivation } from '@/lib/banua/derivation'
-import type { Step, Term } from '@/lib/banua/derivation'
-import type { Rules } from '@/lib/banua/types'
+import { derivation } from '@/lib/tradition/toraja/derivation'
+import type { Step, Term } from '@/lib/tradition/toraja/derivation'
+import type { Rules } from '@/lib/tradition/toraja/types'
 import { RailSection } from './Sheet'
 
 /**

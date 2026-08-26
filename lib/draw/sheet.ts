@@ -18,9 +18,9 @@
  * a ruler on the page gives the metres in the model.
  */
 
-import type { House, Layout } from '../banua/types'
-import { ALL_DIMS, DIMS, DIM_KEYS, provenanceSplit, sourceFor } from '../banua/rules'
-import { dimsForLayout } from '../banua/rules'
+import type { House, Layout } from '../tradition/toraja/types'
+import { ALL_DIMS, DIMS, DIM_KEYS, provenanceSplit, sourceFor } from '../tradition/toraja/rules'
+import { dimsForLayout } from '../tradition/toraja/rules'
 import {
   MARGIN,
   PIGMENT,

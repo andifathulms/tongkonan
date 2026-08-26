@@ -14,6 +14,16 @@
  * here is `measured`, because no survey has been wired in yet.
  */
 
+import type { RulePack } from '@/lib/core/kinds'
+import type { Split } from '@/lib/core/provenance'
+import {
+  dimFactory,
+  partClass as corePartClass,
+  partSplit as corePartSplit,
+  provenanceSplit as coreProvenanceSplit,
+  worstClass as coreWorstClass,
+} from '@/lib/core/provenance'
+import { STAGE_ORDER } from './types'
 import type {
   Dim,
   Layout,
@@ -23,7 +33,9 @@ import type {
   Rules,
   Source,
   SourceKey,
+  Stage,
   StageInfo,
+  TorajaKinds,
 } from './types'
 
 /* ── The source table ─────────────────────────────────────────────────── */
@@ -82,16 +94,11 @@ export function sourceFor(key: SourceKey): Source {
 
 /* ── Dimensions ───────────────────────────────────────────────────────── */
 
-function dim(
-  value: number,
-  unit: Dim['unit'],
-  cls: Dim['class'],
-  source: SourceKey,
-  note: string,
-  noteEn: string,
-): Dim {
-  return { value, unit, class: cls, source, note, noteEn }
-}
+/**
+ * Bound to this tradition's source keys, so a Toraja dimension cannot cite a
+ * source table it does not appear in.
+ */
+const dim = dimFactory<SourceKey>()
 
 /**
  * Base dimensions, before rank scales them. Keys are stable and are what
@@ -186,69 +193,61 @@ export const DIM_KEYS = Object.keys(DIMS) as readonly DimKey[]
 
 export const ALL_DIMS: readonly Dim[] = DIM_KEYS.map((k) => DIMS[k])
 
-/**
- * The class of a part, given the dimensions that produced it.
- *
- * A part is only as sourced as its least-sourced input. A post whose section
- * is invented and whose spacing is invented is an invented post, and the fact
- * that its pairing is canon does not redeem the metres. Taking the worst is
- * the only rule that cannot flatter the model.
+/* ── The pack ─────────────────────────────────────────────────────────────
+ * Everything the generic core is allowed to know about the Toraja house: how
+ * to look a dimension up, how to look a source up, what order the stages come
+ * in, and how long each one takes in the raising sequence. It cannot
+ * enumerate the tables and it cannot name a part.
  */
+
+/**
+ * Relative durations of the nine stages.
+ *
+ * These are not proportional to part count. Raising the posts is the act that
+ * decides whether the house stands, and the ijuk is a long patient job — the
+ * sequence is meant to read like the work, not like a progress bar.
+ */
+const STAGE_WEIGHT: Record<Stage, number> = {
+  batu: 0.6,
+  ariri: 1.6,
+  'rangka-lantai': 1.1,
+  lantai: 0.7,
+  dinding: 1.0,
+  'tulak-somba': 0.8,
+  'rangka-atap': 1.7,
+  ijuk: 2.0,
+  tanduk: 0.9,
+}
+
+export const PACK: RulePack<TorajaKinds> = {
+  key: 'toraja',
+  dimKeys: DIM_KEYS,
+  dim: (key) => DIMS[key],
+  sources: SOURCES,
+  sourceFor,
+  stageOrder: STAGE_ORDER,
+  stageWeight: (stage) => STAGE_WEIGHT[stage],
+}
+
+/* ── Provenance, bound to this pack ───────────────────────────────────────
+ * The rules are in `lib/core/provenance.ts`; these are the Toraja-bound
+ * spellings of them, so nothing downstream has to carry the pack around.
+ */
+
 export function worstClass(keys: readonly DimKey[]): ProvenanceClass {
-  let worst: ProvenanceClass = 'measured'
-  for (const key of keys) {
-    const cls = DIMS[key].class
-    if (cls === 'interpolated') return 'interpolated'
-    if (cls === 'canon') worst = 'canon'
-  }
-  return worst
+  return coreWorstClass(PACK, keys)
 }
 
-/** The provenance class of one part, for the overlay and for /sumber. */
 export function partClass(part: Pick<Part, 'dims'>): ProvenanceClass {
-  return worstClass(part.dims)
+  return corePartClass(PACK, part)
 }
 
-/**
- * How the house divides by provenance class, counted in parts rather than in
- * dimensions.
- *
- * This answers a different question from `provenanceSplit`, and the two will
- * disagree: one canon dimension can govern a hundred parts and one
- * interpolated dimension can govern three. Both numbers are true and neither
- * is the whole picture, so the app shows the dimension split as the metric
- * and this one only where the model itself is being marked up.
- */
-export function partSplit(parts: readonly Pick<Part, 'dims'>[]): {
-  measured: number
-  canon: number
-  interpolated: number
-  total: number
-} {
-  const count = (c: ProvenanceClass) => parts.filter((p) => partClass(p) === c).length
-  return {
-    measured: count('measured'),
-    canon: count('canon'),
-    interpolated: count('interpolated'),
-    total: parts.length,
-  }
+export function partSplit(parts: readonly Pick<Part, 'dims'>[]): Split {
+  return corePartSplit(PACK, parts)
 }
 
-/** The provenance split, as counts. The rail draws this and it is the metric. */
-export function provenanceSplit(dims: readonly Dim[] = ALL_DIMS): {
-  measured: number
-  canon: number
-  interpolated: number
-  total: number
-} {
-  const total = dims.length
-  const count = (c: Dim['class']) => dims.filter((d) => d.class === c).length
-  return {
-    measured: count('measured'),
-    canon: count('canon'),
-    interpolated: count('interpolated'),
-    total,
-  }
+export function provenanceSplit(dims: readonly Dim[] = ALL_DIMS): Split {
+  return coreProvenanceSplit(dims)
 }
 
 /* ── Rank ─────────────────────────────────────────────────────────────── */

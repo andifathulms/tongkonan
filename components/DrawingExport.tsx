@@ -15,7 +15,7 @@ import type { Locale } from '@/lib/i18n'
  * added this was not allowed to add a dependency to solve a size problem.
  */
 import type { Projection } from '@/lib/draw/orthographic'
-import type { House, Layout } from '@/lib/banua/types'
+import type { House, Layout } from '@/lib/tradition/toraja/types'
 
 /**
  * Take the drawing away as lines.

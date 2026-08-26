@@ -14,14 +14,14 @@
  */
 
 import * as THREE from 'three'
-import type { House, Layout, Part, ProvenanceClass } from '@/lib/banua/types'
-import { partClass } from '@/lib/banua/rules'
+import type { House, Layout, Part, ProvenanceClass } from '@/lib/tradition/toraja/types'
+import { partClass } from '@/lib/tradition/toraja/rules'
 import type { SolarPosition } from '@/lib/solar/position'
 import { sunDirection } from '@/lib/solar/position'
 import { createMaterials, TEXTURE_METRES } from '../materials'
 import type { MaterialSet } from '../materials'
-import type { Timeline } from '@/lib/banua/assembly'
-import { progressAt } from '@/lib/banua/assembly'
+import type { Timeline } from '@/lib/tradition/toraja/assembly'
+import { progressAt } from '@/lib/tradition/toraja/assembly'
 
 export type ViewKey = 'perspektif' | 'tampak' | 'kolong' | 'potongan'
 

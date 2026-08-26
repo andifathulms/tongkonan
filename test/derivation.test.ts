@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { derivation } from '@/lib/banua/derivation'
-import { buildHouse } from '@/lib/banua/assembly'
-import { DEFAULT_RULES } from '@/lib/banua/rules'
-import type { Rules } from '@/lib/banua/types'
+import { derivation } from '@/lib/tradition/toraja/derivation'
+import { buildHouse } from '@/lib/tradition/toraja/assembly'
+import { DEFAULT_RULES } from '@/lib/tradition/toraja/rules'
+import type { Rules } from '@/lib/tradition/toraja/types'
 
 const CASES: Rules[] = [
   DEFAULT_RULES,

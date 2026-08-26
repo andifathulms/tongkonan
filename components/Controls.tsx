@@ -2,8 +2,8 @@
 
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { RANKS, bayCountIsUnusual, rankInfo } from '@/lib/banua/rules'
-import type { Rules } from '@/lib/banua/types'
+import { RANKS, bayCountIsUnusual, rankInfo } from '@/lib/tradition/toraja/rules'
+import type { Rules } from '@/lib/tradition/toraja/types'
 import { formatClock } from '@/lib/solar/presets'
 import type { DatePreset } from '@/lib/solar/presets'
 import type { ViewKey } from './viewport/scene'

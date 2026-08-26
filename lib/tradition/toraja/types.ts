@@ -1,28 +1,31 @@
 /**
- * The generator's vocabulary.
+ * What the Toraja house calls things.
  *
- * Nothing in `lib/` may import three.js, touch `window`, or read the DOM. These
- * types are the whole surface the renderer is allowed to see, and they are
- * deliberately dumb: numbers, arrays and tags. A part is data about a piece of
- * timber, not a drawing instruction.
+ * Everything in here is a word from one building tradition — nine stages,
+ * seven materials, three joints, five bibliography entries, three ranks. That
+ * is exactly why it is here and not in `lib/core`: the core is generic over
+ * these, and binding them is what a tradition is.
+ *
+ * The concrete aliases at the foot of the file are the ones the rest of the
+ * Toraja generator and the renderer use. `Part` here means a Toraja part, and
+ * a `switch` over its material is still exhaustively checked — the
+ * generic-over-`Kinds` core costs nothing at the point of use.
  */
 
+import type { Kinds } from '@/lib/core/kinds'
+import type {
+  BoxPart as CoreBoxPart,
+  Dim as CoreDim,
+  House as CoreHouse,
+  Joint as CoreJoint,
+  MeshPart as CoreMeshPart,
+  Part as CorePart,
+  Source as CoreSource,
+} from '@/lib/core/types'
 import type { DimKey } from './rules'
 
-export type Vec3 = readonly [number, number, number]
-
-/* ── Provenance ───────────────────────────────────────────────────────────
- * Every dimension declares where it came from. This is not decoration: the
- * rail reads it, /sumber lists it, and a test prints the interpolated share.
- */
-
-export type ProvenanceClass =
-  /** taken from a published measured drawing of a named, surveyed house */
-  | 'measured'
-  /** stated in a documented canon or ethnographic description, not measured */
-  | 'canon'
-  /** the author's own value, closing a gap the sources leave open */
-  | 'interpolated'
+export type { Bounds, ProvenanceClass, Vec3 } from '@/lib/core/types'
+export type { DimKey } from './rules'
 
 /** Key into the source table in `rules.ts`. `none` means: nobody said this. */
 export type SourceKey =
@@ -32,29 +35,6 @@ export type SourceKey =
   | 'schefold-2003'
   | 'depdikbud-sulsel'
   | 'nooy-palm-1979'
-
-/**
- * A number that knows its own epistemic status.
- *
- * Replacing an interpolated value with a measured one is a two-line edit —
- * change `value`, change `class`, point `source` at the survey. Nothing
- * downstream needs to know it happened.
- */
-export interface Dim {
-  readonly value: number
-  readonly unit: 'm' | 'deg' | 'count' | 'ratio'
-  readonly class: ProvenanceClass
-  readonly source: SourceKey
-  /** What the value means. Shown in full on /sumber, in both locales. */
-  readonly note: string
-  readonly noteEn: string
-}
-
-export interface Source {
-  readonly key: SourceKey
-  readonly citation: string
-  readonly kind: 'survey' | 'ethnography' | 'reference' | 'none'
-}
 
 /* ── Rules — the socially meaningful input set ────────────────────────────
  * Parameters are things a household would say about itself. There is no
@@ -128,58 +108,6 @@ export type MaterialKey =
   | 'ukiran'  // carved panel — constructed from the four pigments
   | 'tanduk'  // horn, waxy clearcoat
 
-/* ── Parts ────────────────────────────────────────────────────────────────
- * Two kinds only. Boxes stay boxes so joint containment has something exact
- * to test against; anything that cannot be a box carries its own triangles.
- */
-
-interface PartBase {
-  readonly id: string
-  /** The Toraja name of the piece. Used as the name in both locales. */
-  readonly name: string
-  readonly nameId: string
-  readonly nameEn: string
-  readonly stage: Stage
-  readonly order: number
-  readonly material: MaterialKey
-  /**
-   * The dimensions that decided this part's size and place.
-   *
-   * The provenance bar says how much of the house is guessed. It cannot say
-   * *which* of it, and that is the more useful half — the sources give
-   * structure richly and metres almost never, so the topology is largely
-   * sourced while the sizes are largely not. Declaring the governing
-   * dimensions per part is what lets the model show that distinction instead
-   * of asserting a single fraction over everything.
-   *
-   * Rank scale is not listed. Every dimension in the house passes through it,
-   * so listing it everywhere would say nothing; it is canon, and a part is
-   * classed by its least-sourced input, so its absence changes no verdict.
-   *
-   * An empty list is a bug and `checkPartProvenance` fails the build on it.
-   */
-  readonly dims: readonly DimKey[]
-}
-
-export interface BoxPart extends PartBase {
-  readonly kind: 'box'
-  readonly center: Vec3
-  readonly size: Vec3
-  /** XYZ-order Euler rotation in radians. Omitted means axis-aligned. */
-  readonly rotation?: Vec3
-}
-
-export interface MeshPart extends PartBase {
-  readonly kind: 'mesh'
-  /** World coordinates, metres. Flat triples. */
-  readonly positions: readonly number[]
-  readonly normals: readonly number[]
-  readonly uvs: readonly number[]
-  readonly indices: readonly number[]
-}
-
-export type Part = BoxPart | MeshPart
-
 /* ── Joints ───────────────────────────────────────────────────────────────
  * The house is built without nails, so the joints are load-bearing claims and
  * the invariant suite checks every tenon sits inside its mortise.
@@ -193,37 +121,36 @@ export type JointKind =
   /** a post foot resting in the dish of its pad stone */
   | 'tumpu'
 
-export interface Joint {
-  readonly id: string
-  readonly kind: JointKind
-  /** the part carrying the mortise (or the socket) */
-  readonly mortise: string
-  /** the part whose tenon enters it */
-  readonly tenon: string
-  /** where the joint sits, world coordinates */
-  readonly at: Vec3
-  /** half-extents of the engagement, world-axis-aligned */
-  readonly halfExtents: Vec3
-}
+/* ── The binding ──────────────────────────────────────────────────────── */
 
-/* ── Output ───────────────────────────────────────────────────────────────*/
-
-export interface Bounds {
-  readonly min: Vec3
-  readonly max: Vec3
-}
-
-export interface House {
+export interface TorajaKinds extends Kinds {
+  readonly stage: Stage
+  readonly material: MaterialKey
+  readonly source: SourceKey
+  readonly dim: DimKey
+  readonly joint: JointKind
   readonly rules: Rules
-  readonly parts: readonly Part[]
-  readonly joints: readonly Joint[]
-  readonly bounds: Bounds
 }
+
+export type Dim = CoreDim<SourceKey>
+export type Source = CoreSource<SourceKey>
+export type BoxPart = CoreBoxPart<TorajaKinds>
+export type MeshPart = CoreMeshPart<TorajaKinds>
+export type Part = CorePart<TorajaKinds>
+export type Joint = CoreJoint<TorajaKinds>
+export type House = CoreHouse<TorajaKinds>
+
+/* ── Layout ───────────────────────────────────────────────────────────── */
 
 /**
  * Every resolved dimension of one house, in metres, with its provenance
  * intact. The renderer reads from here rather than recomputing anything —
  * a number hardcoded in a component escapes the provenance layer.
+ *
+ * This stays tradition-side and is not generic. Two thirds of it is the
+ * Toraja roof — prows, an eave that oversails, a knee across the slope, ijuk
+ * courses, the tulak somba — and there is no honest way to write those as a
+ * shared shape before a second house has said what it needs.
  */
 export interface Layout {
   readonly rules: Rules

@@ -16,11 +16,11 @@
  * polylines is a figure a static page can carry where sixteen hundred is not.
  */
 
-import { buildHouse } from '../banua/assembly'
-import { withDimValue } from '../banua/whatif'
-import { DIMS } from '../banua/rules'
-import type { DimKey } from '../banua/rules'
-import type { Rules } from '../banua/types'
+import { buildHouse } from '../tradition/toraja/assembly'
+import { withDimValue } from '../tradition/toraja/whatif'
+import { DIMS } from '../tradition/toraja/rules'
+import type { DimKey } from '../tradition/toraja/rules'
+import type { Rules } from '../tradition/toraja/types'
 import { MARGIN, PIGMENT, linesForRoof } from './orthographic'
 import type { Line, Projection } from './orthographic'
 

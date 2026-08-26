@@ -2,7 +2,7 @@
 
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import type { ProvenanceClass } from '@/lib/banua/types'
+import type { ProvenanceClass } from '@/lib/tradition/toraja/types'
 
 /** The three counts and their total. All this component needs. */
 export interface Split {

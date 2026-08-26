@@ -14,7 +14,7 @@
  */
 
 import * as THREE from 'three'
-import type { MaterialKey } from '@/lib/banua/types'
+import type { MaterialKey } from '@/lib/tradition/toraja/types'
 
 /** One texture tile covers one square metre of surface. */
 export const TEXTURE_METRES = 1

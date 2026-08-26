@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/banua/address'
-import { DEFAULT_RULES } from '@/lib/banua/rules'
-import { buildHouse } from '@/lib/banua/assembly'
-import type { Rules } from '@/lib/banua/types'
+import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/tradition/toraja/address'
+import { DEFAULT_RULES } from '@/lib/tradition/toraja/rules'
+import { buildHouse } from '@/lib/tradition/toraja/assembly'
+import type { Rules } from '@/lib/tradition/toraja/types'
 
 describe('the rules as an address', () => {
   it('round-trips every house the rules admit', () => {

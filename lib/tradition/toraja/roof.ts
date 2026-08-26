@@ -13,12 +13,12 @@ import {
   lerp,
   mergeMeshes,
   mirrorZ,
-  prowTaper,
   slopeDrop,
   sweepSurface,
   tubeMesh,
-} from './geometry'
-import type { MeshData, Station } from './geometry'
+} from '@/lib/core/geometry'
+import type { MeshData, Station } from '@/lib/core/geometry'
+import { prowTaper } from './ridge'
 import type { BoxPart, Joint, Layout, Part, Vec3 } from './types'
 
 /** How narrow the roof closes to at a prow tip, as a fraction of full width. */

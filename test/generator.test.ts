@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { buildHouse, buildTimeline, placedAt } from '@/lib/banua/assembly'
+import { buildHouse, buildTimeline, placedAt } from '@/lib/tradition/toraja/assembly'
 import {
   ALL_DIMS,
   DEFAULT_RULES,
@@ -10,9 +10,9 @@ import {
   partSplit,
   provenanceSplit,
   worstClass,
-} from '@/lib/banua/rules'
-import { STAGE_ORDER } from '@/lib/banua/types'
-import type { Rules, Stage } from '@/lib/banua/types'
+} from '@/lib/tradition/toraja/rules'
+import { STAGE_ORDER } from '@/lib/tradition/toraja/types'
+import type { Rules, Stage } from '@/lib/tradition/toraja/types'
 
 describe('the generator contract', () => {
   it('is deterministic: the same rules give byte-identical output', () => {
@@ -207,7 +207,7 @@ describe('the provenance layer covers what the geometry actually uses', () => {
    * than declaring it, and the honesty layer quietly stops being honest.
    */
   it('declares the numbers that size and place what the reader can see', () => {
-    const sources = ['lib/banua/frame.ts', 'lib/banua/roof.ts'].map((f) =>
+    const sources = ['lib/tradition/toraja/frame.ts', 'lib/tradition/toraja/roof.ts'].map((f) =>
       readFileSync(new URL(`../${f}`, import.meta.url), 'utf8'),
     )
     const offenders: string[] = []

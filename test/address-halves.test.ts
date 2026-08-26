@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { rulesToQuery, rulesFromQuery } from '@/lib/banua/address'
+import { rulesToQuery, rulesFromQuery } from '@/lib/tradition/toraja/address'
 import { formatHash, parseHash, readChoice, readInt } from '@/lib/reader'
 
 /* Simulates the two writers against one location, in both orders. */

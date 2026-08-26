@@ -21,7 +21,7 @@
 import { DIMS, rankInfo } from './rules'
 import type { DimKey } from './rules'
 import { resolveLayout } from './frame'
-import { slopeLength } from './geometry'
+import { slopeLength } from '@/lib/core/geometry'
 import type { Dim, Rules } from './types'
 
 export interface Term {

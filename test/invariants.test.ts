@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildHouse } from '@/lib/banua/assembly'
-import { runInvariants } from '@/lib/banua/invariants'
-import type { Rules } from '@/lib/banua/types'
-import { DEFAULT_RULES } from '@/lib/banua/rules'
+import { buildHouse } from '@/lib/tradition/toraja/assembly'
+import { runInvariants } from '@/lib/tradition/toraja/invariants'
+import type { Rules } from '@/lib/tradition/toraja/types'
+import { DEFAULT_RULES } from '@/lib/tradition/toraja/rules'
 
 const CASES: Rules[] = [
   { rank: 'pekamberan', bays: 3, horns: 6 },

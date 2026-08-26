@@ -1,39 +1,17 @@
 /**
  * Build order, and the timeline the frame-raising sequence walks.
  *
- * `buildHouse` is the whole public surface of the generator. It is pure and
- * deterministic — no unseeded randomness, no `Date.now()` — so the same call
- * runs in the browser and in the test suite and produces identical output.
+ * None of this knows what is being raised. It knows there is a declared
+ * sequence of stages, that parts carry a stage and a position within it, and
+ * that a crew works through them in that order — which is true of every
+ * house, and is the whole of what the animation and the invariants need.
+ *
+ * The tradition supplies the stages and their weights through its rule pack.
  */
 
-import { STAGE_ORDER } from './types'
-import type { Bounds, House, Layout, Part, Rules, Stage, Vec3 } from './types'
-import { buildFrame, buildHorns, resolveLayout } from './frame'
-import { buildIjuk, buildRoofFrame } from './roof'
-import { dimsForLayout, normaliseRules } from './rules'
+import type { Kinds, RulePack } from './kinds'
+import type { Bounds, House, Part, Vec3 } from './types'
 import { rotatedHalfExtents } from './geometry'
-
-export interface BuildResult {
-  readonly house: House
-  readonly layout: Layout
-}
-
-export function buildHouse(rules: Rules): BuildResult {
-  const normalised = normaliseRules(rules)
-  const base = resolveLayout(normalised)
-  const layout: Layout = { ...base, dims: dimsForLayout(base) }
-
-  const frame = buildFrame(layout)
-  const roof = buildRoofFrame(layout)
-  const parts = [...frame.parts, ...roof.parts, ...buildIjuk(layout), ...buildHorns(layout)]
-  const joints = [...frame.joints, ...roof.joints]
-
-  const ordered = sortByBuildOrder(parts)
-  return {
-    layout,
-    house: { rules: normalised, parts: ordered, joints, bounds: boundsOf(ordered) },
-  }
-}
 
 /**
  * Build order: stage first, then the part's own order within it.
@@ -42,8 +20,11 @@ export function buildHouse(rules: Rules): BuildResult {
  * crew would work in, and the invariant suite reads it as such — nothing may
  * be placed before the thing that carries it.
  */
-export function sortByBuildOrder(parts: readonly Part[]): readonly Part[] {
-  const rank = new Map<Stage, number>(STAGE_ORDER.map((s, i) => [s, i]))
+export function sortByBuildOrder<K extends Kinds>(
+  pack: RulePack<K>,
+  parts: readonly Part<K>[],
+): readonly Part<K>[] {
+  const rank = new Map<K['stage'], number>(pack.stageOrder.map((s, i) => [s, i]))
   return [...parts].sort((a, b) => {
     const sa = rank.get(a.stage) ?? 0
     const sb = rank.get(b.stage) ?? 0
@@ -55,7 +36,7 @@ export function sortByBuildOrder(parts: readonly Part[]): readonly Part[] {
 
 /* ── Bounds ───────────────────────────────────────────────────────────── */
 
-export function boundsOf(parts: readonly Part[]): Bounds {
+export function boundsOf<K extends Kinds>(parts: readonly Part<K>[]): Bounds {
   let minX = Infinity
   let minY = Infinity
   let minZ = Infinity
@@ -93,47 +74,28 @@ export function boundsOf(parts: readonly Part[]): Bounds {
 
 /* ── The timeline ─────────────────────────────────────────────────────── */
 
-/**
- * Relative durations of the nine stages.
- *
- * These are not proportional to part count. Raising the posts is the act that
- * decides whether the house stands, and the ijuk is a long patient job — the
- * sequence is meant to read like the work, not like a progress bar.
- */
-const STAGE_WEIGHT: Record<Stage, number> = {
-  batu: 0.6,
-  ariri: 1.6,
-  'rangka-lantai': 1.1,
-  lantai: 0.7,
-  dinding: 1.0,
-  'tulak-somba': 0.8,
-  'rangka-atap': 1.7,
-  ijuk: 2.0,
-  tanduk: 0.9,
-}
-
 /** Seconds. Long enough to read the stage names, short enough to sit through. */
 export const SEQUENCE_SECONDS = 15
 
-export interface TimelineEntry {
+export interface TimelineEntry<K extends Kinds> {
   readonly partId: string
-  readonly stage: Stage
+  readonly stage: K['stage']
   /** normalised over the whole sequence, 0–1 */
   readonly start: number
   readonly end: number
 }
 
-export interface StageSpan {
-  readonly stage: Stage
+export interface StageSpan<K extends Kinds> {
+  readonly stage: K['stage']
   readonly start: number
   readonly end: number
   readonly partIds: readonly string[]
 }
 
-export interface Timeline {
+export interface Timeline<K extends Kinds> {
   readonly seconds: number
-  readonly entries: readonly TimelineEntry[]
-  readonly stages: readonly StageSpan[]
+  readonly entries: readonly TimelineEntry<K>[]
+  readonly stages: readonly StageSpan<K>[]
 }
 
 /**
@@ -141,16 +103,20 @@ export interface Timeline {
  * both in 0–1. Parts within a stage overlap heavily, because a crew does not
  * place one board and wait.
  */
-export function buildTimeline(house: House, seconds = SEQUENCE_SECONDS): Timeline {
-  const present = STAGE_ORDER.filter((s) => house.parts.some((p) => p.stage === s))
-  const totalWeight = present.reduce((sum, s) => sum + STAGE_WEIGHT[s], 0) || 1
+export function buildTimeline<K extends Kinds>(
+  pack: RulePack<K>,
+  house: House<K>,
+  seconds = SEQUENCE_SECONDS,
+): Timeline<K> {
+  const present = pack.stageOrder.filter((s) => house.parts.some((p) => p.stage === s))
+  const totalWeight = present.reduce((sum, s) => sum + pack.stageWeight(s), 0) || 1
 
-  const entries: TimelineEntry[] = []
-  const stages: StageSpan[] = []
+  const entries: TimelineEntry<K>[] = []
+  const stages: StageSpan<K>[] = []
   let cursor = 0
 
   for (const stage of present) {
-    const span = STAGE_WEIGHT[stage] / totalWeight
+    const span = pack.stageWeight(stage) / totalWeight
     const start = cursor
     const end = cursor + span
     cursor = end
@@ -171,7 +137,10 @@ export function buildTimeline(house: House, seconds = SEQUENCE_SECONDS): Timelin
 }
 
 /** Which parts are placed at a given point in the sequence, 0–1. */
-export function placedAt(timeline: Timeline, t: number): ReadonlySet<string> {
+export function placedAt<K extends Kinds>(
+  timeline: Timeline<K>,
+  t: number,
+): ReadonlySet<string> {
   const out = new Set<string>()
   for (const e of timeline.entries) if (t >= e.end) out.add(e.partId)
   return out
@@ -182,7 +151,11 @@ export function placedAt(timeline: Timeline, t: number): ReadonlySet<string> {
  * Reduced-motion callers ignore this and take the ordered reveal instead:
  * the sequence is content, so it is de-animated, never removed.
  */
-export function progressAt(timeline: Timeline, partId: string, t: number): number {
+export function progressAt<K extends Kinds>(
+  timeline: Timeline<K>,
+  partId: string,
+  t: number,
+): number {
   const e = timeline.entries.find((x) => x.partId === partId)
   if (!e) return 1
   if (t <= e.start) return 0

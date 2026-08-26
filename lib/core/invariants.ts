@@ -1,22 +1,25 @@
 /**
- * The checks that gate the build.
+ * The checks that hold of any house, whatever tradition built it.
  *
  * There is no measured drawing yet, so correctness cannot rest on comparing
- * the model to a survey. It rests on structural truth instead: things that
- * must hold of any tongkonan, stated precisely enough to fail.
+ * the model to a survey. It rests on structural truth instead — and the
+ * structural truths split cleanly in two. Some of them are claims about one
+ * building ("the ridge sags, the front prow is highest"); those belong to the
+ * tradition that makes them. The rest are claims about building at all: that
+ * the thing is symmetric, that every tenon is inside its mortise, that
+ * nothing was placed before what carries it, that the meshes are sound, and
+ * that every part says where its numbers came from. Those are here, and they
+ * are generic because they were never Toraja in the first place.
  *
  * A failing invariant fails the build. `checkAgainstSurvey` reports skipped
  * and stays skipped — it is the only check here that cannot be satisfied by
  * writing better code, and that is exactly why it is kept.
  */
 
-import type { Bounds, House, Layout, Part, Vec3 } from './types'
-import { STAGE_ORDER } from './types'
-import { rotatedHalfExtents, slopeDrop } from './geometry'
-import { ridgeOf } from './frame'
-import { RIDGE_CAP_BAND, ijukBands } from './roof'
-import { DIMS, DIM_KEYS, partClass, rankInfo } from './rules'
-
+import type { Kinds, RulePack } from './kinds'
+import type { Bounds, House, Part, Vec3 } from './types'
+import { rotatedHalfExtents } from './geometry'
+import { partClass } from './provenance'
 export type CheckStatus = 'pass' | 'fail' | 'skip'
 
 export interface CheckResult {
@@ -39,7 +42,7 @@ const TOL = 1e-4
 
 /* ── AABB helpers ─────────────────────────────────────────────────────── */
 
-export function partBounds(part: Part): Bounds {
+export function partBounds<K extends Kinds>(part: Part<K>): Bounds {
   if (part.kind === 'box') {
     const h = rotatedHalfExtents(part.size, part.rotation)
     return {
@@ -84,7 +87,7 @@ function contains(outer: Bounds, at: Vec3, half: Vec3, pad: number): boolean {
 }
 
 /** Every vertex of a part in world space — box corners included. */
-function partVertices(part: Part): number[] {
+function partVertices<K extends Kinds>(part: Part<K>): number[] {
   if (part.kind === 'mesh') return part.positions.slice()
   const out: number[] = []
   const [hx, hy, hz] = [part.size[0] / 2, part.size[1] / 2, part.size[2] / 2]
@@ -123,7 +126,7 @@ function partVertices(part: Part): number[] {
  * a mirrored box and its twin have different Euler angles while occupying
  * mirrored volumes. What must be symmetric is the building, not the bookkeeping.
  */
-export function checkSymmetry(house: House): CheckResult {
+export function checkSymmetry<K extends Kinds>(house: House<K>): CheckResult {
   const cell = 0.002
   const buckets = new Map<string, number[]>()
   const all: number[] = []
@@ -193,7 +196,7 @@ export function checkSymmetry(house: House): CheckResult {
  * The house is built without nails, so a joint that does not engage is not a
  * detail that looks slightly wrong — it is a house that falls down.
  */
-export function checkJoints(house: House): CheckResult {
+export function checkJoints<K extends Kinds>(house: House<K>): CheckResult {
   const byId = new Map(house.parts.map((p) => [p.id, p]))
   const bounds = new Map(house.parts.map((p) => [p.id, partBounds(p)]))
   const missing: string[] = []
@@ -238,13 +241,16 @@ export function checkJoints(house: House): CheckResult {
  * rests on the ground itself. Walking the build order and checking that is
  * the closest a static model gets to watching the crew work.
  */
-export function checkBuildOrder(house: House): CheckResult {
+export function checkBuildOrder<K extends Kinds>(
+  pack: RulePack<K>,
+  house: House<K>,
+): CheckResult {
   const belowGround = house.parts.filter((p) => (partBounds(p).min[1] ?? 0) < -TOL)
   const bounds = house.parts.map((p) => partBounds(p))
 
   // Ordering must already be monotone: assembly.ts sorts, and if something
   // re-ordered the array afterwards the timeline would be a fiction.
-  const rank = new Map(STAGE_ORDER.map((s, i) => [s, i]))
+  const rank = new Map<K['stage'], number>(pack.stageOrder.map((s, i) => [s, i]))
   let monotone = true
   for (let i = 1; i < house.parts.length; i++) {
     const prev = house.parts[i - 1]
@@ -307,9 +313,12 @@ export function checkBuildOrder(house: House): CheckResult {
  * You cannot peg into something that is not up yet, and you do not go back
  * three stages to peg something you left loose.
  */
-export function checkJointStages(house: House): CheckResult {
+export function checkJointStages<K extends Kinds>(
+  pack: RulePack<K>,
+  house: House<K>,
+): CheckResult {
   const byId = new Map(house.parts.map((p) => [p.id, p]))
-  const rank = new Map(STAGE_ORDER.map((s, i) => [s, i]))
+  const rank = new Map<K['stage'], number>(pack.stageOrder.map((s, i) => [s, i]))
   const bad: string[] = []
   for (const joint of house.joints) {
     const m = byId.get(joint.mortise)
@@ -335,7 +344,7 @@ export function checkJointStages(house: House): CheckResult {
 }
 
 /** Indices in range, no degenerate triangles, unit normals. */
-export function checkMeshes(house: House): CheckResult {
+export function checkMeshes<K extends Kinds>(house: House<K>): CheckResult {
   let tris = 0
   const problems: string[] = []
   for (const part of house.parts) {
@@ -401,161 +410,6 @@ export function checkMeshes(house: House): CheckResult {
 }
 
 /**
- * The ridge sags in the interior, both prows rise, and the front prow is the
- * higher of the two. This ordering is canon; it has to fall out of the curve.
- */
-export function checkRidgeProfile(layout: Layout): CheckResult {
-  const ridge = ridgeOf(layout)
-  let lowest = Infinity
-  let lowestS = 0
-  for (let i = 0; i <= 200; i++) {
-    const s = i / 200
-    const y = ridge(s).y
-    if (y < lowest) {
-      lowest = y
-      lowestS = s
-    }
-  }
-  const front = ridge(0).y
-  const rear = ridge(1).y
-  const interior = lowestS > 0.15 && lowestS < 0.85
-  const sags = lowest < front - TOL && lowest < rear - TOL
-  const frontHigher = front > rear + TOL
-  const ok = interior && sags && frontHigher
-  return {
-    key: 'ridge-profile',
-    titleId: 'Punggung melengkung turun, kedua haluan naik, haluan depan tertinggi',
-    titleEn: 'Ridge sags in the interior; both prows rise; the front prow is highest',
-    status: ok ? 'pass' : 'fail',
-    detail: ok
-      ? `titik terendah pada s=${lowestS.toFixed(2)} (${lowest.toFixed(2)} m); haluan depan ${front.toFixed(2)} m, belakang ${rear.toFixed(2)} m.`
-      : `s terendah ${lowestS.toFixed(2)}, depan ${front.toFixed(2)}, belakang ${rear.toFixed(2)}.`,
-    detailEn: ok
-      ? `lowest point at s=${lowestS.toFixed(2)} (${lowest.toFixed(2)} m); front prow ${front.toFixed(2)} m, rear ${rear.toFixed(2)} m.`
-      : `lowest s ${lowestS.toFixed(2)}, front ${front.toFixed(2)}, rear ${rear.toFixed(2)}.`,
-  }
-}
-
-/**
- * Ijuk courses lap with no bare strip, and the ridge is covered.
- *
- * The bands are read from the same function the geometry was cut from, so a
- * lap that is claimed and a lap that is built cannot drift apart.
- */
-export function checkIjukCoverage(house: House, layout: Layout): CheckResult {
-  const bands = ijukBands(layout)
-  const gaps: string[] = []
-  // Eave course must reach the eave; each course must reach past the head of
-  // the one below it, or a strip of frame shows through.
-  const first = bands[0]
-  if (!first || first.foot < 1 - TOL) gaps.push('lapis terbawah tidak mencapai tepi atap')
-  for (let k = 1; k < bands.length; k++) {
-    const below = bands[k - 1]
-    const cur = bands[k]
-    if (!below || !cur) continue
-    const lap = cur.foot - below.head
-    if (lap <= TOL) gaps.push(`lapis ${k + 1} tidak menindih lapis ${k}`)
-  }
-  const top = bands[bands.length - 1]
-  if (!top || top.head > TOL) gaps.push('lapis teratas tidak mencapai punggung')
-  const cap = house.parts.find((p) => p.id === 'ijuk-bubungan')
-  if (!cap) gaps.push('tidak ada penutup punggung')
-  if (RIDGE_CAP_BAND.head > TOL) gaps.push('penutup punggung tidak menutup garis punggung')
-
-  const minLap =
-    bands.length > 1
-      ? Math.min(
-          ...bands.slice(1).map((b, i) => b.foot - (bands[i]?.head ?? 0)),
-        )
-      : 1
-  return {
-    key: 'ijuk-coverage',
-    titleId: 'Lapis ijuk saling menindih tanpa celah; punggung tertutup',
-    titleEn: 'Ijuk courses lap with no bare strip; the ridge is covered',
-    status: gaps.length === 0 ? 'pass' : 'fail',
-    detail:
-      gaps.length === 0
-        ? `${bands.length} lapis; tindihan terkecil ${(minLap * 100).toFixed(1)}% dari bentang lereng.`
-        : gaps.join('; '),
-    detailEn:
-      gaps.length === 0
-        ? `${bands.length} courses; smallest lap ${(minLap * 100).toFixed(1)}% of the slope run.`
-        : gaps.join('; '),
-  }
-}
-
-/**
- * The eave oversails the outer post line.
- *
- * Rain shed off a pitch this steep has to land clear of the post feet. That
- * is why the overhang is as deep as it is, so it is an invariant rather than
- * a coincidence of the numbers.
- */
-export function checkEaveOversail(layout: Layout): CheckResult {
-  const outerPostFace = Math.max(...layout.postZ.map(Math.abs)) + layout.postSection / 2
-  const clear = layout.eaveHalfWidth - outerPostFace
-  const ok = clear > TOL
-  return {
-    key: 'eave-oversail',
-    titleId: 'Tepi atap melewati garis tiang terluar',
-    titleEn: 'The eave oversails the outer post line',
-    status: ok ? 'pass' : 'fail',
-    detail: `tepi atap ${layout.eaveHalfWidth.toFixed(2)} m dari sumbu; muka tiang terluar ${outerPostFace.toFixed(2)} m; julur ${clear.toFixed(2)} m.`,
-    detailEn: `eave ${layout.eaveHalfWidth.toFixed(2)} m from the axis; outer post face ${outerPostFace.toFixed(2)} m; oversail ${clear.toFixed(2)} m.`,
-  }
-}
-
-/**
- * The eave clears the wall plate: the roof passes over the plate on its way
- * out, rather than through it, and the eave edge lands outboard of it.
- */
-export function checkEaveClearsPlate(layout: Layout): CheckResult {
-  const s = rankInfo(layout.rules.rank).scale.value
-  const plateZ = Math.max(...layout.postZ.map(Math.abs))
-  const plateTop = layout.plateY + (DIMS.plateDepth.value * s) / 2
-  const f = plateZ / layout.eaveHalfWidth
-  // Height of the flared roof where it crosses the plate. Read from the same
-  // curve the surface was swept along, not from a straight chord.
-  const roofY =
-    layout.ridgeY -
-    (layout.ridgeY - layout.eaveY) *
-      slopeDrop(f, { at: layout.breakFraction, drop: layout.kneeDrop })
-  const clearsAbove = roofY > layout.plateY - (DIMS.plateDepth.value * s) / 2 - TOL
-  const outboard = layout.eaveHalfWidth > plateZ + TOL
-  const ok = clearsAbove && outboard
-  return {
-    key: 'eave-plate',
-    titleId: 'Atap melewati balok tumpuan lalu turun di luarnya',
-    titleEn: 'The eave clears the wall plate',
-    status: ok ? 'pass' : 'fail',
-    detail: `atap pada z=${plateZ.toFixed(2)} m berada di ${roofY.toFixed(2)} m; puncak balok tumpuan ${plateTop.toFixed(2)} m; tepi atap ${layout.eaveHalfWidth.toFixed(2)} m.`,
-    detailEn: `roof at z=${plateZ.toFixed(2)} m sits at ${roofY.toFixed(2)} m; top of the wall plate ${plateTop.toFixed(2)} m; eave ${layout.eaveHalfWidth.toFixed(2)} m.`,
-  }
-}
-
-/** Post count follows the declared bay count. */
-export function checkPostCount(house: House, layout: Layout): CheckResult {
-  const expectedRows = layout.rules.bays + 1
-  const expected = expectedRows * layout.postZ.length
-  const posts = house.parts.filter((p) => p.id.startsWith('ariri-')).length
-  const stones = house.parts.filter((p) => p.id.startsWith('batu-') && p.id !== 'batu-tulak-somba')
-    .length
-  const ok = posts === expected && stones === expected && layout.postX.length === expectedRows
-  return {
-    key: 'post-count',
-    titleId: 'Jumlah tiang mengikuti jumlah ruang',
-    titleEn: 'Post count follows the declared bay count',
-    status: ok ? 'pass' : 'fail',
-    detail: ok
-      ? `${layout.rules.bays} ruang → ${expectedRows} baris × ${layout.postZ.length} tiang = ${expected} a'riri, ${stones} batu umpak.`
-      : `diharapkan ${expected}, ditemukan ${posts} tiang dan ${stones} batu.`,
-    detailEn: ok
-      ? `${layout.rules.bays} bays → ${expectedRows} rows × ${layout.postZ.length} posts = ${expected} a'riri, ${stones} pad stones.`
-      : `expected ${expected}, found ${posts} posts and ${stones} stones.`,
-  }
-}
-
-/**
  * Every part declares what it was derived from.
  *
  * The model can be marked up by provenance only because each part names the
@@ -566,8 +420,11 @@ export function checkPostCount(house: House, layout: Layout): CheckResult {
  * convention, it is a check: no part may be untagged, and no part may cite a
  * dimension that does not exist.
  */
-export function checkPartProvenance(house: House): CheckResult {
-  const known = new Set<string>(DIM_KEYS)
+export function checkPartProvenance<K extends Kinds>(
+  pack: RulePack<K>,
+  house: House<K>,
+): CheckResult {
+  const known = new Set<string>(pack.dimKeys)
   const untagged: string[] = []
   const unknown: string[] = []
 
@@ -579,7 +436,7 @@ export function checkPartProvenance(house: House): CheckResult {
   }
 
   const split = { measured: 0, canon: 0, interpolated: 0 }
-  for (const part of house.parts) split[partClass(part)]++
+  for (const part of house.parts) split[partClass(pack, part)]++
 
   const ok = untagged.length === 0 && unknown.length === 0
   return {
@@ -620,25 +477,6 @@ export function checkAgainstSurvey(): CheckResult {
     detailEn:
       'Skipped. No measured drawing has been wired in, so there is nothing to compare against. This check will not be made to pass by weakening it.',
   }
-}
-
-/* ── The suite ────────────────────────────────────────────────────────── */
-
-export function runInvariants(house: House, layout: Layout): readonly CheckResult[] {
-  return [
-    checkSymmetry(house),
-    checkJoints(house),
-    checkJointStages(house),
-    checkBuildOrder(house),
-    checkMeshes(house),
-    checkRidgeProfile(layout),
-    checkIjukCoverage(house, layout),
-    checkEaveOversail(layout),
-    checkEaveClearsPlate(layout),
-    checkPostCount(house, layout),
-    checkPartProvenance(house),
-    checkAgainstSurvey(),
-  ]
 }
 
 export function summarise(results: readonly CheckResult[]): {

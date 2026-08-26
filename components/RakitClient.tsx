@@ -7,14 +7,14 @@ import { Viewport, usePrefersReducedMotion } from './viewport/Viewport'
 import { ProvenanceStrip } from './Provenance'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { SEQUENCE_SECONDS, buildHouse, buildTimeline } from '@/lib/banua/assembly'
-import { DEFAULT_RULES, stageInfo, provenanceSplit } from '@/lib/banua/rules'
-import type { Stage } from '@/lib/banua/types'
+import { SEQUENCE_SECONDS, buildHouse, buildTimeline } from '@/lib/tradition/toraja/assembly'
+import { DEFAULT_RULES, stageInfo, provenanceSplit } from '@/lib/tradition/toraja/rules'
+import type { Stage } from '@/lib/tradition/toraja/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
 import { useReaderState } from './useReaderState'
 import { readInt, unless } from '@/lib/reader'
-import { STAGE_ORDER } from '@/lib/banua/types'
+import { STAGE_ORDER } from '@/lib/tradition/toraja/types'
 
 const RAKIT_DEFAULTS = { stage: '' as Stage | '', explode: 0 }
 type RakitVantage = typeof RAKIT_DEFAULTS

@@ -12,10 +12,10 @@
  * about being a line drawing rather than pretending to be a photograph.
  */
 
-import type { House, Layout, Part } from '../banua/types'
-import { roofStations } from '../banua/roof'
-import { slopeDrop } from '../banua/geometry'
-import { provenanceSplit } from '../banua/rules'
+import type { House, Layout, Part } from '../tradition/toraja/types'
+import { roofStations } from '../tradition/toraja/roof'
+import { slopeDrop } from '../core/geometry'
+import { provenanceSplit } from '../tradition/toraja/rules'
 
 export type Projection = 'denah' | 'tampak' | 'potongan'
 

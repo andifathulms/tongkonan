@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildHouse } from '@/lib/banua/assembly'
+import { buildHouse } from '@/lib/tradition/toraja/assembly'
 import { drawOrthographic, drawingFileName } from '@/lib/draw/orthographic'
 import type { Projection } from '@/lib/draw/orthographic'
-import { ALL_DIMS, DEFAULT_RULES, DIMS, DIM_KEYS } from '@/lib/banua/rules'
+import { ALL_DIMS, DEFAULT_RULES, DIMS, DIM_KEYS } from '@/lib/tradition/toraja/rules'
 import { drawSheet, sheetFileName } from '@/lib/draw/sheet'
 
 const VIEWS: Projection[] = ['denah', 'tampak', 'potongan']

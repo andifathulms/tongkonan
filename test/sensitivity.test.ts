@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { PERTURBATION, sensitivities, sensitivityOf } from '@/lib/banua/sensitivity'
-import { ALL_DIMS, DIMS, DIM_KEYS, DEFAULT_RULES } from '@/lib/banua/rules'
-import { ridgeCounterexample } from '@/lib/banua/counterexample'
-import { checkEaveOversail } from '@/lib/banua/invariants'
-import { buildHouse } from '@/lib/banua/assembly'
-import { withDimValue } from '@/lib/banua/whatif'
+import { PERTURBATION, sensitivities, sensitivityOf } from '@/lib/tradition/toraja/sensitivity'
+import { ALL_DIMS, DIMS, DIM_KEYS, DEFAULT_RULES } from '@/lib/tradition/toraja/rules'
+import { ridgeCounterexample } from '@/lib/tradition/toraja/counterexample'
+import { checkEaveOversail } from '@/lib/tradition/toraja/invariants'
+import { buildHouse } from '@/lib/tradition/toraja/assembly'
+import { withDimValue } from '@/lib/tradition/toraja/whatif'
 import { compareDimension } from '@/lib/draw/compare'
 
 describe('what a survey would change', () => {
