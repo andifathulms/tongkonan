@@ -4,14 +4,14 @@ Working instructions for Claude Code. Read PRD.md for what is being built and DE
 
 ## Current state
 
-**M5 shipped. The second-tradition work is done: a tradition-neutral core, two houses binding it, and both of them on screen.**
+**M5 shipped. Three houses on a tradition-neutral core, all three on screen.**
 
-- `lib/tradition/toraja/` generates a tongkonan: 155 parts and 33 joints at the default rules. `lib/tradition/minang/` generates a rumah gadang: 265 parts and 62 joints. `lib/core/` holds what is true of any house and knows a word from neither. `lib/tradition/registry.ts` is the list the app walks. `lib/solar/` is validated against almanac values and now serves two sites.
+- `lib/tradition/toraja/` generates a tongkonan (155 parts, 33 joints), `lib/tradition/minang/` a rumah gadang (263 parts, 62 joints), `lib/tradition/jawa/` a joglo (296 parts, 58 joints). `lib/core/` holds what is true of any house and knows a word from none of them. `lib/tradition/registry.ts` is the list the app walks. `lib/solar/` is validated against almanac values and serves three sites.
 - `pnpm check` type-checks and runs 165 tests. Both invariant suites run over five rule combinations each — eleven structural checks for the tongkonan, sixteen for the rumah gadang — and every one passes. `checkAgainstSurvey` reports **skipped** in both and must stay that way.
 - **The project is called Pasak.** It was called Tongkonan while there was one house, which stopped being a name and became a claim the moment there were two. A pasak is the peg that pins a mortise and tenon: ordinary Indonesian, belonging to no one tradition, naming the join rather than the building. The repository and `NEXT_PUBLIC_BASE_PATH` still say `tongkonan`, because renaming a GitHub Pages project is the author's action and a half-done rename is worse than none — **that is the one outstanding step of the rename.**
-- **Both houses have all four routes, in both locales**: `/[locale]/[tradisi]/{bangun,rakit,baca,sumber}`, sixteen pages. The four old tradition-less paths still answer and say where the page went, carrying the query with them, because a citable address that stops resolving is not much of a citation.
+- **All three houses have all four routes, in both locales**: `/[locale]/[tradisi]/{bangun,rakit,baca,sumber}`, twenty-four pages. The four old tradition-less paths still answer and say where the page went, carrying the query with them, because a citable address that stops resolving is not much of a citation.
 - The split is tested three ways. `test/architecture.test.ts` fails the build if `lib/core/` imports a tradition or names one in code, if one tradition imports another, if anything under `lib/` reaches for three.js, the DOM, `Math.random` or `Date.now`, or if two tracked paths differ only in case. `test/registry.test.ts` asserts the neutral contract without naming a rank or a laras.
-- Provenance, kept separate and never averaged: tongkonan 0 measured / 7 canon / 46 interpolated (87%); rumah gadang 0 measured / 8 canon / 48 interpolated (86%). Both are 100% interpolated by part. The second house did not improve the number and was never going to.
+- Provenance, kept separate and never averaged: tongkonan 0 measured / 7 canon / 46 interpolated (87%); rumah gadang 0 / 8 / 48 (86%); joglo 0 / 8 / 44 (85%). All three are 100% interpolated by part. **Three houses and still no survey** — the bar has not moved and a third tradition was never going to move it. The second house did not improve the number and was never going to.
 - The bar got worse before it got better, twice, and both times that was the fix. A pedagogy pass on the Toraja builders found a dozen dimensional numbers sitting as bare literals — the ridge upsweep and the rafter section among them — which the bar had never counted. The Minang builders shipped their first draft with six of their own, all in the form `DIMS.gonjongRise.value * 0.55`. Declaring them raised the interpolated share in both packs. The higher number is the honest one.
 - **Counted by part rather than by dimension both houses are 100% interpolated**, and `/bangun` can mark either model to show it. Every canon rule in either pack states structure — faces north, ridge sags, horns are a tally; ruang count is odd, Koto Piliang steps the floor, bilik are a tally — and none of them sets a length, so every part depends on at least one invented metre. The shape's logic is sourced; its sizes are not. Do not resolve this by retagging a plausible number as canon.
 - The frame-raising sequence, the parameter-change rebuild, the day-of-sun, rain, the four view transitions, and the section cut through the occupancy zones all work for both houses. The section is cut on the axis the ridge does not run along, so the tongkonan is cut across its ridge and the rumah gadang along it — which is what shows the anjuang stepping up at both ends.
@@ -76,6 +76,14 @@ lib/tradition/toraja/   the tongkonan, binding the core
   address.ts        the three rules, to and from a query string
   scene.ts          the reading the renderer needs
   facade.ts         the one file that meets the registry's vocabulary
+lib/tradition/jawa/     the joglo, binding the same core
+  types.ts          Stage, MaterialKey, SourceKey, JointKind, Wujud, Rules, Layout, RoofLevel
+  rules.ts          wujud/tumpang/pendhapa, dimensions with provenance tags, source table, PACK
+  hip.ts            the stepped hipped surface — a second roof primitive, not a generalisation
+  frame.ts          rings of pillars, sunduk, floor, gebyok, senthong, the tumpang sari
+  roof.ts           rafters, hip rafters, molo, tiles, and the pendhapa
+  invariants.ts     not raised, hipped, roof on rings, tumpang sari, senthong empty, pendhapa
+  sensitivity.ts, counterexample.ts, address.ts, scene.ts, facade.ts
 lib/tradition/minang/   the rumah gadang, binding the same core
   types.ts          Stage, MaterialKey, SourceKey, JointKind, Laras, Rules, Layout
   rules.ts          laras/ruang/bilik, dimensions with provenance tags, source table, PACK
@@ -203,6 +211,22 @@ Phase 2 is real and these decisions are made. Phase A has landed; B and C have n
 - **Phase A — done.** Split `lib/core/` from `lib/tradition/toraja/`, extracting only what is mechanically neutral. No new concepts invented, no user-visible change, tests and provenance figures identical before and after.
 - **Phase B — done.** The rumah gadang, built concretely in `lib/tradition/minang/` and allowed to duplicate. Generator, rule pack, source table, invariants and tests; not routed.
 - **Phase C — done.** Five extractions the two houses earned, a registry, a scene model, the renderer generic over both, the route, the copy, and the rename.
+- **Phase D — done.** A third house: the joglo. Built to settle the questions two houses could not, and it settled them mostly by refusing to fit.
+
+### What the third house settled
+
+- **`sweepSurface` is not the roof primitive, it is the swept-roof primitive.** `minang/roof.ts` asked whether a third house turning the sweep meant the axis belonged in `SweepOptions`. The joglo declined the ballot: a hipped roof has a ridge shorter than its building and four planes falling to a closed eave, and no amount of sweeping makes one. `jawa/hip.ts` is a second primitive standing beside the first, not a generalisation of it. It moves to the core when a second house hips.
+- **`ridgeCurve` stays two functions.** `minang/ridge.ts` was waiting for a third vote. It got an abstention: this ridge is a straight segment and has no curve to share.
+- **`Layout` is still three `Layout`s**, and the third is the least like the others — rings of pillars, a corbelled stack, a stack of roof rectangles.
+- **Not every house is raised.** `SceneModel.underfloorHeight` assumed a habitable void; a joglo has a plinth you cannot get under. The field reports the clearance honestly and the difference between the traditions is an order of magnitude, which is the difference between a storey and a step.
+- **Not every house divides vertically.** `SceneModel.zones` is a stack of horizontal bands because that is what two houses needed. This one divides from the centre outward — under the brunjung against under the penanggap — and the bands are the closest honest reading of that, not the thing itself. A fourth house should not be made to pretend otherwise. See the note at the head of `jawa/scene.ts`.
+- **Not every site has a zero-shadow day.** Both earlier houses sit within three degrees of the equator; Yogyakarta is at 7.8° south and the sun never passes overhead. The third preset used to fall back to a March date and keep the label, which would have printed a day on which nothing happens and called it the thing the preset exists to show. It is now the December solstice and says plainly that there is no zenith here.
+- **A rule can be a flag.** Both earlier packs had only choices and counts; the pendhapa is present or absent, so `rulesCodec` grew a `flag` field rather than the house pretending a boolean was a number.
+- **A test written against two examples asserted uniqueness where the truth was variety.** `registry.test.ts` required every tradition to run its ridge on a different axis — true of two, false of three. What matters is that they disagree at all, which is why the field exists.
+- **`courseBands` turned out to be about lapping, not about thatch.** Extracted when two thatched roofs agreed; it holds for fired clay on a hip, which is the first evidence it was extracted for the right reason.
+- **And what came through untouched:** the whole generic half of the invariant suite, for the third time, which is now reasonable evidence that it is generic.
+
+Three houses, three different ways for a social fact to become a dimension, and no two of them the same shape: the tongkonan has a rank that scales everything, the rumah gadang has a switch that is legible in the floor, and the joglo has a graded series and a tier count that state standing without counting anything. There is still no shared `Rules` interface and there should not be one.
 
 ### What Phase C settled
 
