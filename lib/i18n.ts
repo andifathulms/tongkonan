@@ -84,6 +84,10 @@ export const COPY = {
     bays: t('Ruang', 'Bays'),
     horns: t('Tanduk', 'Horns'),
     hornsUnit: t('upacara', 'funerals'),
+    rankHint: t(
+      'Pangkat mengalikan setiap ukuran panjang dengan angka di samping namanya — itu saja yang dilakukannya. Rumah berpangkat lebih tinggi bukan berbentuk lain; ia berbentuk sama, lebih besar. Kedudukan dinyatakan lewat skala.',
+      'Rank multiplies every length by the figure beside its name, and that is the only thing it does. A higher-ranked house is not a different shape; it is the same shape, larger. Standing is expressed as scale.',
+    ),
     /*
      * Spoken values for the sliders. A range announces its raw number, so
      * without these the time control says "720" where the screen says 12:00,

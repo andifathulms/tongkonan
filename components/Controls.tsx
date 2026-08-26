@@ -45,7 +45,16 @@ export function RuleControls({
                 rules.rank === r.rank ? 'bg-bolu text-kapur' : 'hover:bg-wash',
               ].join(' ')}
             >
-              <span className="block text-body leading-tight">{r.name}</span>
+              <span className="flex items-baseline justify-between gap-2">
+                <span className="text-body leading-tight">{r.name}</span>
+                {/*
+                  The multiplier, on the control that applies it. Rank was the
+                  one rule whose arithmetic was invisible at the point of use,
+                  so a reader watching the house grow could not tell whether it
+                  had gained bays, height or simply scale.
+                */}
+                <span className="num shrink-0 text-meta">×{r.scale.value.toFixed(2)}</span>
+              </span>
               <span
                 className={[
                   'mt-0.5 block text-meta',
@@ -54,9 +63,26 @@ export function RuleControls({
               >
                 {locale === 'id' ? r.glossId : r.glossEn}
               </span>
+              <span
+                className={[
+                  'mt-1 flex items-baseline gap-1.5 text-micro',
+                  rules.rank === r.rank ? 'text-muted-on-ink' : 'text-muted',
+                ].join(' ')}
+              >
+                <span
+                  aria-hidden
+                  className="inline-block h-2 w-2 shrink-0 rounded border"
+                  style={{
+                    background: r.scale.class === 'canon' ? 'var(--riri)' : 'var(--rara)',
+                    borderColor: r.scale.class === 'canon' ? 'var(--riri-ink)' : 'var(--rara)',
+                  }}
+                />
+                {r.scale.source === 'none' ? pick(COPY.sources.none, locale) : r.scale.source}
+              </span>
             </Choice>
           ))}
         </div>
+        <p className="mt-2 text-body text-muted">{pick(COPY.controls.rankHint, locale)}</p>
       </Choices>
 
       <Field
