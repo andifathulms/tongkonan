@@ -74,6 +74,13 @@
   --lh-body: 1.5;
 
   /* ── Spacing ── 4px grid, named so a component never counts pixels. */
+  /*
+   * The floor for anything a finger or a stylus has to hit. The sliders were
+   * shipping the user agent's default thumb, around 16px; everything else in
+   * the app already clears this.
+   */
+  --control-target: 24px;
+
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;

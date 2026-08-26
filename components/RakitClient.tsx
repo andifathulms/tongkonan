@@ -127,7 +127,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
                   : pick(COPY.assembly.complete, locale),
                 pct: String(Math.round(t * 100)),
               })}
-              className="w-full accent-bolu"
+              className="h-control w-full accent-bolu"
             />
 
             <ol className="mt-4 flex flex-col gap-px">
@@ -212,7 +212,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
                 aria-valuetext={fill(pick(COPY.joints.explodeValue, locale), {
                   pct: String(Math.round(explode * 100)),
                 })}
-                className="w-full accent-bolu"
+                className="h-control w-full accent-bolu"
               />
               <p className="mt-2 text-body text-muted">
                 {pick(COPY.joints.explodeGloss, locale)}

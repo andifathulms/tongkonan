@@ -38,6 +38,10 @@ const config: Config = {
         sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
       },
+      height: {
+        // The minimum pointer target, from the tokens.
+        control: 'var(--control-target)',
+      },
       spacing: {
         // 4px grid. Tailwind's default scale is already on it; this is the
         // rail width the surveyor's-sheet layout needs.

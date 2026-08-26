@@ -104,7 +104,7 @@ export function RuleControls({
           aria-valuetext={fill(pick(COPY.controls.hornsValue, locale), {
             n: String(rules.horns),
           })}
-          className="w-full accent-bolu"
+          className="h-control w-full accent-bolu"
         />
       </Field>
     </RailSection>
@@ -196,7 +196,7 @@ export function SunControls({
             clock: formatClock(minutes),
             alt: altitude.toFixed(1),
           })}
-          className="w-full accent-bolu"
+          className="h-control w-full accent-bolu"
         />
         <div className="mt-1 flex items-baseline justify-between">
           <span className="micro">
