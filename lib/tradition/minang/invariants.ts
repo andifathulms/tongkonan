@@ -159,10 +159,23 @@ export function checkAnjuangFloor(house: House, layout: Layout): CheckResult {
   }
 
   const floors = raised.filter((p) => p.id.startsWith('anjuang-lantai-'))
+  if (floors.length === 0) {
+    // Said plainly rather than reported as a step of minus two metres, which
+    // is what subtracting an absent floor from a present one produces. A
+    // verdict a reader cannot act on is not evidence.
+    return {
+      key: 'anjuang-floor',
+      titleId: 'Koto Piliang: lantai kedua ujung naik menjadi anjuang',
+      titleEn: 'Koto Piliang: the floor at both ends rises into anjuang',
+      status: 'fail',
+      detail: `Tidak ada anjuang yang terbangun. Naiknya lantai ${layout.anjuangRise.toFixed(3)} m lebih tipis daripada papan lantai ${DIMS.deckThickness.value.toFixed(3)} m, jadi tidak ada yang bisa dipijak.`,
+      detailEn: `No anjuang was built. The step of ${layout.anjuangRise.toFixed(3)} m is thinner than the ${DIMS.deckThickness.value.toFixed(3)} m floor board that would form it, so there is nothing to stand on.`,
+    }
+  }
   const tops = floors.map((p) => partBounds(p).max[1] ?? 0)
-  const lowestRaised = tops.length ? Math.min(...tops) : 0
+  const lowestRaised = Math.min(...tops)
   const step = lowestRaised - mainTop
-  const ok = floors.length > 0 && step > TOL && Math.abs(step - layout.anjuangRise) < 1e-6
+  const ok = step > TOL && Math.abs(step - layout.anjuangRise) < 1e-6
   return {
     key: 'anjuang-floor',
     titleId: 'Koto Piliang: lantai kedua ujung naik menjadi anjuang',

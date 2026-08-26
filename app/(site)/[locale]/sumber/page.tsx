@@ -8,7 +8,7 @@ import { DIMS, DIM_KEYS, SOURCES, dimsForLayout, sourceFor, provenanceSplit } fr
 import { DEFAULT_RULES } from '@/lib/tradition/toraja/rules'
 import { buildHouse } from '@/lib/tradition/toraja/assembly'
 import { runInvariants, summarise } from '@/lib/tradition/toraja/invariants'
-import { PERTURBATION, PROBE_LABELS, sensitivities, sensitivityOf } from '@/lib/tradition/toraja/sensitivity'
+import { PERTURBATION, probeLabel, sensitivities, sensitivityOf } from '@/lib/tradition/toraja/sensitivity'
 import { ridgeCounterexample } from '@/lib/tradition/toraja/counterexample'
 import { compareDimension } from '@/lib/draw/compare'
 import type { Sensitivity } from '@/lib/tradition/toraja/sensitivity'
@@ -114,7 +114,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
                     {s.worst.toFixed(2)} m
                   </span>
                   <span className="w-full pl-[3.25rem] text-meta text-muted sheet:w-auto sheet:pl-0">
-                    {PROBE_LABELS[s.worstProbe][locale]}
+                    {probeLabel(s.worstProbe)[locale]}
                   </span>
                 </li>
               ))}
@@ -233,7 +233,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             <CounterCase
               title={pick(COPY.checks.counterSound, locale)}
               result={counter.sound}
-              prows={counter.prows.sound}
+              prows={counter.witness.sound}
               locale={locale}
             />
             <CounterCase
@@ -241,7 +241,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
                 value: Number(counter.value.toFixed(2)),
               })}
               result={counter.broken}
-              prows={counter.prows.broken}
+              prows={counter.witness.broken}
               locale={locale}
             />
           </div>

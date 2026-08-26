@@ -25,6 +25,8 @@ import {
   tubeMesh,
 } from '@/lib/core/geometry'
 import type { MeshData, Station } from '@/lib/core/geometry'
+import { courseBands } from '@/lib/core/courses'
+import type { CourseBand } from '@/lib/core/courses'
 import type { BoxPart, Joint, Layout, Part, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS, larasInfo } from './rules'
@@ -504,28 +506,15 @@ export function buildGonjong(layout: Layout): readonly Part[] {
 
 export const RIDGE_CAP_BAND = { head: 0, foot: 0.1 } as const
 
-export interface IjukBand {
-  readonly course: number
-  /** upper edge, toward the ridge; f runs 0 at the ridge to 1 at the eave */
-  readonly head: number
-  readonly foot: number
-}
-
 /**
- * The course layout, derived once and used both to build the geometry and to
- * check it, so a lap that is claimed and a lap that is built cannot drift.
+ * The course layout for this roof.
+ *
+ * The arithmetic is `courseBands` in the core: both houses lay ijuk from the
+ * eave up with the same lap rule, and the two copies of it here were the same
+ * function over different constants.
  */
-export function ijukBands(layout: Layout): readonly IjukBand[] {
-  const lap = DIMS.ijukLap.value
-  const courses = layout.ijukCourses
-  const exposure = 1 / courses
-  const bands: IjukBand[] = []
-  for (let k = 0; k < courses; k++) {
-    const head = 1 - (k + 1) * exposure
-    const foot = Math.min(1, head + exposure * (1 + lap * 2))
-    bands.push({ course: k, head, foot })
-  }
-  return bands
+export function ijukBands(layout: Layout): readonly CourseBand[] {
+  return courseBands(layout.ijukCourses, DIMS.ijukLap.value)
 }
 
 export function buildIjuk(layout: Layout): readonly Part[] {

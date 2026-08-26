@@ -18,6 +18,8 @@ import {
   tubeMesh,
 } from '@/lib/core/geometry'
 import type { MeshData, Station } from '@/lib/core/geometry'
+import { courseBands } from '@/lib/core/courses'
+import type { CourseBand } from '@/lib/core/courses'
 import { prowTaper } from './ridge'
 import type { BoxPart, Joint, Layout, Part, Vec3 } from './types'
 
@@ -272,44 +274,17 @@ function sampleStation(stations: readonly Station[], s: number): Station {
 /** Where the ridge cap starts and stops, in slope-fraction space. */
 export const RIDGE_CAP_BAND = { head: 0, foot: 0.1 } as const
 
-export interface IjukBand {
-  readonly course: number
-  /** upper edge, toward the ridge; f runs 0 at the ridge to 1 at the eave */
-  readonly head: number
-  /** lower edge, toward the eave */
-  readonly foot: number
-}
-
 /**
- * The course layout, derived once and used both to build the geometry and to
- * check it. The invariant reads the same numbers the courses were cut from,
- * which is the point: a lap that is claimed and a lap that is built cannot
- * drift apart.
- */
-export function ijukBands(layout: Layout): readonly IjukBand[] {
-  const lap = DIMS.ijukLap.value
-  const courses = layout.ijukCourses
-  // Exposure in slope-fraction space: f runs 0 at the ridge to 1 at the eave.
-  const exposure = 1 / courses
-  const bands: IjukBand[] = []
-  for (let k = 0; k < courses; k++) {
-    // k = 0 is the eave course. Each head sits one exposure further up.
-    const head = 1 - (k + 1) * exposure
-    // The foot reaches past the head of the course below by the lap, so there
-    // is no line across the slope where the frame could show through.
-    const foot = Math.min(1, head + exposure * (1 + lap * 2))
-    bands.push({ course: k, head, foot })
-  }
-  return bands
-}
-
-/**
- * The courses, laid from the eave upward.
+ * The course layout for this roof.
  *
- * Each course is real geometry standing proud of the one below it. Flattening
- * the roof to a single surface with a thatch texture would throw away the
- * shadow line between courses, and that shadow is most of the material.
+ * The arithmetic is `courseBands` in the core: both houses lay ijuk from the
+ * eave up with the same lap rule, and the two copies of it here were the same
+ * function over different constants.
  */
+export function ijukBands(layout: Layout): readonly CourseBand[] {
+  return courseBands(layout.ijukCourses, DIMS.ijukLap.value)
+}
+
 export function buildIjuk(layout: Layout): readonly Part[] {
   const parts: Part[] = []
   const stations = roofStations(layout)

@@ -19,7 +19,8 @@ import {
 } from '@/lib/core/geometry'
 import { ridgeCurve } from './ridge'
 import type { MeshData } from '@/lib/core/geometry'
-import type { BoxPart, Joint, Layout, MeshPart, Part, Rules, Stage, Vec3 } from './types'
+import { partBuilders } from '@/lib/core/parts'
+import type { Joint, Layout, Part, Rules, TorajaKinds, Vec3 } from './types'
 
 /* ── Layout ───────────────────────────────────────────────────────────── */
 
@@ -144,57 +145,16 @@ export function sAtX(layout: Layout, x: number): number {
 
 /* ── Part helpers ─────────────────────────────────────────────────────── */
 
-interface Naming {
-  readonly name: string
-  readonly nameId: string
-  readonly nameEn: string
-}
-
-/**
- * @param dims the dimensions that decided this part's size and place. Not
- *   optional and not decorative: the model can be marked up by provenance
- *   only because every part says what it was derived from, and
- *   `checkPartProvenance` fails the build on an empty list.
+/*
+ * The two ways to be a part, bound to this tradition.
+ *
+ * The builders are in `lib/core/parts.ts`. Both generators had them written
+ * out, identical but for the type they were bound to, which is what an
+ * extraction is supposed to look like.
  */
-function box(
-  id: string,
-  naming: Naming,
-  stage: Stage,
-  order: number,
-  material: BoxPart['material'],
-  dims: readonly DimKey[],
-  center: Vec3,
-  size: Vec3,
-  rotation?: Vec3,
-): BoxPart {
-  return rotation
-    ? { kind: 'box', id, ...naming, stage, order, material, dims, center, size, rotation }
-    : { kind: 'box', id, ...naming, stage, order, material, dims, center, size }
-}
-
-export function meshPart(
-  id: string,
-  naming: Naming,
-  stage: Stage,
-  order: number,
-  material: MeshPart['material'],
-  dims: readonly DimKey[],
-  mesh: MeshData,
-): MeshPart {
-  return {
-    kind: 'mesh',
-    id,
-    ...naming,
-    stage,
-    order,
-    material,
-    dims,
-    positions: mesh.positions,
-    normals: mesh.normals,
-    uvs: mesh.uvs,
-    indices: mesh.indices,
-  }
-}
+const builders = partBuilders<TorajaKinds>()
+const box = builders.box
+export const meshPart = builders.mesh
 
 /* ── The frame ────────────────────────────────────────────────────────── */
 

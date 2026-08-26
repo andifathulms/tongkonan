@@ -17,7 +17,8 @@
 
 import { clamp01, slopeLength } from '@/lib/core/geometry'
 import type { MeshData } from '@/lib/core/geometry'
-import type { BoxPart, Joint, Layout, MeshPart, Part, Rules, Stage, Vec3 } from './types'
+import { partBuilders } from '@/lib/core/parts'
+import type { Joint, Layout, MinangKinds, Part, Rules, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS, larasInfo, lanjarNames, ruangNames } from './rules'
 import { ridgeCurve } from './ridge'
@@ -204,57 +205,16 @@ export function sAtZ(layout: Layout, z: number): number {
 
 /* ── Part helpers ─────────────────────────────────────────────────────── */
 
-interface Naming {
-  readonly name: string
-  readonly nameId: string
-  readonly nameEn: string
-}
-
-/**
- * @param dims the dimensions that decided this part's size and place. Not
- *   optional and not decorative: `checkPartProvenance` fails the build on an
- *   empty list, because a part that claims to come from nowhere is a guess the
- *   provenance bar never counted.
+/*
+ * The two ways to be a part, bound to this tradition.
+ *
+ * The builders are in `lib/core/parts.ts`. Both generators had them written
+ * out, identical but for the type they were bound to, which is what an
+ * extraction is supposed to look like.
  */
-function box(
-  id: string,
-  naming: Naming,
-  stage: Stage,
-  order: number,
-  material: BoxPart['material'],
-  dims: readonly DimKey[],
-  center: Vec3,
-  size: Vec3,
-  rotation?: Vec3,
-): BoxPart {
-  return rotation
-    ? { kind: 'box', id, ...naming, stage, order, material, dims, center, size, rotation }
-    : { kind: 'box', id, ...naming, stage, order, material, dims, center, size }
-}
-
-export function meshPart(
-  id: string,
-  naming: Naming,
-  stage: Stage,
-  order: number,
-  material: MeshPart['material'],
-  dims: readonly DimKey[],
-  mesh: MeshData,
-): MeshPart {
-  return {
-    kind: 'mesh',
-    id,
-    ...naming,
-    stage,
-    order,
-    material,
-    dims,
-    positions: mesh.positions,
-    normals: mesh.normals,
-    uvs: mesh.uvs,
-    indices: mesh.indices,
-  }
-}
+const builders = partBuilders<MinangKinds>()
+const box = builders.box
+export const meshPart = builders.mesh
 
 /* ── The frame ────────────────────────────────────────────────────────── */
 
@@ -417,7 +377,16 @@ export function buildFrame(layout: Layout): FrameResult {
   }
 
   /* The anjuang: the end floors, raised. Absent entirely under Bodi Caniago. */
-  if (laras.anjuang && layout.anjuangRise > 0) {
+  /*
+   * A step shallower than the boards that make it is not a step.
+   *
+   * The guard used to be `> 0`, which meant a small enough rise produced an
+   * anjuang bearer of negative height — a box the invariants would have drawn
+   * inside out without complaining. It surfaced while searching for a
+   * counterexample to `checkAnjuangFloor`, which is the check earning its
+   * keep twice: once as evidence on the page, and once here.
+   */
+  if (laras.anjuang && layout.anjuangRise > DIMS.deckThickness.value) {
     const ruangSpan = layout.bodyLength / layout.rules.ruang
     const anjuangDims: readonly DimKey[] = [
       'anjuangRise',

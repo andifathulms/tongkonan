@@ -75,8 +75,8 @@ describe('a check, shown doing its job', () => {
 
   it('the broken house cannot say which end is its face', () => {
     const c = ridgeCounterexample()
-    expect(c.prows.sound.front).toBeGreaterThan(c.prows.sound.rear)
-    expect(c.prows.broken.front).toBeLessThanOrEqual(c.prows.broken.rear)
+    expect(c.witness.sound.front).toBeGreaterThan(c.witness.sound.rear)
+    expect(c.witness.broken.front).toBeLessThanOrEqual(c.witness.broken.rear)
   })
 
   it('leaves the rule pack intact, the same as the sensitivity table does', () => {

@@ -141,3 +141,18 @@ export interface House<K extends Kinds> {
   readonly joints: readonly Joint<K>[]
   readonly bounds: Bounds
 }
+
+/* ── Neutral aliases ──────────────────────────────────────────────────────
+ * Every member of `Kinds` is a string or an object, and every field of a part
+ * is readonly, so `House<TorajaKinds>` is assignable to `House<Kinds>`. That
+ * is what lets the renderer take a house it cannot name a single stage of.
+ *
+ * Use these where something genuinely does not care which house it has —
+ * the renderer, the registry, the provenance strip. Anything that switches on
+ * a stage or a material wants the tradition's own concrete alias instead, so
+ * that the switch stays exhaustively checked.
+ */
+
+export type AnyPart = Part<Kinds>
+export type AnyJoint = Joint<Kinds>
+export type AnyHouse = House<Kinds>
