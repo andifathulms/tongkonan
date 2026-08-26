@@ -14,6 +14,7 @@ import {
   provenanceSplit,
 } from '@/lib/tradition/minang/rules'
 import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/tradition/minang/address'
+import { roofStations } from '@/lib/tradition/minang/roof'
 import { STAGE_ORDER } from '@/lib/tradition/minang/types'
 import type { Rules } from '@/lib/tradition/minang/types'
 
@@ -89,13 +90,72 @@ describe('the laras is legible in the floor', () => {
     expect(bodi.house.parts.some((p) => p.stage === 'anjuang')).toBe(false)
   })
 
-  it('gives the roof its gonjong count without anyone setting one', () => {
+  it('shows in the floor and nowhere else', () => {
+    // The gonjong count used to differ by laras, with the extra pair standing
+    // on the middle of the ridge — a shape nobody builds. Both carry four
+    // until a roof over the anjuang is modelled, so the floor is the only
+    // place the laras is legible, which is where the sources put it.
+    expect(larasInfo('koto-piliang').gonjong).toBe(larasInfo('bodi-caniago').gonjong)
     for (const rules of COMBOS) {
       const { house } = buildHouse(rules)
-      const spires = house.parts.filter((p) => p.stage === 'gonjong')
-      expect(spires.length).toBe(larasInfo(rules.laras).gonjong)
+      expect(house.parts.filter((p) => p.stage === 'gonjong').length).toBe(
+        larasInfo(rules.laras).gonjong,
+      )
     }
-    expect(larasInfo('koto-piliang').gonjong).toBeGreaterThan(larasInfo('bodi-caniago').gonjong)
+  })
+})
+
+/**
+ * The form a render caught and the invariants had not.
+ *
+ * Every check passed on a house with four rods standing on its ridge, because
+ * none of them asked whether the roof surface was what rose into the point.
+ * These are that question, asked three ways.
+ */
+describe('the gonjong is the roof', () => {
+  it('lifts the roof edge past the ridge instead of standing on it', () => {
+    const { layout } = buildHouse(DEFAULT_RULES)
+    const stations = roofStations(layout)
+    const half = layout.bodyLength / 2
+    const overBody = stations.filter((s) => Math.abs(s.x) <= half)
+    const overEnds = stations.filter((s) => Math.abs(s.x) > half)
+
+    // Level along the house...
+    for (const s of overBody) expect(s.eaveY).toBeCloseTo(layout.eaveY, 9)
+    // ...and past its own ridge at the ends.
+    expect(Math.max(...overEnds.map((s) => s.eaveY))).toBeGreaterThan(layout.ridgeEndY)
+    // The tips sit above the ridge end, which is what makes the hollow.
+    for (const tip of layout.gonjongTips) expect(tip[1]).toBeGreaterThan(layout.ridgeEndY)
+  })
+
+  it('narrows toward the tips rather than ending square', () => {
+    const { layout } = buildHouse(DEFAULT_RULES)
+    const stations = roofStations(layout)
+    const last = stations[stations.length - 1]
+    expect(last?.halfWidth).toBeLessThan(layout.eaveHalfDepth)
+    // But not to a pinch: a pair of gonjong stands wide, footed near the
+    // roof's own edge.
+    expect(last?.halfWidth).toBeGreaterThan(layout.eaveHalfDepth * 0.4)
+  })
+
+  it('straightens the transverse break over the overhang', () => {
+    // The break in the slope sits on the wall head; past the end of the wall
+    // there is nothing for it to sit on, and carrying it out would put a kink
+    // down the middle of a spire.
+    const { layout } = buildHouse(DEFAULT_RULES)
+    const stations = roofStations(layout)
+    const tip = stations[stations.length - 1]
+    expect(tip?.knee?.drop).toBeCloseTo(layout.breakFraction, 6)
+    const middle = stations[Math.floor(stations.length / 2)]
+    expect(middle?.knee?.drop).toBeCloseTo(layout.kneeDrop, 6)
+  })
+
+  it('makes the roof the dominant mass, as it is in the building', () => {
+    const { layout } = buildHouse(DEFAULT_RULES)
+    const roof = Math.max(...layout.gonjongTips.map((t) => t[1])) - layout.plateY
+    // A rumah gadang is a low box under an enormous roof. It was 1.04 when
+    // the gonjong were rods and the roof was a shed.
+    expect(roof / layout.plateY).toBeGreaterThan(1.6)
   })
 })
 
