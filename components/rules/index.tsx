@@ -4,6 +4,7 @@ import type { Locale } from '@/lib/i18n'
 import type { TraditionKey } from '@/lib/tradition/registry'
 import { TorajaControls } from './toraja'
 import { MinangControls } from './minang'
+import { JawaControls } from './jawa'
 
 /**
  * The rule controls, chosen by tradition.
@@ -38,5 +39,7 @@ export function RuleControlsFor({
       return <TorajaControls {...props} />
     case 'minang':
       return <MinangControls {...props} />
+    case 'jawa':
+      return <JawaControls {...props} />
   }
 }
