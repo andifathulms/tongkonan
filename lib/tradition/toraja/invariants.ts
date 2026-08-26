@@ -209,7 +209,7 @@ export function checkPostCount(house: House, layout: Layout): CheckResult {
 
 export function runInvariants(house: House, layout: Layout): readonly CheckResult[] {
   return [
-    checkSymmetry(house),
+    checkSymmetry(house, { labelId: 'bidang punggung', labelEn: 'the ridge plane' }),
     checkJoints(house),
     checkJointStages(house),
     checkBuildOrder(house),

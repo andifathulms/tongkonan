@@ -120,23 +120,66 @@ function partVertices<K extends Kinds>(part: Part<K>): number[] {
 /* ── The checks ───────────────────────────────────────────────────────── */
 
 /**
- * Bilateral symmetry about the ridge plane, z = 0.
+ * What a symmetry check has to be told.
+ *
+ * The plane was hardcoded at z = 0 while there was one house, and the label
+ * said "the ridge plane" because for that house the mirror plane and the
+ * ridge plane are the same thing. The second house says otherwise: its ridge
+ * runs along Z and the mirror plane cuts across it, so the plane is right and
+ * the words are wrong. Hence the label.
+ *
+ * `include` is the harder one, and it is not a way of excusing parts that
+ * fail. Some houses are symmetric in the frame and deliberately asymmetric in
+ * something the frame carries — a tally that grows from one end is a fact
+ * about the household, not a defect in the building — and a check that
+ * swallowed both would either be false or have to be softened until it said
+ * nothing. Scoping it says the true thing instead, and the count of what was
+ * left out is printed in the verdict so the narrowing is never silent.
+ */
+export interface SymmetryOptions<K extends Kinds> {
+  /** which axis the mirror negates. 0 = X, 1 = Y, 2 = Z. Defaults to Z. */
+  readonly axis?: 0 | 1 | 2
+  /** which parts the claim is made over. Defaults to all of them. */
+  readonly include?: (part: Part<K>) => boolean
+  /** what to call the plane, in each locale. */
+  readonly labelId?: string
+  readonly labelEn?: string
+}
+
+/**
+ * Bilateral symmetry about a plane through the origin.
  *
  * Checked over the aggregate vertex set rather than by pairing parts, because
  * a mirrored box and its twin have different Euler angles while occupying
  * mirrored volumes. What must be symmetric is the building, not the bookkeeping.
  */
-export function checkSymmetry<K extends Kinds>(house: House<K>): CheckResult {
+export function checkSymmetry<K extends Kinds>(
+  house: House<K>,
+  opts: SymmetryOptions<K> = {},
+): CheckResult {
+  const axis = opts.axis ?? 2
+  const labelId = opts.labelId ?? 'bidang cermin'
+  const labelEn = opts.labelEn ?? 'the mirror plane'
+  const scoped = house.parts.filter((p) => (opts.include ? opts.include(p) : true))
+
   const cell = 0.002
   const buckets = new Map<string, number[]>()
   const all: number[] = []
-  for (const part of house.parts) all.push(...partVertices(part))
+  for (const part of scoped) all.push(...partVertices(part))
 
-  const key = (x: number, y: number, z: number) =>
-    `${Math.round(x / cell)}|${Math.round(y / cell)}|${Math.round(z / cell)}`
+  /** The bucket key of a point, with `flip` negating the mirrored axis. */
+  const key = (i: number, d: readonly [number, number, number], flip: boolean) => {
+    const c = [0, 0, 0]
+    for (let a = 0; a < 3; a++) {
+      const v = (all[i + a] ?? 0) * (flip && a === axis ? -1 : 1)
+      c[a] = Math.round(v / cell) + (d[a] ?? 0)
+    }
+    return `${c[0]}|${c[1]}|${c[2]}`
+  }
+  const ZERO = [0, 0, 0] as const
 
   for (let i = 0; i < all.length; i += 3) {
-    const k = key(all[i] ?? 0, all[i + 1] ?? 0, all[i + 2] ?? 0)
+    const k = key(i, ZERO, false)
     const list = buckets.get(k)
     if (list) list.push(i)
     else buckets.set(k, [i])
@@ -145,26 +188,22 @@ export function checkSymmetry<K extends Kinds>(house: House<K>): CheckResult {
   let worst = 0
   let orphan = 0
   for (let i = 0; i < all.length; i += 3) {
-    const x = all[i] ?? 0
-    const y = all[i + 1] ?? 0
-    const z = all[i + 2] ?? 0
-    if (Math.abs(z) < cell) continue // on the plane; its own mirror
+    if (Math.abs(all[i + axis] ?? 0) < cell) continue // on the plane; its own mirror
     let best = Infinity
     // Search the bucket the mirror should land in and its neighbours, so a
     // vertex sitting on a cell boundary is not reported as asymmetric.
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
         for (let dz = -1; dz <= 1; dz++) {
-          const list = buckets.get(
-            `${Math.round(x / cell) + dx}|${Math.round(y / cell) + dy}|${Math.round(-z / cell) + dz}`,
-          )
+          const list = buckets.get(key(i, [dx, dy, dz], true))
           if (!list) continue
           for (const j of list) {
-            const d = Math.hypot(
-              (all[j] ?? 0) - x,
-              (all[j + 1] ?? 0) - y,
-              (all[j + 2] ?? 0) + z,
-            )
+            let sum = 0
+            for (let a = 0; a < 3; a++) {
+              const mirrored = (all[i + a] ?? 0) * (a === axis ? -1 : 1)
+              sum += ((all[j + a] ?? 0) - mirrored) ** 2
+            }
+            const d = Math.sqrt(sum)
             if (d < best) best = d
           }
         }
@@ -174,19 +213,26 @@ export function checkSymmetry<K extends Kinds>(house: House<K>): CheckResult {
     if (best < Infinity && best > worst) worst = best
   }
 
+  // Named when it is not everything, so a narrowed claim never reads as a
+  // whole-building one.
+  const scopeId =
+    scoped.length === house.parts.length ? '' : ` (${scoped.length} dari ${house.parts.length} bagian)`
+  const scopeEn =
+    scoped.length === house.parts.length ? '' : ` (${scoped.length} of ${house.parts.length} parts)`
+
   return {
     key: 'symmetry',
-    titleId: 'Simetri terhadap bidang punggung',
-    titleEn: 'Bilateral symmetry about the ridge plane',
+    titleId: `Simetri terhadap ${labelId}`,
+    titleEn: `Bilateral symmetry about ${labelEn}`,
     status: orphan === 0 ? 'pass' : 'fail',
     detail:
       orphan === 0
-        ? `${all.length / 3} titik; simpangan cermin terbesar ${(worst * 1000).toFixed(2)} mm.`
-        : `${orphan} titik tanpa pasangan cermin dalam 5 mm.`,
+        ? `${all.length / 3} titik${scopeId}; simpangan cermin terbesar ${(worst * 1000).toFixed(2)} mm.`
+        : `${orphan} titik tanpa pasangan cermin dalam 5 mm${scopeId}.`,
     detailEn:
       orphan === 0
-        ? `${all.length / 3} points; largest mirror deviation ${(worst * 1000).toFixed(2)} mm.`
-        : `${orphan} points with no mirror partner within 5 mm.`,
+        ? `${all.length / 3} points${scopeEn}; largest mirror deviation ${(worst * 1000).toFixed(2)} mm.`
+        : `${orphan} points with no mirror partner within 5 mm${scopeEn}.`,
   }
 }
 
