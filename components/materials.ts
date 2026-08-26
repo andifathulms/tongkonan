@@ -229,7 +229,7 @@ function anyamanCanvas(): HTMLCanvasElement {
 }
 
 /**
- * A carved panel, constructed rather than traced.
+ * A carved Toraja panel, constructed rather than traced.
  *
  * Bands in the four pigments, and pa'barre allo drawn as a circle divided
  * into eight rays. The motif is a construction rule, so whatever draws it has
@@ -239,8 +239,15 @@ function anyamanCanvas(): HTMLCanvasElement {
  * extruded geometry from these same rules, so the relief casts real shadow.
  * Only the plainly geometric pa'ssura is drawn here; motifs whose use is
  * restricted are not rendered at all.
+ *
+ * This ran on both houses until a render was looked at, and the rumah gadang
+ * was wearing the Toraja sun disc across its whole front. That was not a
+ * shortcut in the geometry, it was one people's motif on another people's
+ * house — the exact thing the PRD's ethics section says not to do — and it
+ * survived because the material set was split by name and the *construction*
+ * behind the name was shared.
  */
-function carvedCanvas(): HTMLCanvasElement {
+function torajaCarvingCanvas(): HTMLCanvasElement {
   const S = 512
   const { ctx, el } = canvas(S)
   ctx.fillStyle = BOLU
@@ -284,6 +291,108 @@ function carvedCanvas(): HTMLCanvasElement {
   return el
 }
 
+/**
+ * A carved Minangkabau panel, constructed rather than traced.
+ *
+ * Two motifs, both chosen because they are named in every published account
+ * of rumah gadang carving, both plainly geometric, and neither restricted in
+ * use:
+ *
+ * - **pucuak rabuang**, the bamboo shoot: a band of upward tapering forms,
+ *   each a shoot with its tip curling over. The saying it carries — useful as
+ *   a shoot, useful as a stem — is why it is the motif that runs across the
+ *   widest boards, so it is the band here.
+ * - **kaluak paku**, the fern frond: a coiled spiral, drawn as an involute
+ *   because that is what a frond is, and repeated along a narrower band.
+ *
+ * What is claimed and what is not. These are constructions of two motifs from
+ * their description, not tracings of a carved board, and the proportions are
+ * the author's — the same standing as an interpolated dimension, and the same
+ * honesty owed. Nothing beyond these two is attempted: Minangkabau carving is
+ * a large vocabulary and inventing plausible members of it would be worse than
+ * showing two real ones plainly.
+ */
+function minangCarvingCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  ctx.fillStyle = mix(BOLU, RARA, 0.18)
+  ctx.fillRect(0, 0, S, S)
+
+  /* Fillets between the bands: the boards are framed, not papered. */
+  const rule = (y: number, h: number, colour: string) => {
+    ctx.fillStyle = colour
+    ctx.fillRect(0, y, S, h)
+  }
+
+  /**
+   * One bamboo shoot: a tapering blade whose tip curls back on itself.
+   *
+   * Drawn from the base up, so the taper and the curl are the same curve
+   * rather than a triangle with a hook added to it.
+   */
+  const shoot = (x: number, base: number, height: number, width: number, flip: number) => {
+    ctx.beginPath()
+    ctx.moveTo(x - width / 2, base)
+    ctx.quadraticCurveTo(x - width * 0.18, base - height * 0.6, x + flip * width * 0.1, base - height)
+    // The curl: the tip turns over toward the direction the shoot leans.
+    ctx.quadraticCurveTo(
+      x + flip * width * 0.62,
+      base - height * 1.02,
+      x + flip * width * 0.34,
+      base - height * 0.7,
+    )
+    ctx.quadraticCurveTo(x + width * 0.34, base - height * 0.3, x + width / 2, base)
+    ctx.closePath()
+    ctx.fill()
+  }
+
+  /** One fern frond: an involute spiral, tightening as it coils inward. */
+  const frond = (cx: number, cy: number, r: number, turns: number, flip: number) => {
+    ctx.beginPath()
+    const steps = 96
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps
+      const a = flip * t * turns * Math.PI * 2
+      const rr = r * (1 - t * 0.86)
+      const px = cx + Math.cos(a) * rr
+      const py = cy + Math.sin(a) * rr * 0.9
+      if (i === 0) ctx.moveTo(px, py)
+      else ctx.lineTo(px, py)
+    }
+    ctx.stroke()
+  }
+
+  const bandH = S / 4
+
+  for (let b = 0; b < 4; b++) {
+    const top = b * bandH
+    rule(top, S * 0.012, mix(KAPUR, RIRI, 0.5))
+    rule(top + bandH - S * 0.012, S * 0.012, mix(KAPUR, RIRI, 0.5))
+
+    if (b % 2 === 0) {
+      // pucuak rabuang: shoots alternating in the direction they lean, which
+      // is how the band reads as growth rather than as a row of spikes.
+      const count = 6
+      const w = S / count
+      for (let i = 0; i < count; i++) {
+        const flip = i % 2 === 0 ? 1 : -1
+        ctx.fillStyle = i % 2 === 0 ? RIRI : mix(KAPUR, RIRI, 0.35)
+        shoot(w * (i + 0.5), top + bandH * 0.88, bandH * 0.66, w * 0.78, flip)
+      }
+    } else {
+      // kaluak paku: fronds in facing pairs along the narrower band.
+      const count = 8
+      const w = S / count
+      ctx.lineWidth = S * 0.012
+      for (let i = 0; i < count; i++) {
+        ctx.strokeStyle = i % 2 === 0 ? mix(KAPUR, RARA, 0.25) : RIRI
+        frond(w * (i + 0.5), top + bandH * 0.5, bandH * 0.34, 1.6, i % 2 === 0 ? 1 : -1)
+      }
+    }
+  }
+  return el
+}
+
 /** River stone: mottled, cool against the timber. */
 function stoneCanvas(): HTMLCanvasElement {
   const S = 256
@@ -306,6 +415,29 @@ function stoneCanvas(): HTMLCanvasElement {
 const clampByte = (v: number) => Math.min(255, Math.max(0, v))
 
 /* ── The material sets ────────────────────────────────────────────────── */
+
+/**
+ * Which materials are the same substance in both houses, and which only share
+ * a name.
+ *
+ * Timber is timber and thatch is thatch: the generators are shared because the
+ * material is. Carving is not. `ukiran` names a carved board in both packs and
+ * the *motif* is a specific people's, so it is listed as each tradition's own
+ * even though both houses have one — which is the distinction the first split
+ * missed, because it split the set by key and left the construction behind the
+ * key shared.
+ *
+ * Declared as data so it can be checked from a test that has no DOM to build
+ * a texture in.
+ */
+export const SHARED_MATERIALS: readonly string[] = ['kayu', 'papan', 'bambu', 'ijuk', 'batu']
+
+export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
+  /** pa'ssura, and buffalo horn on the tulak somba */
+  toraja: ['ukiran', 'tanduk'],
+  /** pucuak rabuang and kaluak paku, and woven bamboo in the end walls */
+  minang: ['ukiran', 'anyaman'],
+}
 
 /**
  * The materials one tradition builds from.
@@ -373,11 +505,6 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
       metalness: 0,
       side: THREE.DoubleSide,
     }),
-    ukiran: new THREE.MeshStandardMaterial({
-      map: tex(carvedCanvas()),
-      roughness: 0.7,
-      metalness: 0,
-    }),
     batu: new THREE.MeshStandardMaterial({
       map: tex(stoneCanvas()),
       roughness: 0.9,
@@ -385,10 +512,22 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     }),
   }
 
+  /*
+   * Carving is the one material that is emphatically not shared. The pigments
+   * are the project's register and stay put; the motifs are a specific
+   * people's and do not.
+   */
+  const own: Record<string, THREE.Material> = {}
+  own.ukiran = new THREE.MeshStandardMaterial({
+    map: tex(tradition === 'toraja' ? torajaCarvingCanvas() : minangCarvingCanvas()),
+    roughness: 0.7,
+    metalness: 0,
+  })
+
   if (tradition === 'toraja') {
     // Horn is waxy rather than matte, so it gets a clearcoat. This is the one
     // material where the physical response is the recognisable thing about it.
-    common.tanduk = new THREE.MeshPhysicalMaterial({
+    own.tanduk = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(mix(BOLU, KAPUR, 0.2)),
       roughness: 0.42,
       metalness: 0,
@@ -396,12 +535,12 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
       clearcoatRoughness: 0.35,
     })
   } else {
-    common.anyaman = new THREE.MeshStandardMaterial({
+    own.anyaman = new THREE.MeshStandardMaterial({
       map: tex(anyamanCanvas()),
       roughness: 0.88,
       metalness: 0,
     })
   }
 
-  return assemble(common, textures)
+  return assemble({ ...common, ...own }, textures)
 }
