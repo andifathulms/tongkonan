@@ -255,7 +255,9 @@ function StageCaption({ stage, locale }: { stage: Stage | null; locale: Locale }
   if (!stage) return null
   const info = stageInfo(stage)
   return (
-    <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 w-[min(30rem,calc(100%-6rem))] -translate-x-1/2 rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px]">
+    // Clear of the masthead band under 860px, by the height that band reserves.
+    // Same collision the scale bar had, and missed here at the time.
+    <div className="pointer-events-none absolute bottom-[calc(var(--masthead-h)+0.75rem)] left-1/2 z-10 w-[min(30rem,calc(100%-6rem))] -translate-x-1/2 rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px] sheet:bottom-3">
       <p className="micro">{info.title}</p>
       <p className="mt-1 text-body">
         {locale === 'id' ? info.glossId : info.glossEn}
