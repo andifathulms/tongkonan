@@ -2,8 +2,15 @@
 
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import type { Dim } from '@/lib/banua/types'
-import { provenanceSplit } from '@/lib/banua/rules'
+import type { ProvenanceClass } from '@/lib/banua/types'
+
+/** The three counts and their total. All this component needs. */
+export interface Split {
+  readonly measured: number
+  readonly canon: number
+  readonly interpolated: number
+  readonly total: number
+}
 
 /**
  * The honesty layer, as a bar and a plain-language line.
@@ -17,14 +24,22 @@ import { provenanceSplit } from '@/lib/banua/rules'
  * arguments.
  */
 export function ProvenanceStrip({
-  dims,
+  split,
   locale,
   compact = false,
   marking,
   onMarking,
   parts,
 }: {
-  dims: readonly Dim[]
+  /*
+   * Counts, not the dimensions they were counted from.
+   *
+   * This is a client component, so whatever it is handed crosses a
+   * serialisation boundary and is shipped to the browser. It was handed 53
+   * whole Dim objects — every note, in both locales, on a page that displays
+   * one of them — to render three numbers it could have been given directly.
+   */
+  split: Split
   locale: Locale
   compact?: boolean
   /**
@@ -38,7 +53,6 @@ export function ProvenanceStrip({
   /** part counts, shown only while the model is marked */
   parts?: { measured: number; canon: number; interpolated: number; total: number }
 }) {
-  const split = provenanceSplit(dims)
   const pct = (n: number) => (split.total === 0 ? 0 : (n / split.total) * 100)
 
   const bands = [
@@ -192,21 +206,28 @@ function fill(template: string, values: Record<string, number>): string {
 }
 
 /** The class of a single dimension, as a mono tag. Used in tables and readouts. */
-export function ProvenanceTag({ dim, locale }: { dim: Dim; locale: Locale }) {
+export function ProvenanceTag({
+  klass,
+  locale,
+}: {
+  /* The class alone. The rest of the Dim is never read here. */
+  klass: ProvenanceClass
+  locale: Locale
+}) {
   const label =
-    dim.class === 'measured'
+    klass === 'measured'
       ? COPY.provenance.measured
-      : dim.class === 'canon'
+      : klass === 'canon'
         ? COPY.provenance.canon
         : COPY.provenance.interpolated
   const colour =
-    dim.class === 'measured'
+    klass === 'measured'
       ? 'var(--bolu)'
-      : dim.class === 'canon'
+      : klass === 'canon'
         ? 'var(--riri)'
         : 'var(--rara)'
   // Same reason as the legend swatch: turmeric needs its own ink round it.
-  const edge = dim.class === 'canon' ? 'var(--riri-ink)' : colour
+  const edge = klass === 'canon' ? 'var(--riri-ink)' : colour
   return (
     <span className="inline-flex items-baseline gap-1.5">
       <span

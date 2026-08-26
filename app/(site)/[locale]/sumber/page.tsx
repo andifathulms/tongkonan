@@ -4,7 +4,7 @@ import { RailSection, Sheet } from '@/components/Sheet'
 import { ProvenanceStrip, ProvenanceTag } from '@/components/Provenance'
 import { COPY, DEFAULT_LOCALE, LOCALES, isLocale, pick, routeMetadata } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { DIMS, DIM_KEYS, SOURCES, dimsForLayout, sourceFor } from '@/lib/banua/rules'
+import { DIMS, DIM_KEYS, SOURCES, dimsForLayout, sourceFor, provenanceSplit } from '@/lib/banua/rules'
 import { DEFAULT_RULES } from '@/lib/banua/rules'
 import { buildHouse } from '@/lib/banua/assembly'
 import { runInvariants, summarise } from '@/lib/banua/invariants'
@@ -64,7 +64,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
       rail={
         <>
           <RailSection title={pick(COPY.provenance.heading, locale)}>
-            <ProvenanceStrip dims={dims} locale={locale} />
+            <ProvenanceStrip split={provenanceSplit(dims)} locale={locale} />
           </RailSection>
           <RailSection title={pick(COPY.checks.heading, locale)}>
             <p className="mb-3 text-body text-muted">
@@ -178,7 +178,7 @@ export default function Sumber({ params }: { params: { locale: string } }) {
                         <IfWrong s={sensitivityOf(sensitivity, key)} pct={pct} locale={locale} />
                       </td>
                       <td className="py-3 pr-4">
-                        <ProvenanceTag dim={dim} locale={locale} />
+                        <ProvenanceTag klass={dim.class} locale={locale} />
                       </td>
                       <td className="py-3 text-meta leading-snug">
                         {locale === 'id' ? dim.note : dim.noteEn}

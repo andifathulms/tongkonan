@@ -19,7 +19,7 @@ import { RailSection } from './Sheet'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { buildHouse, buildTimeline } from '@/lib/banua/assembly'
-import { DEFAULT_RULES, partSplit, rankInfo } from '@/lib/banua/rules'
+import { DEFAULT_RULES, partSplit, rankInfo, provenanceSplit } from '@/lib/banua/rules'
 import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/banua/address'
 import type { Rules } from '@/lib/banua/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
@@ -82,7 +82,7 @@ export function BangunClient({ locale }: { locale: Locale }) {
           <Derivation rules={rules} locale={locale} />
           <RailSection title={pick(COPY.provenance.heading, locale)}>
             <ProvenanceStrip
-              dims={layout.dims}
+              split={provenanceSplit(layout.dims)}
               locale={locale}
               marking={marking}
               onMarking={setMarking}

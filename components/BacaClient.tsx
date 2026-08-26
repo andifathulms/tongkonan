@@ -8,7 +8,7 @@ import { Choice } from './Controls'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { buildHouse } from '@/lib/banua/assembly'
-import { rankInfo } from '@/lib/banua/rules'
+import { rankInfo, provenanceSplit } from '@/lib/banua/rules'
 import type { Rules } from '@/lib/banua/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
@@ -139,7 +139,7 @@ export function BacaClient({ locale }: { locale: Locale }) {
           </RailSection>
 
           <RailSection title={pick(COPY.provenance.heading, locale)}>
-            <ProvenanceStrip dims={layout.dims} locale={locale} />
+            <ProvenanceStrip split={provenanceSplit(layout.dims)} locale={locale} />
           </RailSection>
         </>
       }

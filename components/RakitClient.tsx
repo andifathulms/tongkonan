@@ -8,7 +8,7 @@ import { ProvenanceStrip } from './Provenance'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { SEQUENCE_SECONDS, buildHouse, buildTimeline } from '@/lib/banua/assembly'
-import { DEFAULT_RULES, stageInfo } from '@/lib/banua/rules'
+import { DEFAULT_RULES, stageInfo, provenanceSplit } from '@/lib/banua/rules'
 import type { Stage } from '@/lib/banua/types'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
@@ -226,7 +226,7 @@ export function RakitClient({ locale }: { locale: Locale }) {
           </RailSection>
 
           <RailSection title={pick(COPY.provenance.heading, locale)}>
-            <ProvenanceStrip dims={layout.dims} locale={locale} compact />
+            <ProvenanceStrip split={provenanceSplit(layout.dims)} locale={locale} compact />
           </RailSection>
         </>
       }
