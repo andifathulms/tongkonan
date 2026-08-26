@@ -1,8 +1,23 @@
-# Tongkonan
+# Pasak
 
-A tongkonan generated from its rules — rank, number of bays, number of horns —
-rather than modelled as a shape. Change a socially meaningful number and the
-building changes with it.
+Two Indonesian houses, each generated from its own rules rather than modelled
+as a shape. Change a socially meaningful number and the building changes with
+it.
+
+- **Tongkonan** — Toraja, South Sulawesi. Rank, bays, and a tally of funerals
+  held on the horns of the tulak somba.
+- **Rumah gadang** — Minangkabau, West Sumatra. Laras, ruang, and a tally of
+  married daughters in the bilik along the rear lanjar. The laras is the reason
+  it is the second house: Koto Piliang steps the floor up at both ends and Bodi
+  Caniago refuses to, which is a claim about who sits where, testable with a
+  spirit level.
+
+Every dimension in either house declares where it came from, and almost none of
+them came from a survey. That is shown on every screen rather than hidden, and
+the two houses' figures are never averaged together.
+
+A pasak is the wooden peg that pins a mortise and tenon. Both of these houses
+go up without a nail in them.
 
 Read [PRD.md](PRD.md) for what is being built, [DESIGN.md](DESIGN.md) for how it
 must look, and [CLAUDE.md](CLAUDE.md) for how to work on it.
@@ -12,7 +27,7 @@ must look, and [CLAUDE.md](CLAUDE.md) for how to work on it.
 ```sh
 pnpm install
 pnpm dev      # http://localhost:3000
-pnpm check    # type-check, then the invariants across four rule combinations
+pnpm check    # type-check, then both invariant suites across five rule combinations each
 pnpm build    # static export into out/
 ```
 

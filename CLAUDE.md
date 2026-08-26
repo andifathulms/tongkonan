@@ -4,16 +4,17 @@ Working instructions for Claude Code. Read PRD.md for what is being built and DE
 
 ## Current state
 
-**M5 shipped. Phases A and B of the second-tradition work are done: the generator is split into a tradition-neutral core, and there are now two houses binding it.**
+**M5 shipped. The second-tradition work is done: a tradition-neutral core, two houses binding it, and both of them on screen.**
 
-- `lib/tradition/toraja/` generates a tongkonan: 155 parts and 33 joints at the default rules. `lib/tradition/minang/` generates a rumah gadang: 265 parts and 62 joints. `lib/core/` holds what is true of any house and knows a word from neither. `lib/solar/` is validated against almanac values. `lib/draw/` emits plan, elevation and long section as SVG.
-- `pnpm check` type-checks and runs 119 tests. Both invariant suites run over five rule combinations each — eleven structural checks for the tongkonan, sixteen for the rumah gadang — and every one passes. `checkAgainstSurvey` reports **skipped** in both and must stay that way.
-- **The app still shows only the tongkonan.** The Minang generator is complete and tested but not routed, because putting it on screen needs the tradition registry, the control schema and the renderer adapter, and those are Phase C by design. The bundle is unchanged.
+- `lib/tradition/toraja/` generates a tongkonan: 155 parts and 33 joints at the default rules. `lib/tradition/minang/` generates a rumah gadang: 265 parts and 62 joints. `lib/core/` holds what is true of any house and knows a word from neither. `lib/tradition/registry.ts` is the list the app walks. `lib/solar/` is validated against almanac values and now serves two sites.
+- `pnpm check` type-checks and runs 158 tests. Both invariant suites run over five rule combinations each — eleven structural checks for the tongkonan, sixteen for the rumah gadang — and every one passes. `checkAgainstSurvey` reports **skipped** in both and must stay that way.
+- **The project is called Pasak.** It was called Tongkonan while there was one house, which stopped being a name and became a claim the moment there were two. A pasak is the peg that pins a mortise and tenon: ordinary Indonesian, belonging to no one tradition, naming the join rather than the building. The repository and `NEXT_PUBLIC_BASE_PATH` still say `tongkonan`, because renaming a GitHub Pages project is the author's action and a half-done rename is worse than none — **that is the one outstanding step of the rename.**
+- **Both houses have all four routes, in both locales**: `/[locale]/[tradisi]/{bangun,rakit,baca,sumber}`, sixteen pages. The four old tradition-less paths still answer and say where the page went, carrying the query with them, because a citable address that stops resolving is not much of a citation.
+- The split is tested three ways. `test/architecture.test.ts` fails the build if `lib/core/` imports a tradition or names one in code, if one tradition imports another, if anything under `lib/` reaches for three.js, the DOM, `Math.random` or `Date.now`, or if two tracked paths differ only in case. `test/registry.test.ts` asserts the neutral contract without naming a rank or a laras.
 - Provenance, kept separate and never averaged: tongkonan 0 measured / 7 canon / 46 interpolated; rumah gadang 0 measured / 8 canon / 54 interpolated. Both land at 87% interpolated by dimension and 100% by part. The second house did not improve the number and was never going to.
-- The split is itself tested. `test/architecture.test.ts` fails the build if `lib/core/` imports a tradition or names one in code, if one tradition imports another, or if anything under `lib/` reaches for three.js, the DOM, `Math.random` or `Date.now`. Those properties are invisible at the point of use, which is exactly why they rot.
 - The bar got worse before it got better, twice, and both times that was the fix. A pedagogy pass on the Toraja builders found a dozen dimensional numbers sitting as bare literals — the ridge upsweep and the rafter section among them — which the bar had never counted. The Minang builders shipped their first draft with six of their own, all in the form `DIMS.gonjongRise.value * 0.55`. Declaring them raised the interpolated share in both packs. The higher number is the honest one.
-- **Counted by part rather than by dimension both houses are 100% interpolated**, and `/bangun` can mark the tongkonan to show it. Every canon rule in either pack states structure — faces north, ridge sags, horns are a tally; ruang count is odd, Koto Piliang steps the floor, bilik are a tally — and none of them sets a length, so every part depends on at least one invented metre. The shape's logic is sourced; its sizes are not. Do not resolve this by retagging a plausible number as canon.
-- `/bangun`, `/rakit`, `/baca`, `/sumber` exist in Indonesian and English. The frame-raising sequence, the parameter-change rebuild, the day-of-sun, rain, the four view transitions, and the section cut through the three zones are all in.
+- **Counted by part rather than by dimension both houses are 100% interpolated**, and `/bangun` can mark either model to show it. Every canon rule in either pack states structure — faces north, ridge sags, horns are a tally; ruang count is odd, Koto Piliang steps the floor, bilik are a tally — and none of them sets a length, so every part depends on at least one invented metre. The shape's logic is sourced; its sizes are not. Do not resolve this by retagging a plausible number as canon.
+- The frame-raising sequence, the parameter-change rebuild, the day-of-sun, rain, the four view transitions, and the section cut through the occupancy zones all work for both houses. The section is cut on the axis the ridge does not run along, so the tongkonan is cut across its ridge and the rumah gadang along it — which is what shows the anjuang stepping up at both ends.
 - **Interface tokens live in `app/globals.css` and nowhere else.** Six type steps, a 4px spacing scale, and a palette that states its contrast ratio beside every pair the interface uses. `tailwind.config.ts` maps utility names onto them and declares no values of its own. A bracketed size or colour in a component (`text-[13px]`, `bg-[rgba(...)]`) is a bug — it escapes the scale the same way a hardcoded dimension escapes provenance.
 
 Known gaps, all deliberate and none of them hidden:
@@ -21,7 +22,8 @@ Known gaps, all deliberate and none of them hidden:
 - **Carving is texture-level.** The pa'barre allo is constructed from its rule rather than traced, but it is drawn onto a canvas, not extruded. Relief casting real shadow is the target.
 - **Contact darkening is a radial-gradient plane.** Real ambient occlusion in the joints and under the raised floor is the largest remaining quality gain. Do not ship the placeholder as the answer.
 - **The tongkonan's body walls are vertical.** The real ones lean outward toward the plate. No source gives an angle, so it is left flat rather than guessed — see the note in `toraja/frame.ts`. The rumah gadang *does* lean, at a declared and openly interpolated 8°, which is the same guess made visibly instead of avoided. The two houses disagreeing about this is a question for Phase C, not a bug.
-- **No survey is wired in.** Everything above follows from that.
+- **The rumah gadang has no derivation and no drawing export.** The tongkonan's `/bangun` shows the arithmetic from three rules to the metres, and exports plan, elevation and section as SVG. Neither is written for the second house: the derivation would have to be worked out rather than generalised, and `lib/draw/` reads a tongkonan's Layout directly — prows, ijuk courses, the knee across the slope — so a second projection is a drawing problem, not a threading one. Both sections are absent for that house rather than wrong, and both components say so at the point they return null.
+- **No survey is wired in, for either house.** Everything above follows from that.
 
 Keep this section accurate. A stale "Current state" is worse than none — a previous project in this portfolio still claimed "not yet scaffolded" long after it had six routes and thirty-five components, and that misled every session that read it. Update this line in the same commit as the work it describes.
 
@@ -40,12 +42,20 @@ Keep this section accurate. A stale "Current state" is worse than none — a pre
 ```
 lib/core/         true of any house — generic over what a tradition calls things
   kinds.ts          Kinds (stage/material/source/dim/joint/rules) and RulePack
-  types.ts          Part, Joint, House, Dim, Source, Provenance
+  types.ts          Part, Joint, House, Dim, Source, Provenance, the Any* aliases
   provenance.ts     dim factory, worst-class, the two splits
   geometry.ts       catmull-rom, section sweep, mesh + tube builders, mirroring
+  parts.ts          the box and mesh builders
+  courses.ts        lapped courses on a slope
+  address.ts        the rules codec: fields as data, query in and out
   assembly.ts       build order, bounds, the normalised timeline
   invariants.ts     symmetry, joints, build order, meshes, part provenance, survey
+  sensitivity.ts    perturb a dimension, rebuild, measure named probes
+  counterexample.ts push a dimension until a check refuses the house
+  scene.ts          SceneModel: what the renderer needs that the parts do not say
   whatif.ts         the one place a rule is temporarily something else
+lib/tradition/
+  registry.ts       the two houses as one list, each sealing its own rule type
 lib/tradition/toraja/   the tongkonan, binding the core
   types.ts          Stage, MaterialKey, SourceKey, JointKind, Rank, Rules, Layout
   rules.ts          rank/bays/horns, dimensions with provenance tags, source table, PACK
@@ -58,6 +68,8 @@ lib/tradition/toraja/   the tongkonan, binding the core
   counterexample.ts a house built to make a check refuse it
   derivation.ts     the arrow from three rules to the dimensions, written out
   address.ts        the three rules, to and from a query string
+  scene.ts          the reading the renderer needs
+  facade.ts         the one file that meets the registry's vocabulary
 lib/tradition/minang/   the rumah gadang, binding the same core
   types.ts          Stage, MaterialKey, SourceKey, JointKind, Laras, Rules, Layout
   rules.ts          laras/ruang/bilik, dimensions with provenance tags, source table, PACK
@@ -66,18 +78,24 @@ lib/tradition/minang/   the rumah gadang, binding the same core
   roof.ts           the quarter-turned sweep, rafters, purlins, singok, gonjong, ijuk
   assembly.ts       buildHouse
   invariants.ts     ruang odd, ridge profile, anjuang floor, gonjong count, bilik tally, walls lean
-  address.ts        the three rules, to and from a query string
+  sensitivity.ts, counterexample.ts, address.ts, scene.ts, facade.ts
 lib/solar/
   position.ts       NOAA solar position; shared with the zero-shadow-day tool
   presets.ts        equinox, June solstice, and the computed zero-shadow day
 lib/draw/
   orthographic.ts   plan, elevation and long section as SVG line drawings
   sheet.ts          all three on one 1:50 sheet with the source table
-components/         renderer, controls, provenance strip
-app/[locale]/       bangun, rakit, baca, sumber
+components/         renderer, shared controls, provenance strip
+  rules/            one rule-control set per tradition, sharing primitives
+app/[locale]/[tradisi]/   bangun, rakit, baca, sumber
+app/[locale]/             the four old paths, saying where they went
 ```
 
 **The first hard split: `lib/` generates, the renderer draws.** `lib/` must never import three.js, touch `window`, or read the DOM. The renderer must never generate geometry. If a shape is being computed inside a component, it is in the wrong file.
+
+**The third hard split: the app may not know which house it has.** `lib/tradition/registry.ts` seals each rule type inside its entry. A route, a rail or the renderer takes a `Built` — parts, a scene model, a timeline, verdicts, provenance — and nothing in it names a rank or a laras. The renderer draws `House<Kinds>`, which was already neutral; the registry is what was still stopping the app from using it.
+
+The exception is the rule controls, and it is deliberate. A data-driven field schema would render both houses from one component and would cost the rank multiplier printed on the rank that applies it, the warning when a bay count is unusual, and the gloss saying that refusing a step *is* the statement. Those are the parts of the interface carrying the argument. So each tradition keeps its own controls under `components/rules/` and they share primitives: **the abstraction goes under the widgets, not over them.**
 
 **The second hard split: `lib/core/` may not know what it is building.** It is generic over a `Kinds` bag — a tradition declares its own stages, materials, sources, dimension keys and joinery, and the core is parameterised on them. So `Part.stage` is not one of nine Toraja words at the type level; it is whatever the tradition binding says it is, and a Minang part cannot claim a Toraja stage and type-check.
 
@@ -93,7 +111,8 @@ Both splits are what make the geometry testable. Neither is a style preference.
 
 The URL has two halves and they mean different things.
 
-- **The query string is the house.** `?pangkat=…&ruang=…&tanduk=…`, all three always written, defaults included — it is a complete description anyone can cite, and a description that omits its defaults is a diff instead. `lib/banua/address.ts`.
+- **The path is the tradition.** `/[locale]/[tradisi]/[route]`. A tradition selects a rule pack rather than being one of its rules, and putting it in the query would make one string mean two kinds of thing at once. The tradition switch keeps the route and drops the query, because `?pangkat=layuk` means nothing to a rumah gadang and carrying it across would hand the reader an address silently describing a different house from the one they left.
+- **The query string is the house**, in that tradition's own parameter names: `?pangkat=…&ruang=…&tanduk=…` for one, `?laras=…&ruang=…&bilik=…` for the other. Every rule always written, defaults included — it is a complete description anyone can cite, and a description that omits its defaults is a diff instead. The mechanism is `lib/core/address.ts`; each tradition declares only which fields exist and what they are called.
 - **The fragment is the reader.** Camera, date, time, toggles, explode, stage, section. Written only where it differs from the default, so an untouched page has no fragment at all. Never reaches a server, never reloads. `lib/reader.ts`.
 
 Rules go in the query string, vantage goes in the fragment, and nothing crosses. The two writers each preserve the other half, read live at write time; a test holds that. Vantage writes are debounced 250ms because a dragged slider would otherwise hit the browser's history rate limit.
@@ -177,7 +196,15 @@ Phase 2 is real and these decisions are made. Phase A has landed; B and C have n
 
 - **Phase A — done.** Split `lib/core/` from `lib/tradition/toraja/`, extracting only what is mechanically neutral. No new concepts invented, no user-visible change, tests and provenance figures identical before and after.
 - **Phase B — done.** The rumah gadang, built concretely in `lib/tradition/minang/` and allowed to duplicate. Generator, rule pack, source table, invariants and tests; not routed.
-- **Phase C — extract the second layer, from two examples, and put the second house on screen.** The tradition registry, the control schema, the renderer adapter, the route, the copy. See what the second house taught, below: that list is the input.
+- **Phase C — done.** Five extractions the two houses earned, a registry, a scene model, the renderer generic over both, the route, the copy, and the rename.
+
+### What Phase C settled
+
+- **What was extracted, and only because two houses agreed:** lapped courses, the box and mesh builders, the rules codec, the sensitivity probe, the counterexample search. Each had been written twice and each pair was the same arithmetic over different constants.
+- **What was not, and stays not:** `Layout`. There is still no shared one and now for a second reason — the second carries anjuang, gonjong tips, lanjar and bilik, and runs its ridge on the other axis. What a probe should measure and which check is worth breaking are judgements about a particular building; the mechanisms moved and the judgements did not.
+- **The renderer needed a narrower question than `Layout` answers.** Not "what are this house's dimensions" but "where does the water land, how does it divide vertically, how far does the roof reach, which way is it long". That question two houses could answer, and `SceneModel` is the answer.
+- **A schema for controls was declined**, with reasons, above.
+- **Extracting found two disagreements and one bug.** The two address codecs disagreed about whether `?tanduk=` means six horns or none — it means a truncated address, so it falls back. The counterexample search found that an anjuang step shallower than the boards forming it produced a bearer of negative height. And `components/controls/` collided with `Controls.tsx` on a case-insensitive filesystem, which is now a test that reads from git rather than the disk, because the machine most likely to introduce that collision is the one that cannot hold it.
 
 ### What the second house taught
 

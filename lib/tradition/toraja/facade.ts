@@ -184,6 +184,32 @@ export function tradition(site: Site): Tradition {
     site,
     params: CODEC.params,
     stageOrder: STAGE_ORDER,
+    joints: [
+      {
+        kind: 'pasak',
+        name: t('Pasak', 'Pegged mortise and tenon'),
+        gloss: t(
+          'Pen masuk ke lubang, lalu dikunci pasak kayu yang menembus keduanya. Inilah sambungan utama rangka.',
+          'A tenon enters a mortise and a wooden peg driven through both locks it. This is the frame’s main joint.',
+        ),
+      },
+      {
+        kind: 'takik',
+        name: t('Takik', 'Lap'),
+        gloss: t(
+          'Dua balok bersilang saling ditakik agar rata dan tidak bergeser.',
+          'Two crossing members are each notched so they sit flush and cannot shift.',
+        ),
+      },
+      {
+        kind: 'tumpu',
+        name: t('Tumpu', 'Seat'),
+        gloss: t(
+          'Kaki tiang duduk di cekungan batu umpak. Tidak ditanam — karena itulah rumah bisa dibongkar dan dipindah.',
+          'A post foot seats in the dish of its pad stone. It is not buried — which is why the house can be taken down and moved.',
+        ),
+      },
+    ],
     stages: STAGES.map((s) => ({
       stage: s.stage,
       title: s.title,

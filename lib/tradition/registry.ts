@@ -60,6 +60,19 @@ export interface Reading {
   readonly unit: Text
 }
 
+/**
+ * One kind of joint this house is put together with.
+ *
+ * Not shared: one house seats a post foot in the dish of a pad stone and
+ * calls that a tumpu, the other calls it a sandi. A fixed list would have
+ * shown a reader a name their house does not use.
+ */
+export interface JointView {
+  readonly kind: string
+  readonly name: Text
+  readonly gloss: Text
+}
+
 /** A build stage, named in the tradition's own words. */
 export interface StageView {
   readonly stage: string
@@ -122,6 +135,7 @@ export interface Tradition {
   readonly params: readonly { readonly key: string; readonly param: string }[]
   readonly stageOrder: readonly string[]
   readonly stages: readonly StageView[]
+  readonly joints: readonly JointView[]
   readonly sources: readonly Source[]
   readonly dims: readonly DimView[]
   readonly split: Split
