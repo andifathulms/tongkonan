@@ -234,7 +234,19 @@ function Readout({
   return (
     // Below the view switch on a narrow screen, beside it on a wide one:
     // at 390px the two would otherwise sit on top of each other.
-    <div className="pointer-events-none absolute left-3 top-14 z-10 max-w-[15rem] rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px] sheet:top-3">
+    /*
+      Announced when it changes, because it is the answer to every rule the
+      reader sets. A sighted reader watches the house rebuild and the figures
+      follow; without this a screen reader user presses a rank button and is
+      told nothing at all.
+
+      polite and not atomic on purpose: only the figures that moved are read,
+      rather than all eight rows every time a slider steps.
+    */
+    <div
+      aria-live="polite"
+      className="pointer-events-none absolute left-3 top-14 z-10 max-w-[15rem] rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px] sheet:top-3"
+    >
       {/*
         Without this line the six figures read as the specifications of a real
         building. They are outputs of the three rules in the rail, and saying

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { RailSection, Sheet } from './Sheet'
+import { fill } from './Controls'
 import { Viewport, usePrefersReducedMotion } from './viewport/Viewport'
 import { ProvenanceStrip } from './Provenance'
 import { COPY, pick } from '@/lib/i18n'
@@ -115,6 +116,17 @@ export function RakitClient({ locale }: { locale: Locale }) {
                 setT(Number(e.target.value) / 1000)
               }}
               aria-label={pick(COPY.assembly.heading, locale)}
+              /*
+                The scrubber runs 0–1000 and announced "500", which names
+                nothing. The stage it is standing in is what the control is
+                for, so that is what it says.
+              */
+              aria-valuetext={fill(pick(COPY.assembly.stageValue, locale), {
+                stage: activeStage
+                  ? stageInfo(activeStage.stage).title
+                  : pick(COPY.assembly.complete, locale),
+                pct: String(Math.round(t * 100)),
+              })}
               className="w-full accent-bolu"
             />
 
@@ -197,6 +209,9 @@ export function RakitClient({ locale }: { locale: Locale }) {
                 value={Math.round(explode * 100)}
                 onChange={(e) => setExplode(Number(e.target.value) / 100)}
                 aria-label={pick(COPY.joints.explode, locale)}
+                aria-valuetext={fill(pick(COPY.joints.explodeValue, locale), {
+                  pct: String(Math.round(explode * 100)),
+                })}
                 className="w-full accent-bolu"
               />
               <p className="mt-2 text-body text-muted">

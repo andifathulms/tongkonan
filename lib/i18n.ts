@@ -76,6 +76,13 @@ export const COPY = {
     bays: t('Ruang', 'Bays'),
     horns: t('Tanduk', 'Horns'),
     hornsUnit: t('upacara', 'funerals'),
+    /*
+     * Spoken values for the sliders. A range announces its raw number, so
+     * without these the time control says "720" where the screen says 12:00,
+     * and the assembly scrubber says "500", which names nothing at all.
+     */
+    timeValue: t('{clock} WITA, matahari {alt}° di atas ufuk', '{clock} WITA, sun {alt}° above the horizon'),
+    hornsValue: t('{n} upacara', '{n} funerals'),
     sun: t('Matahari', 'Sun'),
     time: t('Waktu', 'Time'),
     date: t('Tanggal', 'Date'),
@@ -239,6 +246,9 @@ export const COPY = {
       'Gerak dikurangi: urutan tetap ditampilkan, tetapi langsung dan berurutan tanpa animasi.',
       'Reduced motion: the sequence is still shown, as an immediate ordered reveal.',
     ),
+    stageValue: t('{stage}, {pct}% dari urutan', '{stage}, {pct}% through the sequence'),
+    /* The scrubber's resting position: the house is up, no stage is running. */
+    complete: t('Rangka berdiri', 'Frame standing'),
     noNails: t(
       'Rangka disusun tanpa paku. Setiap sambungan pada model ini diuji: pen harus berada di dalam lubangnya.',
       'The frame goes up without nails. Every joint in this model is tested: the tenon has to sit inside its mortise.',
@@ -263,6 +273,7 @@ export const COPY = {
       'A post foot seats in the dish of its pad stone. It is not buried — which is why the house can be taken down and moved.',
     ),
     explode: t('Urai', 'Explode'),
+    explodeValue: t('terurai {pct}%', '{pct}% exploded'),
     explodeGloss: t(
       'Mengangkat tiap bagian sesuai urutan pendiriannya, agar sambungan di bawahnya terlihat.',
       'Lifts each part by its place in the build order, so the joints beneath it can be seen.',

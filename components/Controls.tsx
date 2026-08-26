@@ -101,6 +101,9 @@ export function RuleControls({
           value={rules.horns}
           onChange={(e) => onChange({ ...rules, horns: Number(e.target.value) })}
           aria-label={pick(COPY.controls.horns, locale)}
+          aria-valuetext={fill(pick(COPY.controls.hornsValue, locale), {
+            n: String(rules.horns),
+          })}
           className="w-full accent-bolu"
         />
       </Field>
@@ -184,6 +187,15 @@ export function SunControls({
           value={minutes}
           onChange={(e) => onMinutes(Number(e.target.value))}
           aria-label={pick(COPY.controls.time, locale)}
+          /*
+            The clock and the altitude together: the altitude is what the
+            control is actually for, and carrying it here is one announcement
+            instead of a live region firing after every step.
+          */
+          aria-valuetext={fill(pick(COPY.controls.timeValue, locale), {
+            clock: formatClock(minutes),
+            alt: altitude.toFixed(1),
+          })}
           className="w-full accent-bolu"
         />
         <div className="mt-1 flex items-baseline justify-between">
@@ -275,6 +287,11 @@ export function ViewSwitch({
       ))}
     </div>
   )
+}
+
+/** Fill {name} placeholders in a copy string. */
+export function fill(template: string, values: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole)
 }
 
 /* ── Primitives ───────────────────────────────────────────────────────── */
