@@ -33,6 +33,19 @@
   --muted: #575349; /* muted ink     — on --film 5.30:1, on --kapur 5.98:1 */
   --muted-on-ink: #aea99b; /* the same step, over --bolu: 7.78:1 */
 
+  /*
+   * The focus ring, as two rings.
+   *
+   * A single soot outline is 12.62:1 on the film and 1:1 on a soot button —
+   * which is every primary control in the app at the moment it takes focus:
+   * the active rank, bay, preset, view and locale chips, the nav item, Play,
+   * and the full-sheet button. The inner ring carries it on dark grounds and
+   * the outer one on light, so one rule covers both and no component needs an
+   * override.
+   */
+  --focus: #17150f; /* on the film 12.62:1 */
+  --focus-contrast: #e9e3d2; /* on the soot 14.24:1 */
+
   --hairline: rgba(23, 21, 15, 0.16);
   --wash: rgba(23, 21, 15, 0.06); /* hover */
   /*
@@ -144,8 +157,9 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--bolu);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--focus-contrast);
 }
 
 /*
