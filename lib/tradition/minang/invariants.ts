@@ -298,55 +298,65 @@ export function checkEaveRises(layout: Layout): CheckResult {
 }
 
 /**
- * The gable panel is cut to the roof that is actually there.
+ * Nothing in the roof frame reaches outside the roof.
  *
- * It was not, and nothing noticed. The panel was built from the level eave —
- * half-width and edge height read straight off the layout — which was the same
- * thing as the roof's section at the gable right up until the roof learned to
- * lift, and then silently was not. It ended up projecting more than a metre
- * past the roof on each side and hanging four and a half metres below its
- * edge: a flat carved slab sticking out of the building.
+ * This has now been the same fault three times, and it has one shape: two
+ * places computing the roof's section, and only one of them updated. The gable
+ * panel and the rafters were both being cut from the level eave — half-width
+ * and edge height read straight off the layout — which was the same thing as
+ * the section at that point right up until the roof learned to lift, and then
+ * silently was not. The panel ended up projecting 1.40 m past the roof on each
+ * side and hanging 4.44 m below its edge; the rafters over the overhang, which
+ * is the whole of the gonjong, stuck out half a metre and hung a metre and a
+ * half low. A carved slab and a set of loose sticks, both invisible to a suite
+ * that never asked.
  *
- * The failure mode is two places computing the same shape and only one of them
- * being updated, so the check is that they agree. `stationAt` is now the single
- * description and this holds the panel to it.
+ * `stationAt` is the one description now. This is what holds everything to it:
+ * no member positioned at a station may reach outboard of that station's edge
+ * or hang below it, by more than the depth of its own timber.
  */
-export function checkGableFollowsRoof(house: House, layout: Layout): CheckResult {
+export function checkRoofFollowsSection(house: House, layout: Layout): CheckResult {
+  // A member straddles the line it lands on, so its own section is the slack
+  // and nothing more.
+  const slack = DIMS.rafterDepth.value
   const problems: string[] = []
-  let worst = 0
+  let worstOut = 0
+  let worstLow = 0
+  let checked = 0
 
-  for (const end of [1, -1] as const) {
-    const z = (end * layout.bodyLength) / 2
+  const at = (z: number, part: Part, what: string) => {
     const st = stationAt(layout, z)
-    const panel = house.parts.find((p) => p.id === `singok-${end > 0 ? 'a' : 'b'}`)
-    if (!panel) {
-      problems.push(`no gable panel at z=${z.toFixed(2)}`)
-      continue
-    }
-    const b = partBounds(panel)
-    // Half-width and the height of the edge: the two numbers that drifted.
-    const wide = Math.max(Math.abs(b.min[0] ?? 0), Math.abs(b.max[0] ?? 0)) - st.halfWidth
+    const b = partBounds(part)
+    checked++
+    const out = Math.max(Math.abs(b.min[0] ?? 0), Math.abs(b.max[0] ?? 0)) - st.halfWidth
     const low = st.eaveY - (b.min[1] ?? 0)
-    worst = Math.max(worst, Math.abs(wide), Math.abs(low))
-    // A hair of tolerance for the panel's own thickness and nothing more.
-    const slack = DIMS.singokThickness.value * 2
-    if (wide > slack) problems.push(`z=${z.toFixed(2)}: ${wide.toFixed(2)} m wider than the roof`)
-    if (low > slack) problems.push(`z=${z.toFixed(2)}: hangs ${low.toFixed(2)} m below the roof edge`)
+    if (out > worstOut) worstOut = out
+    if (low > worstLow) worstLow = low
+    if (out > slack) problems.push(`${what}: ${out.toFixed(2)} m outboard of the roof`)
+    if (low > slack) problems.push(`${what}: hangs ${low.toFixed(2)} m below the roof edge`)
+  }
+
+  for (const part of house.parts) {
+    // Rafters are boxes at a known station; the panel names its own end.
+    if (part.kind === 'box' && part.id.startsWith('kasau-')) at(part.center[2], part, part.id)
+    else if (part.id.startsWith('singok-')) {
+      at((part.id.endsWith('-a') ? 1 : -1) * (layout.bodyLength / 2), part, part.id)
+    }
   }
 
   return {
-    key: 'gable-follows-roof',
-    titleId: 'Papan singok mengikuti bentuk atap di tempatnya berdiri',
-    titleEn: 'The gable panel is cut to the roof section it closes',
+    key: 'roof-follows-section',
+    titleId: 'Tidak ada bagian rangka atap yang menjulur keluar dari atap',
+    titleEn: 'Nothing in the roof frame reaches outside the roof',
     status: problems.length === 0 ? 'pass' : 'fail',
     detail:
       problems.length === 0
-        ? `Kedua papan singok sesuai dengan atap di ujung badan rumah, selisih terbesar ${(worst * 1000).toFixed(0)} mm.`
-        : problems.join('; '),
+        ? `${checked} kasau dan papan singok dipotong menurut penampang atap di tempatnya; terjauh ${(worstOut * 1000).toFixed(0)} mm ke luar dan ${(worstLow * 1000).toFixed(0)} mm ke bawah.`
+        : problems.slice(0, 6).join('; '),
     detailEn:
       problems.length === 0
-        ? `Both gable panels match the roof at the end of the body, largest discrepancy ${(worst * 1000).toFixed(0)} mm.`
-        : problems.join('; '),
+        ? `${checked} rafters and gable panels cut to the roof section they sit at; the furthest reaches ${(worstOut * 1000).toFixed(0)} mm outboard and ${(worstLow * 1000).toFixed(0)} mm low.`
+        : problems.slice(0, 6).join('; '),
   }
 }
 
@@ -519,7 +529,7 @@ export function runInvariants(house: House, layout: Layout): readonly CheckResul
     checkAnjuangFloor(house, layout),
     checkGonjongCount(house, layout),
     checkEaveRises(layout),
-    checkGableFollowsRoof(house, layout),
+    checkRoofFollowsSection(house, layout),
     checkBilikTally(house, layout),
     checkWallsLeanOut(house, layout),
     checkIjukCoverage(house, layout),

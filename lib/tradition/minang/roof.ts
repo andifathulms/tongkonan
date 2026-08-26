@@ -289,8 +289,22 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
    */
   const placeRafters = (zs: readonly number[], tag: string, upperFirst: boolean) => {
     zs.forEach((z, i) => {
-      const ridgeYz = ridge(sAtZ(layout, z)).y
-      const kneeY = ridgeYz - (ridgeYz - layout.eaveY) * layout.kneeDrop
+      /*
+       * Cut to the roof at *this* z, not to the level eave.
+       *
+       * The two were the same number over the body and stopped being the same
+       * the moment the roof learned to lift — so the rafters over the
+       * overhang, which is the whole of the gonjong, were still being cut to a
+       * roof 5.40 m wide with its edge at 3.66 m. They ended up half a metre
+       * outboard of the roof and more than a metre and a half below its edge:
+       * thin sticks poking out of both ends of the building, which is exactly
+       * how they rendered.
+       */
+      const st = stationAt(layout, z)
+      const ridgeYz = st.ridgeY
+      const knee = st.knee ?? { at: layout.breakFraction, drop: layout.kneeDrop }
+      const kneeX = st.halfWidth * knee.at
+      const kneeY = ridgeYz - (ridgeYz - st.eaveY) * knee.drop
       for (const side of [-1, 1] as const) {
         const upper = () =>
           rafter(
@@ -299,7 +313,7 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
             'Upper rafter',
             order++,
             [0, ridgeYz],
-            [side * wallHeadX, kneeY],
+            [side * kneeX, kneeY],
             z,
             rafterDims,
           )
@@ -309,8 +323,8 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
             'Kasau bawah',
             'Lower rafter',
             order++,
-            [side * wallHeadX, kneeY],
-            [side * layout.eaveHalfDepth, layout.eaveY],
+            [side * kneeX, kneeY],
+            [side * st.halfWidth, st.eaveY],
             z,
             rafterDims,
           )
@@ -363,7 +377,8 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
     ] as const) {
       const path: Vec3[] = stations.map((st) => {
         const depth = st.ridgeY - st.eaveY
-        const drop = f <= knee.at ? (knee.drop * f) / knee.at : knee.drop + ((1 - knee.drop) * (f - knee.at)) / (1 - knee.at)
+        const k = st.knee ?? knee
+        const drop = f <= k.at ? (k.drop * f) / k.at : k.drop + ((1 - k.drop) * (f - k.at)) / (1 - k.at)
         return [side * st.halfWidth * f, st.ridgeY - depth * drop, st.x]
       })
       parts.push(
