@@ -110,6 +110,20 @@ export const COPY = {
     ),
   },
 
+  derivation: {
+    heading: t('Cara rumah ini dihitung', 'How this house was worked out'),
+    intro: t(
+      'Tiga aturan di atas menghasilkan setiap ukuran di bawah. Ini perhitungannya, bukan ringkasannya — angka yang sama yang membentuk model di sebelah.',
+      'The three rules above produce every dimension below. This is the working, not a summary of it — the same numbers that built the model beside it.',
+    ),
+    yours: t('pilihan Anda', 'yours'),
+    carried: t('dari langkah di atas', 'from the step above'),
+    foot: t(
+      'Titik merah berarti angka itu tidak punya sumber: penulis menetapkannya untuk menutup celah. Sebagian besar perhitungan ini bertumpu pada angka semacam itu.',
+      'A red dot means that number has no source — the author set it to close a gap. Most of this working rests on numbers like that.',
+    ),
+  },
+
   provenance: {
     heading: t('Asal ukuran', 'Provenance'),
     measured: t('Terukur', 'Measured'),

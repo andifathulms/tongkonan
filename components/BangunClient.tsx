@@ -12,6 +12,7 @@ import {
   ViewSwitch,
 } from './Controls'
 import { ProvenanceStrip } from './Provenance'
+import { Derivation } from './Derivation'
 import { DrawingExport } from './DrawingExport'
 import { RailSection } from './Sheet'
 import { COPY, pick } from '@/lib/i18n'
@@ -71,6 +72,12 @@ export function BangunClient({ locale }: { locale: Locale }) {
             drawing away is the last thing anyone does.
           */}
           <RuleControls rules={rules} onChange={setRules} locale={locale} />
+          {/*
+            Directly under the rules, because it explains the rules. It is the
+            worked example a newcomer needs before touching anything, so it is
+            filled in on arrival rather than waiting to be asked for.
+          */}
+          <Derivation rules={rules} locale={locale} />
           <RailSection title={pick(COPY.provenance.heading, locale)}>
             <ProvenanceStrip
               dims={layout.dims}
