@@ -48,7 +48,15 @@ export const COPY = {
     'Ubah pangkat, jumlah ruang, atau jumlah tanduk — rumah dihitung ulang dari aturan itu.',
     'Change the rank, the bay count, or the horns — the house is recomputed from those rules.',
   ),
-  hint: t('Seret untuk memutar · gulir untuk mendekat', 'Drag to rotate · scroll to zoom'),
+  /*
+   * Says both ways of doing it, in one line, so it is not two pieces of copy
+   * that can disagree — and so it can be the canvas's description rather than
+   * a second hidden sentence saying the same thing to a screen reader.
+   */
+  hint: t(
+    'Seret atau tombol panah untuk memutar · gulir atau +/− untuk mendekat',
+    'Drag or arrow keys to rotate · scroll or +/− to zoom',
+  ),
   computed: t('Dihitung dari aturan', 'Computed from the rules'),
   modelLabel: t(
     'Model tongkonan, dihitung dari aturannya',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { HouseScene } from './scene'
 import type { CameraState, ViewKey } from './scene'
@@ -53,6 +53,10 @@ export function Viewport({
   const [scaleBar, setScaleBar] = useState<{ metres: number; pixels: number } | null>(null)
   // The hint retires itself the moment the reader does the thing it names.
   const [touched, setTouched] = useState(false)
+  // It is also the canvas's description, so the keys are available to someone
+  // who cannot see it fade. It goes to opacity 0 rather than display:none for
+  // exactly that reason.
+  const hintId = useId()
   const reducedMotion = usePrefersReducedMotion()
 
   // Everything the render loop reads lives in a ref, so a prop change does not
@@ -168,6 +172,54 @@ export function Viewport({
     }
   }, [view, house])
 
+  /* ── Keyboard rotation ────────────────────────────────────────────── */
+  /*
+   * Rotation is drag-only by design, and a model that never idles gives a
+   * mouse user the whole gesture and a keyboard user nothing. This is the
+   * same functionality reached a different way — not a turntable and not idle
+   * motion, which stay banned.
+   *
+   * The step is a fixed number of pixels of equivalent drag, so a key press
+   * moves the camera exactly as far as the same drag would.
+   */
+  const onKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
+    const scene = sceneRef.current
+    if (!scene) return
+    const step = e.shiftKey ? 60 : 20
+    switch (e.key) {
+      case 'ArrowLeft':
+        scene.orbit(-step, 0)
+        break
+      case 'ArrowRight':
+        scene.orbit(step, 0)
+        break
+      case 'ArrowUp':
+        scene.orbit(0, -step)
+        break
+      case 'ArrowDown':
+        scene.orbit(0, step)
+        break
+      case '+':
+      case '=':
+        scene.dolly(1 / 1.12)
+        break
+      case '-':
+      case '_':
+        scene.dolly(1.12)
+        break
+      case 'Home':
+        // Back to the preset the view switch is showing, so there is always a
+        // way out of an orientation the reader cannot undo by eye.
+        scene.setCamera(scene.viewPreset(view))
+        break
+      default:
+        return
+    }
+    // Only now: an unhandled key keeps its default, so Tab still leaves.
+    e.preventDefault()
+    setTouched(true)
+  }
+
   /* ── Drag-only rotation ───────────────────────────────────────────── */
   useEffect(() => {
     const canvas = canvasRef.current
@@ -238,7 +290,10 @@ export function Viewport({
         ref={canvasRef}
         className="block h-full w-full touch-none"
         role="img"
+        tabIndex={0}
         aria-label={pick(COPY.modelLabel, locale)}
+        aria-describedby={hintId}
+        onKeyDown={onKeyDown}
       />
       {caption}
       {children}
@@ -249,7 +304,7 @@ export function Viewport({
         left, and it goes away as soon as it has been used.
       */}
       <p
-        aria-hidden
+        id={hintId}
         className={[
           'micro pointer-events-none absolute bottom-[calc(var(--masthead-h)+0.75rem)] right-3 select-none text-right transition-opacity duration-layout sheet:bottom-3',
           touched ? 'opacity-0' : 'opacity-100',
