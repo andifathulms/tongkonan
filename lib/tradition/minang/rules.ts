@@ -122,17 +122,11 @@ export const DIMS = {
   ridgeEndRise: dim(1.55, 'm', 'interpolated', 'none', 'Naiknya kedua ujung bubungan. Simetris: tidak seperti tongkonan, tak ada ujung yang lebih tinggi.', 'Rise of both ends of the ridge. Symmetric: unlike the tongkonan, neither end is the higher one.'),
   ridgeOverhang: dim(0.9, 'm', 'interpolated', 'none', 'Julur bubungan melewati ujung badan rumah.', 'How far the ridge projects beyond the end of the body.'),
   ridgeUpsweep: dim(0.20, 'ratio', 'interpolated', 'none', 'Seberapa jauh lengkung bubungan melampaui titik kendali sebelum naik ke ujung; inilah yang membuat garis bubungan melengkung, bukan patah.', 'How far the ridge curve overshoots its control point before rising to the end; this is what makes the ridge a curve rather than a kink.'),
-  gonjongRise: dim(3.4, 'm', 'interpolated', 'none', 'Tinggi puncak gonjong di atas ujung bubungan.', 'Height of a gonjong tip above the end of the ridge.'),
-  gonjongSplay: dim(0.85, 'm', 'interpolated', 'none', 'Jarak puncak gonjong dari bidang bubungan, ke muka dan ke belakang. Sepasang gonjong mengembang, tidak sejajar.', 'How far a gonjong tip stands off the ridge plane, toward the front and toward the rear. A pair splays; it does not run parallel.'),
-  gonjongLean: dim(0.45, 'ratio', 'interpolated', 'none', 'Condongnya gonjong ke luar melewati ujung bubungan, sebagai bagian dari tingginya.', 'How far a gonjong leans outward beyond the ridge end, as a share of its own rise.'),
-  gonjongButtRadius: dim(0.14, 'm', 'interpolated', 'none', 'Jari-jari pangkal gonjong.', 'Radius at the foot of a gonjong.'),
-  gonjongSplayCurve: dim(1.6, 'ratio', 'interpolated', 'none', 'Seberapa lambat puncak gonjong menjauh dari bidang bubungan. Nilai satu memberi garis lurus; inilah yang membuat gonjong meninggalkan bubungan hampir tegak lalu membuka di dekat puncak.', 'How late the gonjong tip pulls away from the ridge plane. A value of one gives a straight line; this is what makes the spire leave the ridge almost vertically and open out only near the top.'),
-  gonjongLeanCurve: dim(1.9, 'ratio', 'interpolated', 'none', 'Seberapa lambat gonjong condong ke luar melewati ujung bubungan.', 'How late the gonjong leans outward beyond the ridge end.'),
-  gonjongTaper: dim(0.7, 'ratio', 'interpolated', 'none', 'Bagaimana penampang gonjong menipis ke puncak.', 'How the gonjong section thins toward its tip.'),
-  anjuangGonjongRise: dim(0.55, 'ratio', 'interpolated', 'none', 'Tinggi gonjong anjuang dibanding gonjong ujung.', 'Rise of an anjuang gonjong relative to an end gonjong.'),
-  anjuangGonjongLean: dim(0.4, 'ratio', 'interpolated', 'none', 'Condongnya gonjong anjuang dibanding gonjong ujung.', 'Lean of an anjuang gonjong relative to an end gonjong.'),
-  anjuangGonjongGirth: dim(0.85, 'ratio', 'interpolated', 'none', 'Ketebalan gonjong anjuang dibanding gonjong ujung.', 'Girth of an anjuang gonjong relative to an end gonjong.'),
-  gonjongTipRadius: dim(0.025, 'm', 'interpolated', 'none', 'Jari-jari ujung gonjong; hampir runcing.', 'Radius at the tip of a gonjong; very nearly a point.'),
+  gonjongRise: dim(4.4, 'm', 'interpolated', 'none', 'Tinggi puncak gonjong di atas ujung bubungan. Puncaknya jauh lebih tinggi daripada ujung bubungan, dan lekuk di antara sepasang gonjong itulah siluet yang paling dikenali.', 'Height of a gonjong tip above the end of the ridge. The tips stand well above the ridge end, and the hollow between a pair of them is the most recognisable part of the silhouette.'),
+  gonjongSplay: dim(0.58, 'ratio', 'interpolated', 'none', 'Letak puncak gonjong melintang, sebagai bagian dari setengah lebar atap. Sepasang gonjong berdiri lebar — pangkalnya di tepi atap dan puncaknya condong masuk — jadi jaraknya adalah sifat lebar atap, bukan panjang tersendiri. Bacaan penulis atas bentuknya; tak satu sumber pun memberi angkanya.', 'Where a gonjong tip stands across the roof, as a share of its half-width. A pair stands wide — footed at the roof edge and leaning inward toward the tips — so the separation is a property of how wide the roof is rather than a length of its own. The author’s reading of the form; no source gives the figure.'),
+  gonjongSweep: dim(2.6, 'ratio', 'interpolated', 'none', 'Seberapa lambat tepi atap berbelok naik menjadi gonjong. Nilai satu memberi kenaikan lurus dari ujung badan rumah; nilai tinggi menahan tepi atap tetap mendatar lalu mengangkatnya dengan tajam di dekat puncak.', 'How late the roof edge turns upward into the gonjong. A value of one lifts it in a straight line from the end of the body; a high value holds the eave level and then raises it sharply near the tip.'),
+  gonjongSparTaper: dim(0.25, 'ratio', 'interpolated', 'none', 'Penampang bilah tepi di puncak dibanding di pangkalnya. Inilah yang membuat ujungnya meruncing dan bukan terpotong.', 'Section of the verge member at the tip relative to its foot. This is what makes the point a point rather than a cut-off stub.'),
+  gonjongSparRadius: dim(0.055, 'm', 'interpolated', 'none', 'Jari-jari bilah tepi yang membawa gonjong sampai ke puncaknya.', 'Radius of the verge member that carries the gonjong out to its point.'),
   eaveOversail: dim(1.35, 'm', 'interpolated', 'none', 'Julur atap melewati garis tonggak terluar, agar tetesan air jatuh bebas.', 'How far the eave oversails the outer post line, so the drip falls clear.'),
   eaveDrop: dim(0.90, 'm', 'interpolated', 'none', 'Turunnya tepi atap di bawah balok tumpuan.', 'How far the eave hangs below the wall plate.'),
   plateDepth: dim(0.24, 'm', 'interpolated', 'none', 'Tinggi balok tumpuan tempat kasau bertumpu.', 'Depth of the wall plate the rafters bear on.'),
@@ -162,8 +156,7 @@ export const DIMS = {
   orientation: dim(0, 'deg', 'canon', 'navis-1984', 'Muka rumah menghadap halaman, dengan rangkiang berjajar di seberangnya. Aturannya bersifat hubungan, bukan arah mata angin — dan di sinilah rumah gadang berbeda dari tongkonan, yang menghadap utara.', 'The front faces the halaman, with the rangkiang ranged across it. The rule is relational rather than a compass bearing — and this is where the rumah gadang differs from the tongkonan, which faces north.'),
   ruangIsOdd: dim(1, 'count', 'canon', 'navis-1984', 'Jumlah ruang selalu ganjil: tiga, lima, tujuh, sembilan.', 'The ruang count is always odd: three, five, seven, nine.'),
   anjuangKotoPiliang: dim(1, 'ratio', 'canon', 'navis-1984', 'Pada laras Koto Piliang lantai kedua ujung dinaikkan menjadi anjuang; pada Bodi Caniago lantainya satu bidang rata. Perbedaan adat itu terbaca pada ketinggian lantai.', 'Under the Koto Piliang laras the floor at both ends is raised into anjuang; under Bodi Caniago the floor is one level plane. The difference in adat is legible as a difference in floor height.'),
-  gonjongBase: dim(4, 'count', 'canon', 'depdikbud-sumbar', 'Bentuk dasar bergonjong empat: sepasang di tiap ujung bubungan.', 'The base form carries four gonjong: a pair at each end of the ridge.'),
-  anjuangGonjong: dim(2, 'count', 'interpolated', 'none', 'Tambahan gonjong di atas anjuang. Bahwa rumah beranjuang bergonjong lebih banyak umum disebut; pasangannya dengan tiap anjuang adalah penetapan penulis.', 'Gonjong added over the anjuang. That houses with anjuang carry more gonjong is commonly stated; pairing one with each anjuang is the author’s decision.'),
+  gonjongBase: dim(4, 'count', 'canon', 'depdikbud-sumbar', 'Bentuk dasar bergonjong empat: satu di tiap sudut atap, tempat tepi atap terangkat menjadi puncak.', 'The base form carries four gonjong: one at each corner of the roof, where the eave lifts into a point.'),
   bilikAreTally: dim(1, 'count', 'canon', 'waterson-1990', 'Bilik bertambah seiring anak perempuan menikah; jumlahnya adalah catatan pertumbuhan garis ibu.', 'A bilik is added as each daughter marries; their number is a record of how the matriline has grown.'),
   bilikFillOrder: dim(1, 'ratio', 'interpolated', 'none', 'Bilik terisi berurutan dari satu ujung tanpa selang. Bahwa bilik bertambah satu per satu adalah kanon; arah pengisiannya dan ketiadaan selang adalah penetapan penulis, dan itulah sebabnya rumah ini tidak simetris pada sekat-sekatnya.', 'The bilik fill sequentially from one end with no gaps. That they are added one at a time is canon; the direction of fill and the absence of gaps are the author’s, and they are why this house is not symmetric in its partitions.'),
   wallsLeanOut: dim(1, 'ratio', 'canon', 'schefold-2003', 'Dinding badan rumah condong ke luar, melebar ke arah balok tumpuan.', 'The body walls lean outward, widening toward the wall plate.'),
@@ -234,7 +227,15 @@ export interface LarasInfo {
   readonly glossEn: string
   /** whether the floor steps up at both ends */
   readonly anjuang: boolean
-  /** how many gonjong the roof carries under this laras */
+  /**
+   * How many gonjong the roof carries. Four under both laras, for now.
+   *
+   * Houses with anjuang are commonly said to carry more, and the extra ones
+   * belong to a roof over the projecting bay rather than to the main ridge —
+   * a bay this model does not build. The first attempt stood the extra pair on
+   * the middle of the ridge, which is a shape nobody builds, so it is four
+   * until the bay is modelled and the gap is recorded rather than filled.
+   */
   readonly gonjong: number
 }
 
@@ -245,7 +246,7 @@ export const LARAS: readonly LarasInfo[] = [
     glossId: 'Laras berjenjang naik. Lantai kedua ujung dinaikkan menjadi anjuang, tempat duduk yang berpangkat.',
     glossEn: 'The tiered laras. The floor at both ends is raised into anjuang, where those holding rank sit.',
     anjuang: true,
-    gonjong: DIMS.gonjongBase.value + DIMS.anjuangGonjong.value,
+    gonjong: DIMS.gonjongBase.value,
   },
   {
     laras: 'bodi-caniago',

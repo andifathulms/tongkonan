@@ -29,7 +29,7 @@ import type { CheckResult } from '@/lib/core/invariants'
 import { slopeDrop } from '@/lib/core/geometry'
 import type { House, Layout, Part } from './types'
 import { ridgeOf } from './frame'
-import { RIDGE_CAP_BAND, ijukBands } from './roof'
+import { RIDGE_CAP_BAND, ijukBands, roofStations } from './roof'
 import { DIMS, PACK, larasInfo } from './rules'
 
 export { checkAgainstSurvey, checkJoints, checkMeshes, partBounds, summarise } from '@/lib/core/invariants'
@@ -186,23 +186,96 @@ export function checkAnjuangFloor(house: House, layout: Layout): CheckResult {
   }
 }
 
-/** The gonjong count follows the laras, and every tip stands above the ridge. */
+/**
+ * The gonjong are part of the roof, at every tip.
+ *
+ * The first version of this check counted spires and asked whether each one
+ * cleared the ridge. Four rods standing on the ridge satisfied both, and a
+ * render showed the house had antennae instead of a roof — a form the whole
+ * suite passed because nothing in it asked the one question that matters:
+ * whether the roof surface actually reaches the point.
+ *
+ * So it does now. Every declared tip must have roof boarding within reach of
+ * it, and the tip must stand above the ridge end rather than merely above
+ * mid-span, because a gonjong that failed to clear the end of its own ridge
+ * would not be a gonjong.
+ */
 export function checkGonjongCount(house: House, layout: Layout): CheckResult {
   const expected = larasInfo(layout.rules.laras).gonjong
-  const spires = house.parts.filter((p) => p.stage === 'gonjong')
-  const below = spires.filter((p) => (partBounds(p).max[1] ?? 0) <= layout.ridgeY + TOL)
-  const ok = spires.length === expected && below.length === 0 && layout.gonjongTips.length === expected
+  const spars = house.parts.filter((p) => p.stage === 'gonjong')
+  const roof = house.parts.find((p) => p.id === 'papan-atap')
+
+  // How near a tip the roof has to come. One rafter depth: close enough that
+  // the surface is what ends in the point, far enough that a station grid
+  // does not have to land exactly on it.
+  const reach = DIMS.rafterDepth.value * 2
+  const orphans: string[] = []
+  let worst = 0
+  for (const [i, tip] of layout.gonjongTips.entries()) {
+    if (!roof || roof.kind !== 'mesh') {
+      orphans.push(`tip ${i + 1}: no roof`)
+      continue
+    }
+    let best = Infinity
+    for (let v = 0; v < roof.positions.length; v += 3) {
+      const d = Math.hypot(
+        (roof.positions[v] ?? 0) - tip[0],
+        (roof.positions[v + 1] ?? 0) - tip[1],
+        (roof.positions[v + 2] ?? 0) - tip[2],
+      )
+      if (d < best) best = d
+    }
+    if (best > reach) orphans.push(`tip ${i + 1}: roof ${best.toFixed(2)} m away`)
+    if (best > worst) worst = best
+  }
+
+  const low = layout.gonjongTips.filter((tip) => tip[1] <= layout.ridgeEndY + TOL)
+  const ok =
+    spars.length === expected &&
+    layout.gonjongTips.length === expected &&
+    orphans.length === 0 &&
+    low.length === 0
+
   return {
     key: 'gonjong-count',
-    titleId: 'Jumlah gonjong mengikuti laras',
-    titleEn: 'The gonjong count follows the laras',
+    titleId: 'Gonjong adalah bagian dari atap, bukan tiang di atasnya',
+    titleEn: 'The gonjong are part of the roof, not masts standing on it',
     status: ok ? 'pass' : 'fail',
     detail: ok
-      ? `${larasInfo(layout.rules.laras).name} → ${expected} gonjong, semuanya menjulang di atas bubungan.`
-      : `diharapkan ${expected}, ditemukan ${spires.length}; ${below.length} tidak melampaui bubungan.`,
+      ? `${expected} gonjong; puncak tertinggi ${Math.max(...layout.gonjongTips.map((t) => t[1])).toFixed(2)} m, ujung bubungan ${layout.ridgeEndY.toFixed(2)} m; atap mencapai tiap puncak dalam ${worst.toFixed(2)} m.`
+      : `diharapkan ${expected}, ditemukan ${spars.length}; ${low.length} tidak melampaui ujung bubungan. ${orphans.join('; ')}`,
     detailEn: ok
-      ? `${larasInfo(layout.rules.laras).name} → ${expected} gonjong, every one standing above the ridge.`
-      : `expected ${expected}, found ${spires.length}; ${below.length} do not clear the ridge.`,
+      ? `${expected} gonjong; highest tip ${Math.max(...layout.gonjongTips.map((t) => t[1])).toFixed(2)} m against a ridge end of ${layout.ridgeEndY.toFixed(2)} m; the roof reaches every tip within ${worst.toFixed(2)} m.`
+      : `expected ${expected}, found ${spars.length}; ${low.length} do not clear the ridge end. ${orphans.join('; ')}`,
+  }
+}
+
+/**
+ * The roof edge is level over the house and rises over the overhangs.
+ *
+ * The other half of the same lesson. A roof with a dead-level eave from end to
+ * end is a shed, and the check above could be satisfied by bolting the tips on
+ * afterwards; this one says the surface has to get there by itself.
+ */
+export function checkEaveRises(layout: Layout): CheckResult {
+  const stations = roofStations(layout)
+  const half = layout.bodyLength / 2
+  const overBody = stations.filter((s) => Math.abs(s.x) <= half + 1e-9)
+  const level = overBody.every((s) => Math.abs(s.eaveY - layout.eaveY) < 1e-6)
+  const ends = stations.filter((s) => Math.abs(s.x) > half)
+  const highest = ends.length ? Math.max(...ends.map((s) => s.eaveY)) : layout.eaveY
+  const narrowest = ends.length
+    ? Math.min(...ends.map((s) => s.halfWidth))
+    : layout.eaveHalfDepth
+  const ok = level && highest > layout.ridgeEndY + TOL && narrowest < layout.eaveHalfDepth - TOL
+
+  return {
+    key: 'eave-rises',
+    titleId: 'Tepi atap mendatar di sepanjang badan rumah, lalu naik melewati bubungan di kedua ujungnya',
+    titleEn: 'The roof edge runs level along the body, then rises past the ridge at both ends',
+    status: ok ? 'pass' : 'fail',
+    detail: `tepi mendatar di ${layout.eaveY.toFixed(2)} m sepanjang badan; naik sampai ${highest.toFixed(2)} m, melewati ujung bubungan ${layout.ridgeEndY.toFixed(2)} m, sambil menyempit dari ${layout.eaveHalfDepth.toFixed(2)} m ke ${narrowest.toFixed(2)} m.`,
+    detailEn: `edge level at ${layout.eaveY.toFixed(2)} m along the body; rises to ${highest.toFixed(2)} m, past the ridge end at ${layout.ridgeEndY.toFixed(2)} m, narrowing from ${layout.eaveHalfDepth.toFixed(2)} m to ${narrowest.toFixed(2)} m.`,
   }
 }
 
@@ -374,6 +447,7 @@ export function runInvariants(house: House, layout: Layout): readonly CheckResul
     checkRidgeProfile(layout),
     checkAnjuangFloor(house, layout),
     checkGonjongCount(house, layout),
+    checkEaveRises(layout),
     checkBilikTally(house, layout),
     checkWallsLeanOut(house, layout),
     checkIjukCoverage(house, layout),

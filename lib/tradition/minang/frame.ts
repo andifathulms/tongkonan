@@ -112,41 +112,25 @@ export function resolveLayout(rules: Rules): Layout {
   }
 
   /*
-   * The gonjong. Four is the base form — a pair at each end of the ridge,
-   * splaying front and rear — and the anjuang, where there are any, carry one
-   * more each. The count follows the laras; nobody sets it directly, which is
-   * the same move as the tongkonan's post count following its bay count.
+   * The gonjong: the four corners of the roof, raised.
+   *
+   * Not four masts standing on the ridge, which is what the first version
+   * built and what a render immediately showed to be wrong. A gonjong is the
+   * end of the roof's own edge, lifted: the eave runs level down the length of
+   * the house and then turns upward over the overhang until it ends in a
+   * point, well above the ridge. The hollow between a pair of them — ridge
+   * below, two tips above — is the silhouette everyone recognises, and it only
+   * exists if the surface is what rises.
+   *
+   * So the tips are resolved here and the roof is swept *to* them; the
+   * invariant checks the surface actually reaches each one, which is the check
+   * that would have caught four rods.
    */
-  const ridge = ridgeCurve({
-    startZ: -ridgeEndZ,
-    endZ: ridgeEndZ,
-    lowY: ridgeY,
-    endY: ridgeEndY,
-    upsweep: DIMS.ridgeUpsweep.value,
-  })
+  const tipY = ridgeEndY + DIMS.gonjongRise.value
   const gonjongTips: Vec3[] = []
   for (const end of [1, -1] as const) {
     for (const splay of [-1, 1] as const) {
-      gonjongTips.push([
-        splay * DIMS.gonjongSplay.value,
-        ridgeEndY + DIMS.gonjongRise.value,
-        end * (ridgeEndZ + DIMS.gonjongLean.value * DIMS.gonjongRise.value),
-      ])
-    }
-  }
-  if (laras.anjuang) {
-    for (const end of [1, -1] as const) {
-      const z = end * (bodyLength / 2 - bodyLength / rules.ruang)
-      const s = (z + ridgeEndZ) / (2 * ridgeEndZ)
-      gonjongTips.push([
-        0,
-        ridge(s).y + DIMS.gonjongRise.value * DIMS.anjuangGonjongRise.value,
-        z +
-          end *
-            DIMS.gonjongLean.value *
-            DIMS.gonjongRise.value *
-            DIMS.anjuangGonjongLean.value,
-      ])
+      gonjongTips.push([splay * eaveHalfDepth * DIMS.gonjongSplay.value, tipY, end * ridgeEndZ])
     }
   }
 

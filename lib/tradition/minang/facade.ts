@@ -63,13 +63,16 @@ function build(search: string): Built {
   const readings: readonly Reading[] = [
     {
       key: 'gonjong',
-      title: t('Berapa gonjong di atasnya', 'How many gonjong it carries'),
+      title: t('Ke mana tepi atapnya pergi', 'Where the roof edge goes'),
       body: t(
-        'Hitung puncak yang menjulang dari bubungan. Empat adalah bentuk dasar; yang lebih dari itu menyertai anjuang, jadi jumlahnya menyusul laras dan bukan selera.',
-        'Count the points rising off the ridge. Four is the base form; more accompany the anjuang, so the number follows the laras rather than a preference.',
+        'Ikuti tepi bawah atap dari tengah rumah ke ujungnya. Tepi itu mendatar sepanjang badan rumah, lalu berbelok naik melewati bubungan sendiri dan berakhir sebagai puncak. Gonjong bukan tiang yang ditancapkan di atas atap; ia adalah tepi atap itu, terangkat — dan lekuk di antara sepasangnya adalah jarak antara bubungan yang rendah dan dua puncak yang tinggi.',
+        'Follow the lower edge of the roof from the middle of the house out to its end. It runs level along the body, then turns upward past the ridge itself and finishes as a point. A gonjong is not a mast planted on the roof; it is that edge, raised — and the hollow between a pair of them is the distance between a low ridge and two high tips.',
       ),
       value: t(String(laras.gonjong), String(laras.gonjong)),
-      unit: t('gonjong', 'gonjong'),
+      unit: t(
+        `puncak ${(Math.max(...layout.gonjongTips.map((g) => g[1])) - layout.ridgeEndY).toFixed(1)} m di atas bubungan`,
+        `tips ${(Math.max(...layout.gonjongTips.map((g) => g[1])) - layout.ridgeEndY).toFixed(1)} m above the ridge`,
+      ),
     },
     {
       key: 'laras',
@@ -82,6 +85,10 @@ function build(search: string): Built {
       unit: laras.anjuang
         ? t(`naik ${layout.anjuangRise.toFixed(2)} m`, `a step of ${layout.anjuangRise.toFixed(2)} m`)
         : t('tanpa tingkat', 'no step'),
+      // Deliberately not the gonjong count. Houses with anjuang are commonly
+      // said to carry more, and the extra ones belong to a roof over the
+      // projecting bay — a bay this model does not build. Reading the laras
+      // off the roof would be reading it off something that is not there.
     },
     {
       key: 'bilik',

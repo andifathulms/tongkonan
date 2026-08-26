@@ -21,6 +21,7 @@ import {
   emptyMesh,
   lerp,
   mergeMeshes,
+  mirrorZ,
   sweepSurface,
   tubeMesh,
 } from '@/lib/core/geometry'
@@ -29,8 +30,7 @@ import { courseBands } from '@/lib/core/courses'
 import type { CourseBand } from '@/lib/core/courses'
 import type { BoxPart, Joint, Layout, Part, Vec3 } from './types'
 import type { DimKey } from './rules'
-import { DIMS, larasInfo } from './rules'
-import { gonjongPath } from './ridge'
+import { DIMS } from './rules'
 import { meshPart, ridgeOf, sAtZ } from './frame'
 
 const STATIONS = 41
@@ -62,25 +62,48 @@ export function swapXZ(mesh: MeshData): MeshData {
 }
 
 /**
- * Stations along the ridge.
+ * Stations along the ridge — and the whole of the gonjong.
+ *
+ * Over the body the roof is an ordinary thing: full width, level eave, ridge
+ * sagging between its ends. Over the two overhangs it stops being ordinary.
+ * The edge narrows toward the ridge plane and climbs past the ridge itself,
+ * so the last station is a steep fin running from the ridge point out and up
+ * to the tip. That fin *is* the gonjong, and the hollow between the pair at
+ * one end is what a station whose eave sits above its own ridge produces.
+ *
+ * The knee straightens out over the overhang for the same reason it exists at
+ * all: the break in the slope sits on the wall head, and past the end of the
+ * wall there is nothing for it to sit on. Carrying it out to the tip would put
+ * a kink down the middle of a spire.
  *
  * `Station.x` is the position along the sweep, which for this house is Z. The
- * name comes from the primitive and the turn happens in `swapXZ`; the
- * alternative was to fork the primitive, which would have been worse.
+ * name comes from the primitive and the quarter turn happens in `swapXZ`.
  */
 export function roofStations(layout: Layout, count = STATIONS): readonly Station[] {
   const ridge = ridgeOf(layout)
+  const half = layout.bodyLength / 2
+  const overhang = Math.max(1e-6, layout.ridgeEndZ - half)
+  const tipY = layout.ridgeEndY + DIMS.gonjongRise.value
+  const sweep = DIMS.gonjongSweep.value
   const out: Station[] = []
+
   for (let i = 0; i < count; i++) {
     const s = i / (count - 1)
     const { z, y } = ridge(s)
+    // 0 anywhere over the body, 1 at the tip. Raised to a power so the eave
+    // stays level almost to the end of the house and then lifts hard, which
+    // is what makes the gonjong read as a point rather than as a ramp.
+    const u = clamp01((Math.abs(z) - half) / overhang) ** sweep
     out.push({
       x: z,
       ridgeY: y,
-      halfWidth: layout.eaveHalfDepth,
-      // The eave is level. Only the ridge sweeps, which is why the roof
-      // planes twist rather than simply tilt.
-      eaveY: layout.eaveY,
+      halfWidth: lerp(layout.eaveHalfDepth, layout.eaveHalfDepth * DIMS.gonjongSplay.value, u),
+      eaveY: lerp(layout.eaveY, tipY, u),
+      knee: {
+        at: layout.breakFraction,
+        // drop === at is a straight run from ridge to edge.
+        drop: lerp(layout.kneeDrop, layout.breakFraction, u),
+      },
     })
   }
   return out
@@ -403,100 +426,71 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
 /* ── Gonjong ──────────────────────────────────────────────────────────── */
 
 /**
- * The spires. Four on the base form, six where there are anjuang.
+ * The verge member that carries each gonjong out to its point.
  *
- * Nobody sets the count: it follows the laras, the same way the tongkonan's
- * post count follows its bay count. A control for it would turn a
- * consequence into an ornament budget.
+ * The gonjong itself is the roof surface — `roofStations` above — and this is
+ * the timber along its raised edge, which is the thing a builder would
+ * actually cut and the thing that makes the point a point. It is generated
+ * from the same stations the surface is swept from, so it cannot drift off it:
+ * one path, two consumers.
+ *
+ * There were six of these standing on the ridge like masts in the first
+ * version. Four is the base form and it is the count that survives without
+ * inventing a roof over the anjuang; see `LarasInfo.gonjong`.
  */
 export function buildGonjong(layout: Layout): readonly Part[] {
   const parts: Part[] = []
-  const ridge = ridgeOf(layout)
+  const stations = roofStations(layout)
+  const half = layout.bodyLength / 2
   const dims: readonly DimKey[] = [
     'gonjongRise',
     'gonjongSplay',
-    'gonjongLean',
-    'gonjongButtRadius',
-    'gonjongTipRadius',
-    'gonjongSplayCurve',
-    'gonjongLeanCurve',
-    'gonjongTaper',
+    'gonjongSweep',
+    'gonjongSparRadius',
+    'gonjongSparTaper',
     'gonjongBase',
     'ridgeEndRise',
     'ridgeOverhang',
   ]
-  const anjuangDims: readonly DimKey[] = [
-    ...dims,
-    'anjuangGonjong',
-    'anjuangGonjongRise',
-    'anjuangGonjongLean',
-    'anjuangGonjongGirth',
-    'anjuangRise',
-    'ruangLength',
-  ]
-  const radius = (t: number) =>
-    lerp(DIMS.gonjongButtRadius.value, DIMS.gonjongTipRadius.value, clamp01(t) ** DIMS.gonjongTaper.value)
   let order = 0
 
-  for (const end of [1, -1] as const) {
-    for (const splay of [-1, 1] as const) {
-      parts.push(
-        meshPart(
-          `gonjong-${end > 0 ? 'a' : 'b'}-${splay > 0 ? 'balakang' : 'muko'}`,
-          { name: 'gonjong', nameId: 'Gonjong', nameEn: 'Gonjong' },
-          'gonjong',
-          order++,
-          'ijuk',
-          dims,
-          tubeMesh(
-            gonjongPath({
-              base: [0, layout.ridgeEndY, end * layout.ridgeEndZ],
-              rise: DIMS.gonjongRise.value,
-              splay: splay * DIMS.gonjongSplay.value,
-              lean: end * DIMS.gonjongLean.value * DIMS.gonjongRise.value,
-              splayCurve: DIMS.gonjongSplayCurve.value,
-              leanCurve: DIMS.gonjongLeanCurve.value,
-            }),
-            radius,
-            8,
-            0.4,
-          ),
-        ),
-      )
-    }
-  }
+  /*
+   * One end is swept and the other is mirrored, never swept twice.
+   *
+   * Two tubes along mirrored paths are mirrored *surfaces* and are not
+   * mirrored *vertex sets*: the section frame picks its own phase from the
+   * tangent at each station, so the two rings land at different angles round
+   * the same circle and the symmetry check — which compares points, because
+   * what must be symmetric is the building and not the bookkeeping — sees
+   * ninety-six orphans. `mirrorZ` exists exactly so symmetry is generated
+   * rather than hoped for, and sweeping both ends was hoping.
+   */
+  for (const splay of [-1, 1] as const) {
+    // Only the raised part of the edge: the member starts where the eave
+    // leaves the body and runs to the tip.
+    const path: Vec3[] = stations
+      .filter((st) => st.x >= half - 1e-9)
+      .sort((a, b) => a.x - b.x)
+      .map((st) => [splay * st.halfWidth, st.eaveY, st.x] as Vec3)
+    if (path.length < 2) continue
 
-  if (larasInfo(layout.rules.laras).anjuang) {
-    for (const end of [1, -1] as const) {
-      const z = end * (layout.bodyLength / 2 - layout.bodyLength / layout.rules.ruang)
-      parts.push(
-        meshPart(
-          `gonjong-anjuang-${end > 0 ? 'a' : 'b'}`,
-          { name: 'gonjong anjuang', nameId: 'Gonjong anjuang', nameEn: 'Anjuang gonjong' },
-          'gonjong',
-          order++,
-          'ijuk',
-          anjuangDims,
-          tubeMesh(
-            gonjongPath({
-              base: [0, ridge(sAtZ(layout, z)).y, z],
-              rise: DIMS.gonjongRise.value * DIMS.anjuangGonjongRise.value,
-              splay: 0,
-              lean:
-                end *
-                DIMS.gonjongLean.value *
-                DIMS.gonjongRise.value *
-                DIMS.anjuangGonjongLean.value,
-              splayCurve: DIMS.gonjongSplayCurve.value,
-              leanCurve: DIMS.gonjongLeanCurve.value,
-            }),
-            (t) => radius(t) * DIMS.anjuangGonjongGirth.value,
-            8,
-            0.4,
-          ),
-        ),
-      )
-    }
+    const swept = tubeMesh(
+      path,
+      // Tapering to almost nothing: the tip is a point, and a member of
+      // constant section would end it with a stub. Linear, because the two
+      // shape numbers this used to carry were an exponent and a factor, and
+      // the grep guard was right that both were dimensions nobody had
+      // declared — one of them was doing nothing a straight taper does not.
+      (t) => lerp(DIMS.gonjongSparRadius.value, DIMS.gonjongSparRadius.value * DIMS.gonjongSparTaper.value, t),
+      7,
+      0.4,
+    )
+    const face = splay > 0 ? 'balakang' : 'muko'
+    const naming = { name: 'gonjong', nameId: 'Gonjong', nameEn: 'Gonjong' }
+    parts.push(meshPart(`gonjong-a-${face}`, naming, 'gonjong', order++, 'kayu', dims, swept))
+    parts.push(
+      meshPart(`gonjong-b-${face}`, naming, 'gonjong', order++, 'kayu', dims, mirrorZ(swept)),
+    )
   }
 
   return parts

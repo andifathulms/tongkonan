@@ -1,5 +1,10 @@
 /**
- * The ridge, and the gonjong that stand on its ends.
+ * The ridge.
+ *
+ * The gonjong used to be here too, as a path for a tube sweep. They are not a
+ * path any more: a gonjong is the raised end of the roof's own edge, so it
+ * lives in `roofStations` where the surface is described. What is left is the
+ * ridge, which really is a curve.
  *
  * Written here rather than shared with the Toraja ridge, deliberately. The
  * arithmetic is close enough that sharing it would be tempting and the
@@ -15,7 +20,6 @@
  */
 
 import { catmullRom, clamp01, lerp } from '@/lib/core/geometry'
-import type { Vec3 } from '@/lib/core/types'
 
 export interface RidgeParams {
   /** Z of the near end; negative */
@@ -54,41 +58,4 @@ export function ridgeCurve(p: RidgeParams): (s: number) => { z: number; y: numbe
     z: lerp(p.startZ, p.endZ, clamp01(s)),
     y: catmullRom(control, clamp01(s)),
   })
-}
-
-export interface GonjongParams {
-  /** where the spire springs from, on the ridge */
-  readonly base: Vec3
-  /** vertical rise from base to tip */
-  readonly rise: number
-  /** how far the tip stands off the ridge plane in X; signed */
-  readonly splay: number
-  /** how far the tip leans out beyond its base in Z; signed */
-  readonly lean: number
-  /** how late the tip pulls away from the ridge plane. 1 is a straight line. */
-  readonly splayCurve: number
-  /** how late it leans outward */
-  readonly leanCurve: number
-}
-
-/**
- * The path of one gonjong, as a list of points for a tube sweep.
- *
- * The two exponents are what make it a gonjong and not a stick: the tip pulls
- * away from the ridge plane late and leans outward later still, so the spire
- * leaves the ridge almost vertically and only opens out near the top. A
- * straight line between the same two endpoints reads as a radio mast.
- *
- * They arrive as parameters because they are dimensions — they change the
- * shape of something the reader can see — and a dimension that sits inline in
- * a builder is a number the provenance bar never counted.
- */
-export function gonjongPath(p: GonjongParams, steps = 16): Vec3[] {
-  const [bx, by, bz] = p.base
-  const out: Vec3[] = []
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps
-    out.push([bx + p.splay * t ** p.splayCurve, by + p.rise * t, bz + p.lean * t ** p.leanCurve])
-  }
-  return out
 }

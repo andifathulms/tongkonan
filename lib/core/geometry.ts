@@ -78,7 +78,24 @@ export interface Station {
   readonly ridgeY: number
   /** half-width of the roof here, measured on Z */
   readonly halfWidth: number
+  /**
+   * Where the outer edge of the roof sits here.
+   *
+   * May be *above* `ridgeY`. A roof whose edge turns upward past its own ridge
+   * is not a mistake — it is what a gonjong is, and modelling it as a rod
+   * standing on the ridge instead was how the second house ended up with
+   * antennae rather than a roof.
+   */
   readonly eaveY: number
+  /**
+   * The transverse profile here, when it is not the sweep's own.
+   *
+   * The break in a roof slope sits on the wall head, so it stops meaning
+   * anything past the end of the wall. Over an overhang the profile can
+   * straighten out, and a single knee for the whole sweep would put a kink
+   * down the middle of a spire.
+   */
+  readonly knee?: Knee
 }
 
 export interface SweepOptions {
@@ -169,9 +186,13 @@ export function sweepSurface(stations: readonly Station[], o: SweepOptions): Mes
       // it, so a lap moves the surface off itself rather than straight up —
       // and on a flared slope that direction changes as you go down.
       // Slope of whichever run this sample falls on.
-      const onUpper = f <= o.knee.at
-      const dzdf = st.halfWidth * (onUpper ? o.knee.at : 1 - o.knee.at)
-      const dydf = -depth * (onUpper ? o.knee.drop : 1 - o.knee.drop)
+      const knee = st.knee ?? o.knee
+      const onUpper = f <= knee.at
+      const dzdf = st.halfWidth * (onUpper ? knee.at : 1 - knee.at)
+      // Magnitude, not the signed depth: where the surface turns upward past
+      // its own ridge the drop is negative, and using it here would flip the
+      // outward normal and bed every course into the roof instead of onto it.
+      const dydf = -Math.abs(depth) * (onUpper ? knee.drop : 1 - knee.drop)
       const len = Math.hypot(dzdf, dydf) || 1
       const outY = dzdf / len
       const outZ = (-dydf / len) * o.side
@@ -179,7 +200,7 @@ export function sweepSurface(stations: readonly Station[], o: SweepOptions): Mes
       const push = o.offsetAt ? o.offsetAt(f) : 0
       mesh.positions.push(
         st.x,
-        st.ridgeY - depth * slopeDrop(f, o.knee) + push * outY,
+        st.ridgeY - depth * slopeDrop(f, knee) + push * outY,
         o.side * st.halfWidth * f + push * outZ,
       )
       mesh.normals.push(0, 0, 0) // filled in by computeNormals below
