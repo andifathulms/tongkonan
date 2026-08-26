@@ -3,8 +3,17 @@
 import { RailSection } from './Sheet'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { drawOrthographic, drawingFileName } from '@/lib/draw/orthographic'
-import { drawSheet, sheetFileName } from '@/lib/draw/sheet'
+/*
+ * The drawing code is loaded when a drawing is asked for, not before.
+ *
+ * It is roughly a third of this route's page chunk and it does nothing until
+ * someone presses one of these four buttons. Nothing above the fold depends
+ * on it and it is not part of a first interaction — the first interaction on
+ * this route is changing a rule, which is already loaded.
+ *
+ * A dynamic import, not a library: it is the platform's own, and the pass that
+ * added this was not allowed to add a dependency to solve a size problem.
+ */
 import type { Projection } from '@/lib/draw/orthographic'
 import type { House, Layout } from '@/lib/banua/types'
 
@@ -48,12 +57,12 @@ export function DrawingExport({
           <button
             key={v.key}
             type="button"
-            onClick={() =>
-              save(
-                drawOrthographic(house, layout, v.key, { locale }),
-                drawingFileName(house, v.key),
+            onClick={async () => {
+              const { drawOrthographic, drawingFileName } = await import(
+                '@/lib/draw/orthographic'
               )
-            }
+              save(drawOrthographic(house, layout, v.key, { locale }), drawingFileName(house, v.key))
+            }}
             className="rounded border border-hairline px-2 py-1.5 text-left text-body transition-colors duration-state hover:bg-wash"
           >
             {v.label}
@@ -70,7 +79,10 @@ export function DrawingExport({
       */}
       <button
         type="button"
-        onClick={() => save(drawSheet(house, layout, { locale }), sheetFileName(house))}
+        onClick={async () => {
+          const { drawSheet, sheetFileName } = await import('@/lib/draw/sheet')
+          save(drawSheet(house, layout, { locale }), sheetFileName(house))
+        }}
         className="mt-4 w-full rounded bg-bolu px-2 py-2 text-left text-body text-kapur transition-opacity duration-state hover:opacity-90"
       >
         {pick(COPY.draw.sheet, locale)}
