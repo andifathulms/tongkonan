@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { derivation } from '@/lib/banua/derivation'
@@ -25,7 +26,16 @@ import { RailSection } from './Sheet'
  * them came from nowhere, and that is what the reader should see.
  */
 export function Derivation({ rules, locale }: { rules: Rules; locale: Locale }) {
-  const steps = derivation(rules)
+  /*
+   * Keyed on the rules, because that is all it depends on.
+   *
+   * This component re-renders whenever anything else on the route changes —
+   * every step of the time slider, every scene toggle — and without this it
+   * re-resolved the whole layout each time to print numbers that had not
+   * moved. It is under a tenth of a millisecond, so this is not a fix for a
+   * measured problem; it is not doing work on a drag that nothing asked for.
+   */
+  const steps = useMemo(() => derivation(rules), [rules])
   return (
     <RailSection title={pick(COPY.derivation.heading, locale)}>
       <p className="mb-4 text-body text-muted">{pick(COPY.derivation.intro, locale)}</p>
