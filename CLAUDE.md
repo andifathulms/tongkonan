@@ -4,13 +4,15 @@ Working instructions for Claude Code. Read PRD.md for what is being built and DE
 
 ## Current state
 
-**M5 shipped. Phase A of the second-tradition work is done: the generator is split into a tradition-neutral core and one tradition that binds it.**
+**M5 shipped. Phases A and B of the second-tradition work are done: the generator is split into a tradition-neutral core, and there are now two houses binding it.**
 
-- `lib/tradition/toraja/` generates a complete house: 155 parts and 33 joints at the default rules. `lib/core/` holds what is true of any house and knows no Toraja word. `lib/solar/` is validated against almanac values. `lib/draw/` emits plan, elevation and long section as SVG.
-- `pnpm check` type-checks and runs 93 tests, including the invariant suite over four rule combinations. All eleven structural checks pass; `checkAgainstSurvey` reports **skipped** and must stay that way.
-- The split is itself tested. `test/architecture.test.ts` fails the build if `lib/core/` imports a tradition or names one in code, and if anything under `lib/` reaches for three.js, the DOM, `Math.random` or `Date.now`. Those properties are invisible at the point of use, which is exactly why they rot.
-- Provenance: 0 measured, 7 canon, 46 interpolated. That is 87% interpolated and it is shown on every screen. Moving that bar is the work. It got worse before it got better: the pedagogy pass found a dozen dimensional numbers sitting as bare literals in `frame.ts` and `roof.ts` — the ridge upsweep and the rafter section among them — which the bar had never counted. Declaring them was the fix; the higher number is the honest one.
-- **Counted by part rather than by dimension it is 100% interpolated**, and `/bangun` can mark the model to show it. Every canon rule in the pack states structure — faces north, ridge sags, horns are a tally, posts in transverse pairs — and none of them sets a length, so every part depends on at least one invented metre. The shape's logic is sourced; its sizes are not. Do not resolve this by retagging a plausible number as canon.
+- `lib/tradition/toraja/` generates a tongkonan: 155 parts and 33 joints at the default rules. `lib/tradition/minang/` generates a rumah gadang: 265 parts and 62 joints. `lib/core/` holds what is true of any house and knows a word from neither. `lib/solar/` is validated against almanac values. `lib/draw/` emits plan, elevation and long section as SVG.
+- `pnpm check` type-checks and runs 119 tests. Both invariant suites run over five rule combinations each — eleven structural checks for the tongkonan, sixteen for the rumah gadang — and every one passes. `checkAgainstSurvey` reports **skipped** in both and must stay that way.
+- **The app still shows only the tongkonan.** The Minang generator is complete and tested but not routed, because putting it on screen needs the tradition registry, the control schema and the renderer adapter, and those are Phase C by design. The bundle is unchanged.
+- Provenance, kept separate and never averaged: tongkonan 0 measured / 7 canon / 46 interpolated; rumah gadang 0 measured / 8 canon / 54 interpolated. Both land at 87% interpolated by dimension and 100% by part. The second house did not improve the number and was never going to.
+- The split is itself tested. `test/architecture.test.ts` fails the build if `lib/core/` imports a tradition or names one in code, if one tradition imports another, or if anything under `lib/` reaches for three.js, the DOM, `Math.random` or `Date.now`. Those properties are invisible at the point of use, which is exactly why they rot.
+- The bar got worse before it got better, twice, and both times that was the fix. A pedagogy pass on the Toraja builders found a dozen dimensional numbers sitting as bare literals — the ridge upsweep and the rafter section among them — which the bar had never counted. The Minang builders shipped their first draft with six of their own, all in the form `DIMS.gonjongRise.value * 0.55`. Declaring them raised the interpolated share in both packs. The higher number is the honest one.
+- **Counted by part rather than by dimension both houses are 100% interpolated**, and `/bangun` can mark the tongkonan to show it. Every canon rule in either pack states structure — faces north, ridge sags, horns are a tally; ruang count is odd, Koto Piliang steps the floor, bilik are a tally — and none of them sets a length, so every part depends on at least one invented metre. The shape's logic is sourced; its sizes are not. Do not resolve this by retagging a plausible number as canon.
 - `/bangun`, `/rakit`, `/baca`, `/sumber` exist in Indonesian and English. The frame-raising sequence, the parameter-change rebuild, the day-of-sun, rain, the four view transitions, and the section cut through the three zones are all in.
 - **Interface tokens live in `app/globals.css` and nowhere else.** Six type steps, a 4px spacing scale, and a palette that states its contrast ratio beside every pair the interface uses. `tailwind.config.ts` maps utility names onto them and declares no values of its own. A bracketed size or colour in a component (`text-[13px]`, `bg-[rgba(...)]`) is a bug — it escapes the scale the same way a hardcoded dimension escapes provenance.
 
@@ -18,7 +20,7 @@ Known gaps, all deliberate and none of them hidden:
 
 - **Carving is texture-level.** The pa'barre allo is constructed from its rule rather than traced, but it is drawn onto a canvas, not extruded. Relief casting real shadow is the target.
 - **Contact darkening is a radial-gradient plane.** Real ambient occlusion in the joints and under the raised floor is the largest remaining quality gain. Do not ship the placeholder as the answer.
-- **The body walls are vertical.** The real ones lean outward toward the plate. No source gives an angle, so it is left flat rather than guessed — see the note in `frame.ts`.
+- **The tongkonan's body walls are vertical.** The real ones lean outward toward the plate. No source gives an angle, so it is left flat rather than guessed — see the note in `toraja/frame.ts`. The rumah gadang *does* lean, at a declared and openly interpolated 8°, which is the same guess made visibly instead of avoided. The two houses disagreeing about this is a question for Phase C, not a bug.
 - **No survey is wired in.** Everything above follows from that.
 
 Keep this section accurate. A stale "Current state" is worse than none — a previous project in this portfolio still claimed "not yet scaffolded" long after it had six routes and thirty-five components, and that misled every session that read it. Update this line in the same commit as the work it describes.
@@ -44,7 +46,7 @@ lib/core/         true of any house — generic over what a tradition calls thin
   assembly.ts       build order, bounds, the normalised timeline
   invariants.ts     symmetry, joints, build order, meshes, part provenance, survey
   whatif.ts         the one place a rule is temporarily something else
-lib/tradition/toraja/   one house, binding the core
+lib/tradition/toraja/   the tongkonan, binding the core
   types.ts          Stage, MaterialKey, SourceKey, JointKind, Rank, Rules, Layout
   rules.ts          rank/bays/horns, dimensions with provenance tags, source table, PACK
   ridge.ts          the sagging ridge and the prow taper
@@ -55,6 +57,15 @@ lib/tradition/toraja/   one house, binding the core
   sensitivity.ts    how far the house moves if a dimension is a fifth out
   counterexample.ts a house built to make a check refuse it
   derivation.ts     the arrow from three rules to the dimensions, written out
+  address.ts        the three rules, to and from a query string
+lib/tradition/minang/   the rumah gadang, binding the same core
+  types.ts          Stage, MaterialKey, SourceKey, JointKind, Laras, Rules, Layout
+  rules.ts          laras/ruang/bilik, dimensions with provenance tags, source table, PACK
+  ridge.ts          the symmetric ridge and the gonjong path
+  frame.ts          layout resolution, posts, rasuak, deck, anjuang, leaning walls, bilik
+  roof.ts           the quarter-turned sweep, rafters, purlins, singok, gonjong, ijuk
+  assembly.ts       buildHouse
+  invariants.ts     ruang odd, ridge profile, anjuang floor, gonjong count, bilik tally, walls lean
   address.ts        the three rules, to and from a query string
 lib/solar/
   position.ts       NOAA solar position; shared with the zero-shadow-day tool
@@ -137,7 +148,7 @@ Use exact AABBs for rotated boxes (`|R| · halfExtents`), not a diagonal pad —
 - Generator and solar engine: Vitest, pure unit tests, no browser.
 - Solar engine is validated against known almanac values, not against itself.
 - The renderer is not unit-tested. Its correctness gate is the invariant suite plus a human looking at it.
-- `test/architecture.test.ts` tests the two hard splits directly, because they are properties of the file layout that nothing else would notice breaking. Its naming check strips comments and keeps string literals: the prose has to be able to say "the core may not know a Toraja word" without being the violation it describes, and the thing worth catching is a `stage === 'ijuk'` branch, not a sentence.
+- `test/architecture.test.ts` tests the hard splits directly — the core naming no tradition, and no tradition importing another — because they are properties of the file layout that nothing else would notice breaking. Its naming check strips comments and keeps string literals: the prose has to be able to say "the core may not know a Toraja word" without being the violation it describes, and the thing worth catching is a `stage === 'ijuk'` branch, not a sentence.
 
 ## Conventions
 
@@ -165,8 +176,28 @@ Use exact AABBs for rotated boxes (`|R| · halfExtents`), not a diagonal pad —
 Phase 2 is real and these decisions are made. Phase A has landed; B and C have not.
 
 - **Phase A — done.** Split `lib/core/` from `lib/tradition/toraja/`, extracting only what is mechanically neutral. No new concepts invented, no user-visible change, tests and provenance figures identical before and after.
-- **Phase B — rumah gadang, built concretely in `lib/tradition/minang/`, duplicating whatever it needs to.** Let it copy. The duplication is the measurement instrument: when it is done, diffing the two `frame.ts` files is what tells us what the shared abstraction actually is. Resist unifying mid-build.
-- **Phase C — extract the second layer, from two examples.** `Layout`, the control schema, the tradition registry, the renderer adapter. Expect one or two things that felt obviously shared to turn out not to be.
+- **Phase B — done.** The rumah gadang, built concretely in `lib/tradition/minang/` and allowed to duplicate. Generator, rule pack, source table, invariants and tests; not routed.
+- **Phase C — extract the second layer, from two examples, and put the second house on screen.** The tradition registry, the control schema, the renderer adapter, the route, the copy. See what the second house taught, below: that list is the input.
+
+### What the second house taught
+
+Written down while it is fresh, because this is the entire reason for building it.
+
+**The core came through almost unchanged**, which is the main result. Joints, build order, joint stages, mesh integrity, part provenance and the survey check all ran against the rumah gadang as written. Only `checkSymmetry` needed touching, and both changes it needed were real:
+
+- The plane needed a *label*. Both houses mirror about z = 0, but this one's ridge runs *along* that plane rather than across it — so "the ridge plane" was Toraja wording that happened to be true, not a general fact. The X-runs-front-to-rear convention held; the relationship between the ridge and the mirror did not.
+- The claim needed a *scope*. The rumah gadang is symmetric in its frame and deliberately asymmetric in its bilik, because the bilik are a tally that fills from one end. A check over everything would have had to be false or be softened; scoped to the frame, and paired with `checkBilikTally` stating the sequence positively, it says two true things. The verdict prints how many parts were left out, so a narrowed claim can never read as a whole-building one.
+
+**What broke that would have broken a premature abstraction:**
+
+- **There is no rank scale.** Every Toraja dimension passes through one multiplier set by rank, because there the social parameter governs *size*. Here the social parameter governs *shape* — whether the floor steps — and size comes from the plan counts. A shared `scale` field would have been the first casualty.
+- **`Layout` is still not shareable**, and now for a second reason: this one carries anjuang, gonjong tips, lanjar and bilik, and its ridge runs on the other axis.
+- **A declared dimension in one house is derived in the other.** `roofKneeDrop` is a guess for the tongkonan because nothing pins its break to a height; here the rafters bear on the wall plate, so the knee is arithmetic. The first draft declared it anyway and put the whole roof 100 mm above the plate it sits on — the joint invariant caught it. Fewer invented numbers, and a roof that touches its own frame.
+- **Orientation is a constraint in both and not the same kind of constraint.** Toraja is absolute — the front faces north. Minang is relational — the front faces the halaman with the rangkiang across it. Neither gets a control; a shared `orientation: degrees` would have been wrong for one of them.
+
+**What is now demonstrably shared and is Phase C's extraction list:** the `ijukBands` course algorithm (identical logic, different constants), the `box`/`meshPart` builders, the `sAtX`/`sAtZ` ridge parameterisation, the plate–rafter–purlin pattern, and the shape of `address.ts`. `sweepSurface` is shared already, reached by a quarter turn (`swapXZ`) rather than an axis flag — two houses is not yet a pattern, so if a third also turns it, the axis belongs in `SweepOptions`.
+
+**One thing the build order taught about the building itself:** over the body the roof is carried from below — the lower rafter lands on the plate, the upper meets it at the knee. Over the two gable overhangs there is no plate, so the upper rafter hangs off the ridge and the lower hangs off that. The invariant refused the overhang until that was written down, which is a check earning its keep: a cantilever built from the bottom up is a cantilever with nothing holding it.
 
 Why gadang and not Batak Toba: Toba is nearly isomorphic to the tongkonan — single sagging ridge, boat roof, raised on posts — so it would go fast and teach nothing, and it would produce an abstraction that is tongkonan-shaped while appearing validated. Gadang refuses to fit, which is the point. The Koto Piliang / Bodi Caniago split (raised end platforms vs a flat floor) is a socially-loaded geometric switch of the same kind as rank, and the multi-gonjong roof genuinely breaks `roofStations`, which sweeps one section along one ridge.
 
