@@ -86,6 +86,7 @@ export function RuleControls({
       </Field>
 
       <Field
+        htmlFor="tanduk"
         label={pick(COPY.controls.horns, locale)}
         value={`${rules.horns} ${pick(COPY.controls.hornsUnit, locale)}`}
         hint={
@@ -95,13 +96,13 @@ export function RuleControls({
         }
       >
         <input
+          id="tanduk"
           type="range"
           min={0}
           max={32}
           step={1}
           value={rules.horns}
           onChange={(e) => onChange({ ...rules, horns: Number(e.target.value) })}
-          aria-label={pick(COPY.controls.horns, locale)}
           aria-valuetext={fill(pick(COPY.controls.hornsValue, locale), {
             n: String(rules.horns),
           })}
@@ -180,17 +181,24 @@ export function SunControls({
 
       <div className="mt-4">
         <div className="mb-1 flex items-baseline justify-between">
-          <span className="micro">{pick(COPY.controls.time, locale)} WITA</span>
+          {/*
+            A real label rather than an aria-label repeating it: the words are
+            already on screen, and pointing at the control is what associates
+            them.
+          */}
+          <label className="micro" htmlFor="waktu">
+            {pick(COPY.controls.time, locale)} WITA
+          </label>
           <span className="num text-meta">{formatClock(minutes)}</span>
         </div>
         <input
+          id="waktu"
           type="range"
           min={0}
           max={1439}
           step={5}
           value={minutes}
           onChange={(e) => onMinutes(Number(e.target.value))}
-          aria-label={pick(COPY.controls.time, locale)}
           /*
             The clock and the altitude together: the altitude is what the
             control is actually for, and carrying it here is one announcement
@@ -372,17 +380,26 @@ function Field({
   value,
   hint,
   group = false,
+  htmlFor,
   children,
 }: {
   label: string
   value?: string
   hint?: string
   group?: boolean
+  /** id of the single control this labels, when it labels one */
+  htmlFor?: string
   children: React.ReactNode
 }) {
   const head = (
     <>
-      <span className="micro">{label}</span>
+      {htmlFor ? (
+        <label className="micro" htmlFor={htmlFor}>
+          {label}
+        </label>
+      ) : (
+        <span className="micro">{label}</span>
+      )}
       {value ? <span className="num text-meta">{value}</span> : null}
     </>
   )

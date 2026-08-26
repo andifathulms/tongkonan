@@ -106,7 +106,11 @@ export function RakitClient({ locale }: { locale: Locale }) {
                     : pick(COPY.assembly.play, locale)}
               </button>
             </div>
+            <label className="sr-only" htmlFor="urutan">
+              {pick(COPY.assembly.heading, locale)}
+            </label>
             <input
+              id="urutan"
               type="range"
               min={0}
               max={1000}
@@ -115,7 +119,6 @@ export function RakitClient({ locale }: { locale: Locale }) {
                 setPlaying(false)
                 setT(Number(e.target.value) / 1000)
               }}
-              aria-label={pick(COPY.assembly.heading, locale)}
               /*
                 The scrubber runs 0–1000 and announced "500", which names
                 nothing. The stage it is standing in is what the control is
@@ -199,16 +202,18 @@ export function RakitClient({ locale }: { locale: Locale }) {
 
             <div className="mt-5">
               <div className="mb-2 flex items-baseline justify-between">
-                <span className="micro">{pick(COPY.joints.explode, locale)}</span>
+                <label className="micro" htmlFor="urai">
+                  {pick(COPY.joints.explode, locale)}
+                </label>
                 <span className="num text-meta">{Math.round(explode * 100)}%</span>
               </div>
               <input
+                id="urai"
                 type="range"
                 min={0}
                 max={100}
                 value={Math.round(explode * 100)}
                 onChange={(e) => setExplode(Number(e.target.value) / 100)}
-                aria-label={pick(COPY.joints.explode, locale)}
                 aria-valuetext={fill(pick(COPY.joints.explodeValue, locale), {
                   pct: String(Math.round(explode * 100)),
                 })}
