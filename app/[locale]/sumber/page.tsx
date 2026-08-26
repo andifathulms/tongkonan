@@ -255,9 +255,18 @@ function formatValue(dim: Dim): string {
   return `${dim.value.toFixed(2)} m`
 }
 
+/**
+ * A column header.
+ *
+ * scope is what ties 34 rows of four cells to the words above them. No
+ * caption: the h2 directly above the table already names it, and a caption
+ * would be the same words announced a second time.
+ */
 function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
   return (
-    <th className={`micro pb-2 pr-4 font-normal ${right ? 'text-right' : ''}`}>{children}</th>
+    <th scope="col" className={`micro pb-2 pr-4 font-normal ${right ? 'text-right' : ''}`}>
+      {children}
+    </th>
   )
 }
 
