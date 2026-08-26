@@ -4,10 +4,11 @@ Working instructions for Claude Code. Read PRD.md for what is being built and DE
 
 ## Current state
 
-**M5 — all four routes are built and the invariants are green.**
+**M5 shipped. Phase A of the second-tradition work is done: the generator is split into a tradition-neutral core and one tradition that binds it.**
 
-- `lib/banua/` generates a complete house: 155 parts and 33 joints at the default rules. `lib/solar/` is validated against almanac values. `lib/draw/` emits plan, elevation and long section as SVG.
-- `pnpm check` type-checks and runs 34 tests, including the invariant suite over four rule combinations. All eleven structural checks pass; `checkAgainstSurvey` reports **skipped** and must stay that way.
+- `lib/tradition/toraja/` generates a complete house: 155 parts and 33 joints at the default rules. `lib/core/` holds what is true of any house and knows no Toraja word. `lib/solar/` is validated against almanac values. `lib/draw/` emits plan, elevation and long section as SVG.
+- `pnpm check` type-checks and runs 93 tests, including the invariant suite over four rule combinations. All eleven structural checks pass; `checkAgainstSurvey` reports **skipped** and must stay that way.
+- The split is itself tested. `test/architecture.test.ts` fails the build if `lib/core/` imports a tradition or names one in code, and if anything under `lib/` reaches for three.js, the DOM, `Math.random` or `Date.now`. Those properties are invisible at the point of use, which is exactly why they rot.
 - Provenance: 0 measured, 7 canon, 46 interpolated. That is 87% interpolated and it is shown on every screen. Moving that bar is the work. It got worse before it got better: the pedagogy pass found a dozen dimensional numbers sitting as bare literals in `frame.ts` and `roof.ts` — the ridge upsweep and the rafter section among them — which the bar had never counted. Declaring them was the fix; the higher number is the honest one.
 - **Counted by part rather than by dimension it is 100% interpolated**, and `/bangun` can mark the model to show it. Every canon rule in the pack states structure — faces north, ridge sags, horns are a tally, posts in transverse pairs — and none of them sets a length, so every part depends on at least one invented metre. The shape's logic is sourced; its sizes are not. Do not resolve this by retagging a plausible number as canon.
 - `/bangun`, `/rakit`, `/baca`, `/sumber` exist in Indonesian and English. The frame-raising sequence, the parameter-change rebuild, the day-of-sun, rain, the four view transitions, and the section cut through the three zones are all in.
@@ -35,17 +36,25 @@ Keep this section accurate. A stale "Current state" is worse than none — a pre
 ## Architecture
 
 ```
-lib/banua/        the generator — pure, no DOM, runs in Node
-  types.ts          Part, Joint, House, Provenance, Stage
-  rules.ts          rank/bays/horns, dimensions with provenance tags, source table
-  geometry.ts       ridge curve, section sweep, mesh + tube builders, mirroring
+lib/core/         true of any house — generic over what a tradition calls things
+  kinds.ts          Kinds (stage/material/source/dim/joint/rules) and RulePack
+  types.ts          Part, Joint, House, Dim, Source, Provenance
+  provenance.ts     dim factory, worst-class, the two splits
+  geometry.ts       catmull-rom, section sweep, mesh + tube builders, mirroring
+  assembly.ts       build order, bounds, the normalised timeline
+  invariants.ts     symmetry, joints, build order, meshes, part provenance, survey
+  whatif.ts         the one place a rule is temporarily something else
+lib/tradition/toraja/   one house, binding the core
+  types.ts          Stage, MaterialKey, SourceKey, JointKind, Rank, Rules, Layout
+  rules.ts          rank/bays/horns, dimensions with provenance tags, source table, PACK
+  ridge.ts          the sagging ridge and the prow taper
   frame.ts          layout resolution, posts, floor frame, deck, walls, tulak somba, horns, joints
   roof.ts           ridge assembly, rafters, purlins, ijuk courses
-  assembly.ts       build order and the normalised timeline
-  invariants.ts     the checks that gate the build
-  whatif.ts         the one place a rule is temporarily something else
+  assembly.ts       buildHouse
+  invariants.ts     ridge profile, ijuk coverage, eave oversail, eave/plate, post count
   sensitivity.ts    how far the house moves if a dimension is a fifth out
   counterexample.ts a house built to make a check refuse it
+  derivation.ts     the arrow from three rules to the dimensions, written out
   address.ts        the three rules, to and from a query string
 lib/solar/
   position.ts       NOAA solar position; shared with the zero-shadow-day tool
@@ -57,9 +66,17 @@ components/         renderer, controls, provenance strip
 app/[locale]/       bangun, rakit, baca, sumber
 ```
 
-**The hard split: `lib/` generates, the renderer draws.** `lib/` must never import three.js, touch `window`, or read the DOM. The renderer must never generate geometry. If a shape is being computed inside a component, it is in the wrong file.
+**The first hard split: `lib/` generates, the renderer draws.** `lib/` must never import three.js, touch `window`, or read the DOM. The renderer must never generate geometry. If a shape is being computed inside a component, it is in the wrong file.
 
-This split is what makes the geometry testable. It is not a style preference.
+**The second hard split: `lib/core/` may not know what it is building.** It is generic over a `Kinds` bag — a tradition declares its own stages, materials, sources, dimension keys and joinery, and the core is parameterised on them. So `Part.stage` is not one of nine Toraja words at the type level; it is whatever the tradition binding says it is, and a Minang part cannot claim a Toraja stage and type-check.
+
+The direction is one-way and enforced: a tradition imports the core, the core imports nothing from a tradition and mentions none by name in code. When a change to the core would be easier if it could read a real value out of the Toraja pack, that is the abstraction being wrong, not a reason to add the import.
+
+Both splits are what make the geometry testable. Neither is a style preference.
+
+**Concrete aliases at the boundary.** Each tradition re-exports the core types bound to itself (`export type Part = CorePart<TorajaKinds>`), so the generator and the renderer say `Part`, not `Part<TorajaKinds>`, and a `switch` over a material is still exhaustively checked. Generic-over-`Kinds` costs nothing at the point of use, and it is meant to stay that way.
+
+**One `Dim` knows its source key, not its own key.** `Dim<S extends string>` is parameterised on the source table alone. Parameterising it on the full `Kinds` would be circular — `Kinds['dim']` is `keyof typeof DIMS`, so a `Dim` would be defined in terms of the table it is an entry in.
 
 ## The address
 
@@ -81,6 +98,8 @@ Playing state is deliberately not in the address. A link that starts animating a
 
 The north–south axis is baked in because orientation is a rule, not a parameter. Do not add a building rotation.
 
+X-runs-front-to-rear is the shared convention; *what decides which end is the front* is the tradition's own rule, and the Toraja answer — ulunna banua faces north — is Toraja, not general. A second tradition declares its own orientation constraint. It still gets no control.
+
 ## The generator contract
 
 `buildHouse(rules)` → `{ house, layout }`. Pure, deterministic, no unseeded randomness, no `Date.now()`. The same call runs in the browser and in the test suite and must produce identical output.
@@ -101,6 +120,8 @@ When adding a dimension, tag it honestly. If you invented the number, it is `int
 
 Replacing an interpolated value with a measured one should be a two-line edit: change the value, change the class, point at the survey. Nothing downstream may need to know.
 
+**Provenance is never merged across traditions.** Two houses have two source tables and two interpolated shares, shown separately. An averaged figure over both would be the single most dishonest number this project could print — a house nobody has surveyed hiding behind a house somebody has. `provenanceSplit` takes one tradition's dimensions at a time and that is deliberate.
+
 ## Invariants
 
 `pnpm check` type-checks and runs the invariant suite across **at least four rule combinations**, not just the default. The full list is in PRD.md. Rules:
@@ -116,6 +137,7 @@ Use exact AABBs for rotated boxes (`|R| · halfExtents`), not a diagonal pad —
 - Generator and solar engine: Vitest, pure unit tests, no browser.
 - Solar engine is validated against known almanac values, not against itself.
 - The renderer is not unit-tested. Its correctness gate is the invariant suite plus a human looking at it.
+- `test/architecture.test.ts` tests the two hard splits directly, because they are properties of the file layout that nothing else would notice breaking. Its naming check strips comments and keeps string literals: the prose has to be able to say "the core may not know a Toraja word" without being the violation it describes, and the thing worth catching is a `stage === 'ijuk'` branch, not a sentence.
 
 ## Conventions
 
@@ -138,11 +160,28 @@ Use exact AABBs for rotated boxes (`|R| · halfExtents`), not a diagonal pad —
 7. No morph between traditions.
 8. `prefers-reduced-motion` gets a complete alternative, never a removed feature. The frame-raising sequence is content: de-animate it, do not delete it.
 
+## The second tradition
+
+Phase 2 is real and these decisions are made. Phase A has landed; B and C have not.
+
+- **Phase A — done.** Split `lib/core/` from `lib/tradition/toraja/`, extracting only what is mechanically neutral. No new concepts invented, no user-visible change, tests and provenance figures identical before and after.
+- **Phase B — rumah gadang, built concretely in `lib/tradition/minang/`, duplicating whatever it needs to.** Let it copy. The duplication is the measurement instrument: when it is done, diffing the two `frame.ts` files is what tells us what the shared abstraction actually is. Resist unifying mid-build.
+- **Phase C — extract the second layer, from two examples.** `Layout`, the control schema, the tradition registry, the renderer adapter. Expect one or two things that felt obviously shared to turn out not to be.
+
+Why gadang and not Batak Toba: Toba is nearly isomorphic to the tongkonan — single sagging ridge, boat roof, raised on posts — so it would go fast and teach nothing, and it would produce an abstraction that is tongkonan-shaped while appearing validated. Gadang refuses to fit, which is the point. The Koto Piliang / Bodi Caniago split (raised end platforms vs a flat floor) is a socially-loaded geometric switch of the same kind as rank, and the multi-gonjong roof genuinely breaks `roofStations`, which sweeps one section along one ridge.
+
+Decisions taken, so they are not re-litigated:
+
+- **Tradition is a path segment, not a query parameter:** `/[locale]/[tradition]/bangun?…`. The query string stays "the house" and each tradition declares its own param names. A tradition selects a rule pack rather than being a rule, and putting it in the query would make that string mean two kinds of thing at once.
+- **The project gets renamed to Pasak** — the peg that pins a mortise and tenon. Standard Indonesian, belongs to no one tradition, and it names the join rather than the house. The rename executes in Phase B, when there are two houses; calling a one-tongkonan app Pasak before then is a promise the app does not keep.
+- **Hard rule 7 gets stronger, not weaker.** A tradition switcher is a cut: unmount, remount, no crossfade, no shared camera easing. The morph is forbidden because it asserts a continuity that does not exist, and a switcher is where that temptation will actually arrive.
+- **The survey is still the higher-value work.** A second tradition does not move the interpolated bar; it adds a second bar that starts worse. If a measured drawing of a named tongkonan becomes obtainable, it pre-empts Phase B.
+
 ## Things that will be tempting and are wrong
 
 - **Adding a roof-shape slider.** The roof is downstream of the rules. If the shape needs adjusting, adjust the rule pack and say why in the provenance note.
 - **Making the render prettier with bloom, vignette, DOF, or a HDRI.** See DESIGN.md. The register is a physical model under real light, and effects on top of interpolated numbers are a lie told fluently.
-- **Abstracting the schema for other traditions now.** The abstraction will come out tongkonan-shaped. Wait for the second house.
+- **Abstracting further before the second house exists.** Phase A extracted only what is mechanically neutral — parts, joints, build order, mesh integrity, provenance, the geometry primitives — and it did so without inventing a single shared concept. Everything past that line waits. `Layout` is two thirds Toraja roof and stays tradition-side; there is no shared `Rules` interface, because a rank and a Minang lineage-system switch have nothing in common but being said out loud; the control schema, the tradition registry and the renderer adapter are all Phase C. An abstraction designed from one example comes out tongkonan-shaped and, worse, looks validated.
 - **Hardcoding a dimension in the renderer** because it is faster than threading it through the layout. It breaks the split and it silently escapes the provenance layer.
 - **Reaching for a mesh library** for CSG, lofting, or subdivision. Generation is the subject.
 

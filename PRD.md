@@ -129,7 +129,7 @@ Explicitly forbidden: morphing one tradition into another. It looks spectacular 
 
 Ship after M5. Then, and only then:
 
-- **Phase 2 (separate PRD)** — a second tradition. Rumah gadang is the right one: the Koto Piliang / Bodi Caniago split (raised end platforms vs a flat floor) is the same kind of socially-loaded geometric switch as rank here, so it tests whether the schema generalises.
+- **Phase 2 (separate PRD)** — a second tradition. Rumah gadang is the right one: the Koto Piliang / Bodi Caniago split (raised end platforms vs a flat floor) is the same kind of socially-loaded geometric switch as rank here, so it tests whether the schema generalises. Phase A of that work — splitting a tradition-neutral core out of the generator, extracting only what is mechanically neutral and inventing nothing — has been done; see CLAUDE.md, "The second tradition", for the decisions taken and the two phases still outstanding.
 
 ## Ethics and attribution
 
