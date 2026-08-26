@@ -10,11 +10,20 @@
  *
  * Colour comes from the four pa'ssura pigments and the interface neutrals.
  * There is no fifth pigment: timber, bamboo and stone are mixes of the set,
- * not new hues introduced because they looked more convincing.
+ * not new hues introduced because they looked more convincing. The palette
+ * stays put across traditions for the same reason it stays put across
+ * screens: it is the register of the whole project, not a costume for one
+ * house.
+ *
+ * The generators are shared and the *sets* are not. Both houses are timbered,
+ * thatched in ijuk and carved; only one of them has buffalo horn on the front
+ * post, and only one has woven bamboo in its walls. A tradition composes the
+ * materials it actually builds from, and asking for one it does not have is a
+ * bug rather than something to paper over.
  */
 
 import * as THREE from 'three'
-import type { MaterialKey } from '@/lib/tradition/toraja/types'
+import type { TraditionKey } from '@/lib/tradition/registry'
 
 /** One texture tile covers one square metre of surface. */
 export const TEXTURE_METRES = 1
@@ -181,6 +190,45 @@ function ijukCanvas(): HTMLCanvasElement {
 }
 
 /**
+ * Woven bamboo — sasak, the plaited infill in a rumah gadang's end walls.
+ *
+ * Drawn as an over-and-under plait rather than a hatch, because the thing
+ * that makes woven panel read as woven is the shadow where one lath passes
+ * under another. The weave is constructed from its rule, like everything
+ * else here: a pitch, a lath width, and a parity test.
+ */
+function anyamanCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  const r = rng(77401)
+  const pitch = S / 16
+  const lath = pitch * 0.82
+  ctx.fillStyle = mix(BOLU, KAPUR, 0.28)
+  ctx.fillRect(0, 0, S, S)
+
+  const strip = (x: number, y: number, w: number, h: number, over: boolean) => {
+    ctx.fillStyle = mix(mix(KAPUR, RIRI, 0.34), BOLU, over ? 0.12 + r() * 0.06 : 0.34 + r() * 0.08)
+    ctx.fillRect(x, y, w, h)
+  }
+
+  for (let i = 0; i < 16; i++) {
+    for (let j = 0; j < 16; j++) {
+      const over = (i + j) % 2 === 0
+      // The under-lath is laid first so the over-lath covers its end, which
+      // is what produces the join rather than a drawn line.
+      if (over) {
+        strip(i * pitch, j * pitch, lath, pitch, false)
+        strip(i * pitch, j * pitch, pitch, lath, true)
+      } else {
+        strip(i * pitch, j * pitch, pitch, lath, false)
+        strip(i * pitch, j * pitch, lath, pitch, true)
+      }
+    }
+  }
+  return el
+}
+
+/**
  * A carved panel, constructed rather than traced.
  *
  * Bands in the four pigments, and pa'barre allo drawn as a circle divided
@@ -257,13 +305,44 @@ function stoneCanvas(): HTMLCanvasElement {
 
 const clampByte = (v: number) => Math.min(255, Math.max(0, v))
 
-/* ── The material set ─────────────────────────────────────────────────── */
+/* ── The material sets ────────────────────────────────────────────────── */
 
-export type MaterialSet = Record<MaterialKey, THREE.Material> & {
+/**
+ * The materials one tradition builds from.
+ *
+ * `get` rather than an index, because the renderer holds a house whose
+ * material names are plain strings — it has no rule pack to narrow them
+ * against. An unknown name is a real bug, so it is loud in development and
+ * falls back to timber in the browser rather than dropping the part.
+ */
+export interface MaterialSet {
+  get(key: string): THREE.Material
   dispose(): void
 }
 
-export function createMaterials(anisotropy: number): MaterialSet {
+function assemble(
+  entries: Record<string, THREE.Material>,
+  textures: readonly THREE.Texture[],
+): MaterialSet {
+  const fallback = entries.kayu
+  if (!fallback) throw new Error('every material set needs kayu as its fallback')
+  return {
+    get(key: string): THREE.Material {
+      const found = entries[key]
+      if (found) return found
+      if (process.env.NODE_ENV !== 'production') {
+        throw new Error(`no material named ${key} in this tradition's set`)
+      }
+      return fallback
+    },
+    dispose() {
+      for (const t of textures) t.dispose()
+      for (const m of Object.values(entries)) m.dispose()
+    },
+  }
+}
+
+export function createMaterials(tradition: TraditionKey, anisotropy: number): MaterialSet {
   const textures: THREE.Texture[] = []
   const tex = (el: HTMLCanvasElement) => {
     const t = toTexture(el, anisotropy)
@@ -271,53 +350,58 @@ export function createMaterials(anisotropy: number): MaterialSet {
     return t
   }
 
-  const kayu = new THREE.MeshStandardMaterial({
-    map: tex(timberCanvas(101, 0, 0)),
-    roughness: 0.82,
-    metalness: 0,
-  })
-  const papan = new THREE.MeshStandardMaterial({
-    map: tex(timberCanvas(202, 1, 0.75)),
-    roughness: 0.86,
-    metalness: 0,
-  })
-  const bambu = new THREE.MeshStandardMaterial({
-    map: tex(bambooCanvas()),
-    roughness: 0.68,
-    metalness: 0,
-  })
-  const ijuk = new THREE.MeshStandardMaterial({
-    map: tex(ijukCanvas()),
-    roughness: 0.97,
-    metalness: 0,
-    side: THREE.DoubleSide,
-  })
-  const ukiran = new THREE.MeshStandardMaterial({
-    map: tex(carvedCanvas()),
-    roughness: 0.7,
-    metalness: 0,
-  })
-  const batu = new THREE.MeshStandardMaterial({
-    map: tex(stoneCanvas()),
-    roughness: 0.9,
-    metalness: 0,
-  })
-  // Horn is waxy rather than matte, so it gets a clearcoat. This is the one
-  // material where the physical response is the recognisable thing about it.
-  const tanduk = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(mix(BOLU, KAPUR, 0.2)),
-    roughness: 0.42,
-    metalness: 0,
-    clearcoat: 0.5,
-    clearcoatRoughness: 0.35,
-  })
-
-  const set = { kayu, papan, bambu, ijuk, ukiran, batu, tanduk }
-  return {
-    ...set,
-    dispose() {
-      for (const t of textures) t.dispose()
-      for (const m of Object.values(set)) m.dispose()
-    },
+  /* Shared between the two houses, because both are built of these. */
+  const common: Record<string, THREE.Material> = {
+    kayu: new THREE.MeshStandardMaterial({
+      map: tex(timberCanvas(101, 0, 0)),
+      roughness: 0.82,
+      metalness: 0,
+    }),
+    papan: new THREE.MeshStandardMaterial({
+      map: tex(timberCanvas(202, 1, 0.75)),
+      roughness: 0.86,
+      metalness: 0,
+    }),
+    bambu: new THREE.MeshStandardMaterial({
+      map: tex(bambooCanvas()),
+      roughness: 0.68,
+      metalness: 0,
+    }),
+    ijuk: new THREE.MeshStandardMaterial({
+      map: tex(ijukCanvas()),
+      roughness: 0.97,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    }),
+    ukiran: new THREE.MeshStandardMaterial({
+      map: tex(carvedCanvas()),
+      roughness: 0.7,
+      metalness: 0,
+    }),
+    batu: new THREE.MeshStandardMaterial({
+      map: tex(stoneCanvas()),
+      roughness: 0.9,
+      metalness: 0,
+    }),
   }
+
+  if (tradition === 'toraja') {
+    // Horn is waxy rather than matte, so it gets a clearcoat. This is the one
+    // material where the physical response is the recognisable thing about it.
+    common.tanduk = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(mix(BOLU, KAPUR, 0.2)),
+      roughness: 0.42,
+      metalness: 0,
+      clearcoat: 0.5,
+      clearcoatRoughness: 0.35,
+    })
+  } else {
+    common.anyaman = new THREE.MeshStandardMaterial({
+      map: tex(anyamanCanvas()),
+      roughness: 0.88,
+      metalness: 0,
+    })
+  }
+
+  return assemble(common, textures)
 }

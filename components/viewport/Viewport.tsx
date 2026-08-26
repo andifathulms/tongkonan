@@ -4,23 +4,28 @@ import { useEffect, useId, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { HouseScene } from './scene'
 import type { CameraState, ViewKey } from './scene'
-import type { House, Layout } from '@/lib/tradition/toraja/types'
+import type { Built } from '@/lib/tradition/registry'
 import type { SolarPosition } from '@/lib/solar/position'
-import type { Timeline } from '@/lib/tradition/toraja/assembly'
+import type { Kinds } from '@/lib/core/kinds'
+import type { Timeline } from '@/lib/core/assembly'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 
 export interface ViewportProps {
   locale: Locale
-  house: House
-  layout: Layout
+  /**
+   * The house, its scene model and how to class its parts, all sealed by the
+   * registry. The viewport never learns which tradition it is drawing beyond
+   * the key it needs to generate the right materials.
+   */
+  built: Built
   sun: SolarPosition
   view: ViewKey
   figure: boolean
   rain: boolean
-  reveal: { timeline: Timeline; t: number } | null
+  reveal: { timeline: Timeline<Kinds>; t: number } | null
   explode?: number
-  /** cut the house on the ridge plane to show the three occupancy zones */
+  /** cut the house open to show the occupancy zones, on the axis the tradition names */
   section?: boolean
   /** mark each part by the provenance of the dimensions that produced it */
   provenance?: boolean
@@ -34,8 +39,7 @@ const TRANSITION_MS = 1100
 
 export function Viewport({
   locale,
-  house,
-  layout,
+  built,
   sun,
   view,
   figure,
@@ -88,7 +92,7 @@ export function Viewport({
     const host = hostRef.current
     if (!canvas || !host) return
 
-    const scene = new HouseScene(canvas)
+    const scene = new HouseScene(canvas, built.key)
     sceneRef.current = scene
 
     const observer = new ResizeObserver(() => {
@@ -150,12 +154,12 @@ export function Viewport({
 
   /* ── Feed the scene ───────────────────────────────────────────────── */
   useEffect(() => {
-    sceneRef.current?.setHouse(house, layout)
-  }, [house, layout])
+    sceneRef.current?.setHouse(built.house, built.scene, built.classOf)
+  }, [built])
 
   useEffect(() => {
-    sceneRef.current?.setSun(sun, house)
-  }, [sun, house])
+    sceneRef.current?.setSun(sun, built.house)
+  }, [sun, built])
 
   useEffect(() => {
     const scene = sceneRef.current
@@ -170,7 +174,7 @@ export function Viewport({
       to: scene.viewPreset(view),
       startedAt: performance.now(),
     }
-  }, [view, house])
+  }, [view, built])
 
   /* ── Keyboard rotation ────────────────────────────────────────────── */
   /*

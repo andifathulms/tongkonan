@@ -14,14 +14,17 @@
  */
 
 import * as THREE from 'three'
-import type { House, Layout, Part, ProvenanceClass } from '@/lib/tradition/toraja/types'
-import { partClass } from '@/lib/tradition/toraja/rules'
+import type { AnyHouse, AnyPart, ProvenanceClass } from '@/lib/core/types'
+import type { SceneModel } from '@/lib/core/scene'
+import { sectionAxis } from '@/lib/core/scene'
+import type { Kinds } from '@/lib/core/kinds'
 import type { SolarPosition } from '@/lib/solar/position'
 import { sunDirection } from '@/lib/solar/position'
 import { createMaterials, TEXTURE_METRES } from '../materials'
 import type { MaterialSet } from '../materials'
-import type { Timeline } from '@/lib/tradition/toraja/assembly'
-import { progressAt } from '@/lib/tradition/toraja/assembly'
+import type { TraditionKey } from '@/lib/tradition/registry'
+import type { Timeline } from '@/lib/core/assembly'
+import { progressAt } from '@/lib/core/assembly'
 
 export type ViewKey = 'perspektif' | 'tampak' | 'kolong' | 'potongan'
 
@@ -36,7 +39,7 @@ export interface SceneOptions {
   figure: boolean
   rain: boolean
   /** null when the house is simply standing there */
-  reveal: { timeline: Timeline; t: number } | null
+  reveal: { timeline: Timeline<Kinds>; t: number } | null
   /** 0 assembled, 1 fully exploded along the build order */
   explode: number
   /** cut the house on the ridge plane to show the three occupancy zones */
@@ -83,12 +86,24 @@ export class HouseScene {
   private rain: RainRig
   private zones: ZoneRig
   private clip = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
-  private layout: Layout | null = null
-  private house: House | null = null
+  private model: SceneModel | null = null
+  private house: AnyHouse | null = null
+  /**
+   * How a part is classed by provenance, supplied by whoever built the house.
+   * The renderer cannot work this out: it would need the rule pack, and the
+   * whole point is that it does not have one.
+   */
+  private classOf: (part: AnyPart) => ProvenanceClass = () => 'interpolated'
   private needsRender = true
   private lastApplied = ''
 
-  constructor(canvas: HTMLCanvasElement) {
+  /**
+   * @param tradition which material set to generate. The renderer knows
+   *   nothing else about the tradition — it is here because anisotropy comes
+   *   off the renderer's own capabilities, so the textures cannot be built
+   *   until it exists.
+   */
+  constructor(canvas: HTMLCanvasElement, tradition: TraditionKey) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
     this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio))
     this.renderer.shadowMap.enabled = true
@@ -105,7 +120,7 @@ export class HouseScene {
       target: new THREE.Vector3(0, 4, 0),
     }
 
-    this.materials = createMaterials(this.renderer.capabilities.getMaxAnisotropy())
+    this.materials = createMaterials(tradition, this.renderer.capabilities.getMaxAnisotropy())
     /*
       Flat, untextured and matte, so the overlay reads as a mark made on the
       model rather than as another material the house could be built from.
@@ -178,9 +193,14 @@ export class HouseScene {
 
   /* ── The house ──────────────────────────────────────────────────────── */
 
-  setHouse(house: House, layout: Layout): void {
+  setHouse(
+    house: AnyHouse,
+    model: SceneModel,
+    classOf: (part: AnyPart) => ProvenanceClass,
+  ): void {
     this.house = house
-    this.layout = layout
+    this.model = model
+    this.classOf = classOf
     this.clearHouse()
 
     for (const part of house.parts) {
@@ -190,37 +210,45 @@ export class HouseScene {
       object.name = part.id
       this.houseGroup.add(object)
       this.byPart.set(part.id, object)
-      this.restMaterial.set(part.id, this.materials[part.material])
+      this.restMaterial.set(part.id, this.materials.get(part.material))
       this.restPosition.set(part.id, object.position.clone())
       if (part.kind === 'box') this.boxParts.add(part.id)
     }
     house.parts.forEach((part, i) => this.orderIndex.set(part.id, i))
 
     // Contact plane sized to the body, not the whole scene.
-    const span = Math.max(layout.bodyLength, layout.bodyWidth) * 1.5
+    const span = Math.max(model.footprint.x, model.footprint.z) * 1.5
     this.contact.scale.set(span, span, 1)
 
-    // The figure stands beside the house, clear of the eave, so it reads as a
-    // measure of the building rather than as a person doing something.
-    this.figure.position.set(
-      layout.bodyLength * 0.28,
-      0,
-      layout.eaveHalfWidth + 1.4,
-    )
+    // Where the tradition says the scale figure belongs: beside the house and
+    // clear of the eave, on whichever side that is for this building.
+    this.figure.position.set(...model.figureAt)
+
+    /*
+     * The section is cut on the axis the ridge does not run along.
+     *
+     * A cut across the ridge shows one bay of a house; a cut along it shows
+     * the whole house in one face. Which of those is the informative one
+     * depends on which way the building is long, so the tradition decides and
+     * the plane's normal follows.
+     */
+    const axis = sectionAxis(model)
+    this.clip.normal.set(axis === 0 ? -1 : 0, 0, axis === 2 ? -1 : 0)
+    this.clip.constant = 0
 
     // A rebuild replaces every mesh, so a mode that was on has to be put
     // back on the new ones.
     if (this.provenanceOn) this.setProvenanceMarking(true)
 
     this.frameShadowCamera(house)
-    this.rain.configure(layout)
-    this.zones.configure(layout, house)
+    this.rain.configure(model)
+    this.zones.configure(model)
     this.fitCamera()
     this.needsRender = true
   }
 
-  private buildPart(part: Part): THREE.Mesh {
-    const material = this.materials[part.material]
+  private buildPart(part: AnyPart): THREE.Mesh {
+    const material = this.materials.get(part.material)
     if (part.kind === 'box') {
       const geometry = new THREE.BoxGeometry(part.size[0], part.size[1], part.size[2])
       scaleBoxUVs(geometry, part.size)
@@ -256,7 +284,7 @@ export class HouseScene {
       const object = this.byPart.get(part.id)
       if (!(object instanceof THREE.Mesh)) continue
       const rest = this.restMaterial.get(part.id)
-      object.material = on ? this.provenanceMaterials[partClass(part)] : rest ?? object.material
+      object.material = on ? this.provenanceMaterials[this.classOf(part)] : rest ?? object.material
     }
     this.needsRender = true
   }
@@ -278,7 +306,7 @@ export class HouseScene {
    * A shadow map stretched over 240 m of ground plane would spend all its
    * resolution on nothing.
    */
-  private frameShadowCamera(house: House): void {
+  private frameShadowCamera(house: AnyHouse): void {
     const [minX, minY, minZ] = house.bounds.min
     const [maxX, maxY, maxZ] = house.bounds.max
     const radius = Math.hypot(maxX - minX, maxY - minY, maxZ - minZ) / 2
@@ -300,7 +328,7 @@ export class HouseScene {
    * the sun's altitude, so the difference between the equinox, the June
    * solstice and the local zenith passage is visible rather than described.
    */
-  setSun(sun: SolarPosition, house: House): void {
+  setSun(sun: SolarPosition, house: AnyHouse): void {
     const [dx, dy, dz] = sunDirection(sun)
     const radius = Math.hypot(...house.bounds.max) + 30
     this.sunLight.position.set(dx * radius, Math.max(dy, -0.2) * radius, dz * radius)
@@ -332,15 +360,14 @@ export class HouseScene {
   apply(options: SceneOptions, elapsedSeconds: number): void {
     this.figure.visible = options.figure
     this.setSection(options.section)
-    this.rain.setActive(options.rain, this.layout)
+    this.rain.setActive(options.rain, this.model)
     const raining = options.rain && !options.reducedMotion
     if (raining) {
       this.rain.advance(elapsedSeconds)
       this.needsRender = true
     }
 
-    const layout = this.layout
-    if (!layout) return
+    if (!this.model) return
 
     // Nothing here is animated by default, so the scene redraws only when
     // something has actually changed. There is no idle motion to keep alive.
@@ -436,36 +463,40 @@ export class HouseScene {
   /* ── Camera ─────────────────────────────────────────────────────────── */
 
   viewPreset(view: ViewKey): CameraState {
-    const layout = this.layout
+    const model = this.model
     const house = this.house
     const target = new THREE.Vector3(0, 4, 0)
     let distance = 26
-    if (house && layout) {
+    if (house && model) {
       target.copy(boundsCentre(house))
       distance = this.fitDistance(house)
     }
     switch (view) {
       case 'tampak':
-        // Looking at the north face, from the north. Near-horizontal, so it
-        // reads as an elevation rather than a three-quarter view.
+        // Looking at the front face, from in front of it. X runs front to rear
+        // in both houses, so this is one azimuth and not a per-tradition one.
+        // Near-horizontal, so it reads as an elevation rather than a
+        // three-quarter view.
         return { azimuth: Math.PI, polar: Math.PI / 2 - 0.03, distance: distance * 0.66, target }
-      case 'potongan':
-        // Square on to the cut face, which the clipping plane leaves pointing
-        // toward +Z. Near-horizontal, so the three zones stack the way they
-        // stack in the building rather than being read off a perspective.
+      case 'potongan': {
+        // Square on to the cut face, whichever axis the tradition cuts on.
+        // Near-horizontal, so the zones stack the way they stack in the
+        // building rather than being read off a perspective.
+        const axis = model ? sectionAxis(model) : 2
         return {
-          azimuth: Math.PI / 2,
+          azimuth: axis === 2 ? Math.PI / 2 : Math.PI,
           polar: Math.PI / 2 - 0.05,
           distance: distance * 0.86,
           target,
         }
+      }
       case 'kolong':
-        // Drops under the floor into the sulluk banua and looks up.
+        // Drops under the floor and looks up.
         return {
           azimuth: -2.5,
           polar: 1.62,
-          distance: layout ? layout.bodyLength * 0.62 : 8,
-          target: new THREE.Vector3(0, layout ? layout.kolongHeight * 0.55 : 1.2, 0),
+          distance: model ? model.ridgeReach * 1.1 : 8,
+          target: new THREE.Vector3(0, model ? model.underfloorHeight * 0.55 : 1.2, 0),
         }
       default:
         return { azimuth: -2.25, polar: 1.13, distance, target }
@@ -478,7 +509,7 @@ export class HouseScene {
    * height crops the prow on a tall narrow viewport, and the prow is the
    * thing the reader came to look at.
    */
-  private fitDistance(house: House): number {
+  private fitDistance(house: AnyHouse): number {
     const centre = boundsCentre(house)
     const [minX, minY, minZ] = house.bounds.min
     const [maxX, maxY, maxZ] = house.bounds.max
@@ -575,32 +606,42 @@ export class HouseScene {
 
 /* ── Rain ─────────────────────────────────────────────────────────────── */
 
+/** Write a triple into a flat array with the ridge axis chosen at runtime. */
+function alongRidge(ridgeAxis: 0 | 2, along: number, y: number, across: number): [number, number, number] {
+  return ridgeAxis === 0 ? [along, y, across] : [across, y, along]
+}
+
 /**
- * Rain, and the argument it makes.
+ * Water shedding off the pitch, and where it lands.
  *
- * The streaks shed off the eave and the drip line is drawn on the ground in
- * rara — one of exactly two things that colour is spent on, because where the
- * water lands is an argument about why the overhang is as deep as it is.
+ * The whole demonstration is the drip line falling clear of the post feet,
+ * which is why the overhang is as deep as it is. Both houses make that
+ * argument and they make it along different axes, so the rig is written
+ * against the ridge axis rather than against X.
  */
 class RainRig {
   readonly group = new THREE.Group()
-  // Seeded, like the materials: a viewer who reloads should get the same
+  // One seeded stream, so a reader who leaves and comes back sees the same
   // rain, not a different shower that reads as the scene being alive.
   private random = seeded(48271)
   private streaks: THREE.LineSegments | null = null
   private dripLine: THREE.LineSegments | null = null
   private velocities: number[] = []
-  private layout: Layout | null = null
+  private model: SceneModel | null = null
 
-  configure(layout: Layout): void {
-    this.layout = layout
+  constructor() {
+    this.group.visible = false
+  }
+
+  configure(model: SceneModel): void {
+    this.model = model
     this.dispose()
 
     const count = 420
     const positions = new Float32Array(count * 6)
     this.velocities = []
     for (let i = 0; i < count; i++) {
-      this.seed(positions, i, layout, this.random())
+      this.seed(positions, i, model, this.random())
       this.velocities.push(6 + this.random() * 4)
     }
     const geometry = new THREE.BufferGeometry()
@@ -611,13 +652,15 @@ class RainRig {
     )
     this.group.add(this.streaks)
 
-    // Where the water lands. Two lines on the ground, just outside the eave.
-    const dripZ = layout.eaveHalfWidth + 0.18
-    const x0 = layout.frontProwX
-    const x1 = layout.rearProwX
+    // Where the water lands. Two lines on the ground, just outside the eave,
+    // running the length of the ridge.
+    const across = (model.ridgeAxis === 0 ? model.drip.z : model.drip.x) + 0.18
+    const reach = model.ridgeReach
     const drip = new Float32Array([
-      x0, 0.02, dripZ, x1, 0.02, dripZ,
-      x0, 0.02, -dripZ, x1, 0.02, -dripZ,
+      ...alongRidge(model.ridgeAxis, -reach, 0.02, across),
+      ...alongRidge(model.ridgeAxis, reach, 0.02, across),
+      ...alongRidge(model.ridgeAxis, -reach, 0.02, -across),
+      ...alongRidge(model.ridgeAxis, reach, 0.02, -across),
     ])
     const dripGeom = new THREE.BufferGeometry()
     dripGeom.setAttribute('position', new THREE.BufferAttribute(drip, 3))
@@ -628,41 +671,43 @@ class RainRig {
     this.group.add(this.dripLine)
   }
 
-  private seed(positions: Float32Array, i: number, layout: Layout, phase: number): void {
-    const x = layout.frontProwX + this.random() * (layout.rearProwX - layout.frontProwX)
-    const z = (this.random() * 2 - 1) * (layout.eaveHalfWidth + 2.2)
-    const top = layout.frontProwY + 2
+  private seed(positions: Float32Array, i: number, model: SceneModel, phase: number): void {
+    const along = (this.random() * 2 - 1) * model.ridgeReach
+    const spread = (model.ridgeAxis === 0 ? model.drip.z : model.drip.x) + 2.2
+    const across = (this.random() * 2 - 1) * spread
+    const top = model.weatherTop + 2
     const y = phase * top
     const len = 0.5
     const o = i * 6
-    positions[o] = x
-    positions[o + 1] = y
-    positions[o + 2] = z
-    positions[o + 3] = x
-    positions[o + 4] = y - len
-    positions[o + 5] = z
+    const head = alongRidge(model.ridgeAxis, along, y, across)
+    const tail = alongRidge(model.ridgeAxis, along, y - len, across)
+    positions[o] = head[0]
+    positions[o + 1] = head[1]
+    positions[o + 2] = head[2]
+    positions[o + 3] = tail[0]
+    positions[o + 4] = tail[1]
+    positions[o + 5] = tail[2]
   }
 
-  setActive(active: boolean, layout: Layout | null): void {
+  setActive(active: boolean, model: SceneModel | null): void {
     this.group.visible = active
-    if (active && layout && !this.streaks) this.configure(layout)
+    if (active && model && !this.streaks) this.configure(model)
   }
 
   advance(seconds: number): void {
-    const layout = this.layout
+    const model = this.model
     const streaks = this.streaks
-    if (!layout || !streaks) return
+    if (!model || !streaks) return
     const attribute = streaks.geometry.getAttribute('position')
     const array = attribute.array as Float32Array
-    const top = layout.frontProwY + 2
     for (let i = 0; i < this.velocities.length; i++) {
       const v = (this.velocities[i] ?? 8) * seconds
       const o = i * 6
       const y = (array[o + 1] ?? 0) - v
-      // Water that reaches the eave line is shed outward: it does not pass
-      // through the roof, it runs off it.
+      // Water that reaches the ground is reseeded at the top: it does not
+      // pass through the roof, it runs off it.
       if (y < 0) {
-        this.seed(array, i, layout, 1)
+        this.seed(array, i, model, 1)
       } else {
         array[o + 1] = y
         array[o + 4] = y - 0.5
@@ -672,12 +717,11 @@ class RainRig {
   }
 
   dispose(): void {
-    for (const child of [...this.group.children]) {
+    for (const child of [this.streaks, this.dripLine]) {
+      if (!child) continue
       this.group.remove(child)
-      if (child instanceof THREE.LineSegments) {
-        child.geometry.dispose()
-        ;(child.material as THREE.Material).dispose()
-      }
+      child.geometry.dispose()
+      ;(child.material as THREE.Material).dispose()
     }
     this.streaks = null
     this.dripLine = null
@@ -693,12 +737,13 @@ function seeded(seed: number): () => number {
 }
 
 /**
- * The three vertical zones, drawn on the cut plane.
+ * The occupancy zones, drawn on the cut plane.
  *
- * sulluk banua below the floor, kale banua on the living floor, rattiang
- * banua in the attic. The lines mark where one ends and the next begins; the
- * rail names them, because nothing on screen may carry meaning that only the
- * code knows.
+ * The lines mark where one zone ends and the next begins; the rail names them,
+ * because nothing on screen may carry meaning that only the code knows. Which
+ * planes are worth a line is the tradition's own answer — the rumah gadang has
+ * one the tongkonan does not, and its absence under the other laras is the
+ * statement rather than an omission.
  */
 class ZoneRig {
   readonly group = new THREE.Group()
@@ -707,17 +752,20 @@ class ZoneRig {
     this.group.visible = false
   }
 
-  configure(layout: Layout, house: House): void {
+  configure(model: SceneModel): void {
     this.dispose()
     // Run past the building at both ends, the way extension lines do on a
     // drawing: the boundary is being pointed at, not enclosed.
     const over = 1.6
-    const x0 = layout.frontProwX - over
-    const x1 = layout.rearProwX + over
-    const z = 0.02
-    const boundaries = [0, layout.floorFrameY, layout.deckY, layout.plateY, house.bounds.max[1]]
+    const reach = model.ridgeReach + over
+    const offset = 0.02
     const points: number[] = []
-    for (const y of boundaries) points.push(x0, y, z, x1, y, z)
+    for (const y of model.zoneLines) {
+      points.push(
+        ...alongRidge(model.ridgeAxis, -reach, y, offset),
+        ...alongRidge(model.ridgeAxis, reach, y, offset),
+      )
+    }
 
     const geometry = new THREE.BufferGeometry()
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3))
@@ -817,7 +865,7 @@ function skyColour(altitude: number): THREE.Color {
   return dusk.clone().lerp(day, clamp01((altitude - 6) / 40))
 }
 
-function boundsCentre(house: House): THREE.Vector3 {
+function boundsCentre(house: AnyHouse): THREE.Vector3 {
   const [minX, minY, minZ] = house.bounds.min
   const [maxX, maxY, maxZ] = house.bounds.max
   return new THREE.Vector3((minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2)
