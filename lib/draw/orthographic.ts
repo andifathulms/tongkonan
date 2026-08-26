@@ -190,7 +190,14 @@ function linesForParts(house: House, layout: Layout, view: Projection): Line[] {
  * pitch breaks, and the eave. Three lines say more about this roof than a
  * thousand projected triangles would.
  */
-function linesForRoof(layout: Layout, view: Projection): Line[] {
+/**
+ * The roof, as lines.
+ *
+ * Exported so a comparison figure can draw two roofs against each other
+ * without redrawing the whole house: the roof is where a changed dimension
+ * shows, and 40 polylines is a figure a page can carry where 1600 is not.
+ */
+export function linesForRoof(layout: Layout, view: Projection): Line[] {
   const stations = roofStations(layout)
   const knee = { at: layout.breakFraction, drop: layout.kneeDrop }
   const lines: Line[] = []

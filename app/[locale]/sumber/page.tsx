@@ -10,6 +10,7 @@ import { buildHouse } from '@/lib/banua/assembly'
 import { runInvariants, summarise } from '@/lib/banua/invariants'
 import { PERTURBATION, PROBE_LABELS, sensitivities, sensitivityOf } from '@/lib/banua/sensitivity'
 import { ridgeCounterexample } from '@/lib/banua/counterexample'
+import { compareDimension } from '@/lib/draw/compare'
 import type { Sensitivity } from '@/lib/banua/sensitivity'
 import type { Dim } from '@/lib/banua/types'
 import type { CheckResult } from '@/lib/banua/invariants'
@@ -47,6 +48,13 @@ export default function Sumber({ params }: { params: { locale: string } }) {
   // is never rendered — this page is the only route that ever sees it, and it
   // sees it as two numbers and a verdict.
   const counter = ridgeCounterexample(DEFAULT_RULES)
+  /*
+    One figure, for the dimension that matters most. The table says what moves
+    in metres; this is the only place the reader can see it move. Built here,
+    so the page stays static HTML.
+  */
+  const worst = sensitivity.find((x) => x.worst > 0)
+  const comparison = worst ? compareDimension(worst.dim, 1 + PERTURBATION, DEFAULT_RULES) : null
 
   return (
     <Sheet
@@ -115,6 +123,26 @@ export default function Sumber({ params }: { params: { locale: string } }) {
             {pick(COPY.sources.measureFirst, locale)}{' '}
             {fill(pick(COPY.sources.sensitivityCaveat, locale), { pct })}
           </p>
+
+          {comparison && worst ? (
+            <figure className="mt-6">
+              <h3 className="micro">{pick(COPY.sources.compareHeading, locale)}</h3>
+              <div
+                className="mt-3 rounded border border-hairline p-3"
+                /* Built at build time from our own generator; there is no user
+                   input anywhere near this string. */
+                dangerouslySetInnerHTML={{ __html: comparison.svg }}
+              />
+              <figcaption className="mt-2 max-w-prose text-body text-muted">
+                {fill(pick(COPY.sources.compareCaption, locale), {
+                  dim: worst.dim,
+                  from: comparison.from.toFixed(2),
+                  to: comparison.to.toFixed(2),
+                  pct,
+                })}
+              </figcaption>
+            </figure>
+          ) : null}
 
           <hr className="rule mb-7 mt-12" />
 
@@ -335,7 +363,7 @@ function IfWrong({
   )
 }
 
-function fill(template: string, values: Record<string, number>): string {
+function fill(template: string, values: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (whole, key: string) => String(values[key] ?? whole))
 }
 

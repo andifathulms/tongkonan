@@ -5,6 +5,7 @@ import { ridgeCounterexample } from '@/lib/banua/counterexample'
 import { checkEaveOversail } from '@/lib/banua/invariants'
 import { buildHouse } from '@/lib/banua/assembly'
 import { withDimValue } from '@/lib/banua/whatif'
+import { compareDimension } from '@/lib/draw/compare'
 
 describe('what a survey would change', () => {
   it('leaves the rule pack exactly as it found it', () => {
@@ -110,5 +111,37 @@ describe('a check, shown doing its job', () => {
       })
     })
     expect(unbreakable).toBe(true)
+  })
+})
+
+describe('showing what a wrong number looks like', () => {
+  it('draws both roofs on the same axes and fits them in the frame', () => {
+    const { svg } = compareDimension('bayLength', 1.2, DEFAULT_RULES)
+    const vb = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg)!
+    const w = Number(vb[1])
+    const h = Number(vb[2])
+    const xs = [...svg.matchAll(/[ML](-?[\d.]+) -?[\d.]+/g)].map((m) => Number(m[1]))
+    const ys = [...svg.matchAll(/[ML]-?[\d.]+ (-?[\d.]+)/g)].map((m) => Number(m[1]))
+    expect(Math.min(...xs)).toBeGreaterThanOrEqual(0)
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(0)
+    expect(Math.max(...xs)).toBeLessThanOrEqual(w)
+    expect(Math.max(...ys)).toBeLessThanOrEqual(h)
+  })
+
+  it('the two roofs actually differ, or the figure is teaching nothing', () => {
+    const { svg, from, to } = compareDimension('bayLength', 1.2, DEFAULT_RULES)
+    expect(to).toBeCloseTo(from * 1.2, 6)
+    const solid = svg.split('stroke-dasharray').length
+    expect(solid).toBeGreaterThan(1)
+    // A dimension that moves nothing should draw two identical roofs; one that
+    // moves the house should not.
+    const flat = compareDimension('deckThickness', 1.2, DEFAULT_RULES)
+    expect(flat.svg).not.toBe(svg)
+  })
+
+  it('leaves the rule pack intact', () => {
+    const before = DIM_KEYS.map((k) => DIMS[k].value)
+    compareDimension('bayLength', 1.2, DEFAULT_RULES)
+    expect(DIM_KEYS.map((k) => DIMS[k].value)).toEqual(before)
   })
 })

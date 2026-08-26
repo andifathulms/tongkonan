@@ -372,6 +372,11 @@ export const COPY = {
       'Ini kepekaan, bukan ketidakpastian: yang ditunjukkan adalah apa yang bergerak, bukan seberapa mungkin nilainya keliru. Angka {pct}% itu sendiri pilihan penulis.',
       'This is sensitivity, not uncertainty: it shows what moves, not how likely the value is to be wrong. The {pct}% is itself the author\u2019s choice.',
     ),
+    compareHeading: t('Seperti apa kalau meleset', 'What being wrong looks like'),
+    compareCaption: t(
+      'Garis utuh: {dim} sebagaimana ditetapkan, {from} m. Garis putus merah: nilai yang sama digeser {pct}%, menjadi {to} m. Keduanya digambar dari generator yang sama pada sumbu yang sama. Tidak ada kendali di sini — {dim} bukan parameter, dan tidak akan menjadi parameter.',
+      'Solid: {dim} as the pack sets it, {from} m. Dashed red: the same value pushed {pct}%, to {to} m. Both are drawn by the same generator on the same axes. There is no control here — {dim} is not a parameter and will not become one.',
+    ),
     sensitivityWorst: t('Pergeseran terbesar', 'Largest shift'),
     sensitivityNone: t('Tidak menggeser ukuran apa pun', 'Moves no measurement'),
     ifWrong: t('Bila meleset {pct}%', 'If {pct}% out'),
