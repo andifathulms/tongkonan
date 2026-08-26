@@ -32,6 +32,24 @@ export const RANTEPAO: Site = {
   tzName: 'WITA',
 }
 
+/**
+ * The second house's sun.
+ *
+ * Bukittinggi sits at 0.3° S — within a third of a degree of the equator, so
+ * the sun passes almost overhead twice a year and the two zenith days fall
+ * near the equinoxes rather than months apart. The deep overhang is doing the
+ * same work here as at Rantepao and the numbers behind it are different,
+ * which is the argument for computing the light rather than art-directing it:
+ * move the house and the sun moves with it.
+ */
+export const BUKITTINGGI: Site = {
+  name: 'Bukittinggi',
+  latitude: -0.3,
+  longitude: 100.37,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /* ── Time ─────────────────────────────────────────────────────────────── */
 
 /** Julian day from a UTC instant in milliseconds. */
