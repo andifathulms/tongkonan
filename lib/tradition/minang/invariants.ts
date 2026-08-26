@@ -29,7 +29,7 @@ import type { CheckResult } from '@/lib/core/invariants'
 import { slopeDrop } from '@/lib/core/geometry'
 import type { House, Layout, Part } from './types'
 import { ridgeOf } from './frame'
-import { RIDGE_CAP_BAND, ijukBands, roofStations } from './roof'
+import { RIDGE_CAP_BAND, ijukBands, roofStations, stationAt } from './roof'
 import { DIMS, PACK, larasInfo } from './rules'
 
 export { checkAgainstSurvey, checkJoints, checkMeshes, partBounds, summarise } from '@/lib/core/invariants'
@@ -298,6 +298,59 @@ export function checkEaveRises(layout: Layout): CheckResult {
 }
 
 /**
+ * The gable panel is cut to the roof that is actually there.
+ *
+ * It was not, and nothing noticed. The panel was built from the level eave —
+ * half-width and edge height read straight off the layout — which was the same
+ * thing as the roof's section at the gable right up until the roof learned to
+ * lift, and then silently was not. It ended up projecting more than a metre
+ * past the roof on each side and hanging four and a half metres below its
+ * edge: a flat carved slab sticking out of the building.
+ *
+ * The failure mode is two places computing the same shape and only one of them
+ * being updated, so the check is that they agree. `stationAt` is now the single
+ * description and this holds the panel to it.
+ */
+export function checkGableFollowsRoof(house: House, layout: Layout): CheckResult {
+  const problems: string[] = []
+  let worst = 0
+
+  for (const end of [1, -1] as const) {
+    const z = (end * layout.bodyLength) / 2
+    const st = stationAt(layout, z)
+    const panel = house.parts.find((p) => p.id === `singok-${end > 0 ? 'a' : 'b'}`)
+    if (!panel) {
+      problems.push(`no gable panel at z=${z.toFixed(2)}`)
+      continue
+    }
+    const b = partBounds(panel)
+    // Half-width and the height of the edge: the two numbers that drifted.
+    const wide = Math.max(Math.abs(b.min[0] ?? 0), Math.abs(b.max[0] ?? 0)) - st.halfWidth
+    const low = st.eaveY - (b.min[1] ?? 0)
+    worst = Math.max(worst, Math.abs(wide), Math.abs(low))
+    // A hair of tolerance for the panel's own thickness and nothing more.
+    const slack = DIMS.singokThickness.value * 2
+    if (wide > slack) problems.push(`z=${z.toFixed(2)}: ${wide.toFixed(2)} m wider than the roof`)
+    if (low > slack) problems.push(`z=${z.toFixed(2)}: hangs ${low.toFixed(2)} m below the roof edge`)
+  }
+
+  return {
+    key: 'gable-follows-roof',
+    titleId: 'Papan singok mengikuti bentuk atap di tempatnya berdiri',
+    titleEn: 'The gable panel is cut to the roof section it closes',
+    status: problems.length === 0 ? 'pass' : 'fail',
+    detail:
+      problems.length === 0
+        ? `Kedua papan singok sesuai dengan atap di ujung badan rumah, selisih terbesar ${(worst * 1000).toFixed(0)} mm.`
+        : problems.join('; '),
+    detailEn:
+      problems.length === 0
+        ? `Both gable panels match the roof at the end of the body, largest discrepancy ${(worst * 1000).toFixed(0)} mm.`
+        : problems.join('; '),
+  }
+}
+
+/**
  * The bilik are a sequence, not a scatter.
  *
  * One room per married daughter, filling the rear lanjar from one end with no
@@ -466,6 +519,7 @@ export function runInvariants(house: House, layout: Layout): readonly CheckResul
     checkAnjuangFloor(house, layout),
     checkGonjongCount(house, layout),
     checkEaveRises(layout),
+    checkGableFollowsRoof(house, layout),
     checkBilikTally(house, layout),
     checkWallsLeanOut(house, layout),
     checkIjukCoverage(house, layout),

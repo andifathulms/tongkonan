@@ -14,7 +14,7 @@ import {
   provenanceSplit,
 } from '@/lib/tradition/minang/rules'
 import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/tradition/minang/address'
-import { roofStations } from '@/lib/tradition/minang/roof'
+import { roofStations, stationAt } from '@/lib/tradition/minang/roof'
 import { STAGE_ORDER } from '@/lib/tradition/minang/types'
 import type { Rules } from '@/lib/tradition/minang/types'
 
@@ -124,6 +124,22 @@ describe('the gonjong is the roof', () => {
     expect(Math.max(...stations.map((s) => s.eaveY))).toBeGreaterThan(layout.ridgeEndY)
     // The tips sit above the ridge end, which is what makes the hollow.
     for (const tip of layout.gonjongTips) expect(tip[1]).toBeGreaterThan(layout.ridgeEndY)
+  })
+
+  it('leaves a gable to close at the end wall', () => {
+    /*
+     * The other way to get this wrong, and the one the second attempt made:
+     * give the sweep room by starting it deep inside the body, and by the time
+     * the roof reaches the end wall its edge has already met its own ridge.
+     * No gable, and a carved panel cut to a roof that is no longer there.
+     */
+    const { layout } = buildHouse(DEFAULT_RULES)
+    const gable = stationAt(layout, layout.bodyLength / 2)
+    expect(gable.ridgeY - gable.eaveY).toBeGreaterThan(layout.wallHeight)
+    expect(gable.halfWidth).toBeGreaterThan(layout.eaveHalfDepth * 0.9)
+    // And the eave along the long façade still reads as a straight line.
+    const facade = roofStations(layout).filter((s) => Math.abs(s.x) < layout.bodyLength * 0.4)
+    for (const s of facade) expect(s.eaveY).toBeCloseTo(layout.eaveY, 9)
   })
 
   it('gives the sweep room to be a curve rather than a cliff', () => {

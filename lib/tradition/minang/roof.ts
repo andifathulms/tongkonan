@@ -68,61 +68,61 @@ export function swapXZ(mesh: MeshData): MeshData {
 }
 
 /**
- * Stations along the ridge — and the whole of the gonjong.
+ * The roof's section at one point along the ridge.
  *
- * Over the body the roof is an ordinary thing: full width, level eave, ridge
- * sagging between its ends. Over the two overhangs it stops being ordinary.
- * The edge narrows toward the ridge plane and climbs past the ridge itself,
- * so the last station is a steep fin running from the ridge point out and up
- * to the tip. That fin *is* the gonjong, and the hollow between the pair at
- * one end is what a station whose eave sits above its own ridge produces.
+ * Over the middle of the house it is an ordinary thing: full width, level
+ * edge, ridge sagging between its ends. Toward the ends it stops being
+ * ordinary — the edge narrows toward the ridge plane and climbs past the ridge
+ * itself, so the last section is a steep fin running from the ridge point out
+ * and up to the tip. That fin *is* the gonjong, and the hollow between the
+ * pair at one end is what a section whose edge sits above its own ridge makes.
  *
- * The knee straightens out over the overhang for the same reason it exists at
- * all: the break in the slope sits on the wall head, and past the end of the
- * wall there is nothing for it to sit on. Carrying it out to the tip would put
- * a kink down the middle of a spire.
+ * Nearly all of that happens past the end wall, over the overhang, which is
+ * why the long façade still reads as a straight eave. The two earlier versions
+ * got this wrong in opposite directions: the first squeezed the whole rise
+ * into nine hundred millimetres, an eleven-to-one slope that rendered as a
+ * flat sail; the second gave it room by starting it deep inside the body, and
+ * by the time the roof reached the end wall its edge had already met the ridge
+ * and there was no gable left to close.
+ *
+ * The knee straightens out along the way for the same reason it exists at all:
+ * the break in a roof slope sits on the wall head, and past the end of the wall
+ * there is nothing for it to sit on. Carrying it out to the tip would put a
+ * kink down the middle of a spire.
+ *
+ * Everything that needs the roof's shape asks here — the sweep, the verge
+ * members and the gable panel — so none of them can be cut to a roof that is
+ * no longer the one being built.
+ */
+export function stationAt(layout: Layout, z: number): Station {
+  const half = layout.bodyLength / 2
+  const tipY = layout.ridgeEndY + DIMS.gonjongRise.value
+  const from = half * (1 - DIMS.gonjongReach.value)
+  const run = Math.max(1e-6, layout.ridgeEndZ - from)
+  // 0 over the level middle, 1 at the tip. Raised to a power so the edge holds
+  // its line and then lifts hard, which is what makes the gonjong read as a
+  // point rather than as a ramp.
+  const u = clamp01((Math.abs(z) - from) / run) ** DIMS.gonjongSweep.value
+  return {
+    x: z,
+    ridgeY: ridgeOf(layout)(sAtZ(layout, z)).y,
+    halfWidth: lerp(layout.eaveHalfDepth, layout.eaveHalfDepth * DIMS.gonjongSplay.value, u),
+    eaveY: lerp(layout.eaveY, tipY, u),
+    // drop === at is a straight run from ridge to edge.
+    knee: { at: layout.breakFraction, drop: lerp(layout.kneeDrop, layout.breakFraction, u) },
+  }
+}
+
+/**
+ * The stations the roof is swept along.
  *
  * `Station.x` is the position along the sweep, which for this house is Z. The
  * name comes from the primitive and the quarter turn happens in `swapXZ`.
  */
 export function roofStations(layout: Layout, count = STATIONS): readonly Station[] {
   const ridge = ridgeOf(layout)
-  const half = layout.bodyLength / 2
-  const tipY = layout.ridgeEndY + DIMS.gonjongRise.value
-  const sweep = DIMS.gonjongSweep.value
-  /*
-   * Where the lift begins, and it is not the end of the house.
-   *
-   * The first version measured the sweep across the overhang alone — nine
-   * hundred millimetres of run for ten metres of rise, an eleven to one slope
-   * that is a wall rather than a curve. It rendered as four flat sails welded
-   * to the ends. A gonjong needs the length of the last third of the roof to
-   * develop in, so the lift starts well inside the body and the eave along the
-   * long façade is already climbing before it reaches the gable.
-   */
-  const from = half * (1 - DIMS.gonjongReach.value)
-  const run = Math.max(1e-6, layout.ridgeEndZ - from)
   const out: Station[] = []
-
-  for (let i = 0; i < count; i++) {
-    const s = i / (count - 1)
-    const { z, y } = ridge(s)
-    // 0 over the level middle, 1 at the tip. Raised to a power so the eave
-    // holds its line and then lifts hard, which is what makes the gonjong read
-    // as a point rather than as a ramp.
-    const u = clamp01((Math.abs(z) - from) / run) ** sweep
-    out.push({
-      x: z,
-      ridgeY: y,
-      halfWidth: lerp(layout.eaveHalfDepth, layout.eaveHalfDepth * DIMS.gonjongSplay.value, u),
-      eaveY: lerp(layout.eaveY, tipY, u),
-      knee: {
-        at: layout.breakFraction,
-        // drop === at is a straight run from ridge to edge.
-        drop: lerp(layout.kneeDrop, layout.breakFraction, u),
-      },
-    })
-  }
+  for (let i = 0; i < count; i++) out.push(stationAt(layout, ridge(i / (count - 1)).z))
   return out
 }
 
@@ -161,15 +161,26 @@ function rafter(
   }
 }
 
-/** The polygon of the roof seen end-on: eave, knee, ridge, knee, eave. */
+/**
+ * The polygon of the roof seen end-on: eave, knee, ridge, knee, eave.
+ *
+ * Read off the station at that z, not off the level eave. Those were the same
+ * number until the roof learned to lift, and then they were not: the panel was
+ * still being cut to a roof 5.4 m wide with its edge at 3.66 m while the roof
+ * at the gable had narrowed to 4.0 m and climbed to 8.1 m. It projected more
+ * than a metre past the roof on each side and hung four and a half metres
+ * below its edge — a flat carved slab sticking out of the building, which is
+ * exactly what it looked like.
+ */
 function gableProfile(layout: Layout, z: number): (readonly [number, number])[] {
-  const ridgeYz = ridgeOf(layout)(sAtZ(layout, z)).y
-  const wallHeadX = layout.eaveHalfDepth * layout.breakFraction
-  const kneeY = ridgeYz - (ridgeYz - layout.eaveY) * layout.kneeDrop
+  const st = stationAt(layout, z)
+  const ridgeYz = st.ridgeY
+  const wallHeadX = st.halfWidth * st.knee!.at
+  const kneeY = ridgeYz - (ridgeYz - st.eaveY) * st.knee!.drop
   // Counter-clockwise seen from +Z, so the front face of the prism points out.
   return [
-    [-layout.eaveHalfDepth, layout.eaveY],
-    [layout.eaveHalfDepth, layout.eaveY],
+    [-st.halfWidth, st.eaveY],
+    [st.halfWidth, st.eaveY],
     [wallHeadX, kneeY],
     [0, ridgeYz],
     [-wallHeadX, kneeY],
