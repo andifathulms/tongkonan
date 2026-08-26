@@ -393,6 +393,135 @@ function minangCarvingCanvas(): HTMLCanvasElement {
   return el
 }
 
+/**
+ * Fired clay tile.
+ *
+ * The first roof in this project that is not thatch. Where ijuk is fibre —
+ * soft-edged, matte, read by the shadow between courses — a tiled roof is a
+ * field of hard repeated units with a shadow under every one of them, so the
+ * generator draws units rather than strokes. The interlock runs one way only,
+ * which is what gives a tiled roof its grain.
+ */
+function gentengCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  const r = rng(60313)
+  const across = 8
+  const down = 10
+  const w = S / across
+  const h = S / down
+  ctx.fillStyle = mix(BOLU, RARA, 0.22)
+  ctx.fillRect(0, 0, S, S)
+
+  for (let row = 0; row < down; row++) {
+    const y = row * h
+    // Every other course offset by half a tile, the way they are laid.
+    const shift = row % 2 === 0 ? 0 : w / 2
+    for (let col = -1; col <= across; col++) {
+      const x = col * w + shift
+      const tone = 0.42 + r() * 0.3
+      ctx.fillStyle = mix(mix(RARA, RIRI, 0.35), BOLU, 1 - tone)
+      // The tile: a rounded pan, slightly proud of the one below it.
+      ctx.beginPath()
+      ctx.moveTo(x + w * 0.04, y + h)
+      ctx.lineTo(x + w * 0.04, y + h * 0.34)
+      ctx.quadraticCurveTo(x + w * 0.5, y - h * 0.08, x + w * 0.96, y + h * 0.34)
+      ctx.lineTo(x + w * 0.96, y + h)
+      ctx.closePath()
+      ctx.fill()
+      // The shadow line under the head of the course above.
+      ctx.strokeStyle = mix(BOLU, RARA, 0.1)
+      ctx.lineWidth = h * 0.09
+      ctx.beginPath()
+      ctx.moveTo(x + w * 0.04, y + h * 0.36)
+      ctx.quadraticCurveTo(x + w * 0.5, y - h * 0.06, x + w * 0.96, y + h * 0.36)
+      ctx.stroke()
+    }
+  }
+  return el
+}
+
+/**
+ * A carved Javanese panel, constructed rather than traced.
+ *
+ * Two motifs, both named in every account of gebyok carving, both plainly
+ * geometric, neither restricted:
+ *
+ * - **lung-lungan**, the running vine: a stem that scrolls and throws a curl
+ *   at each turn. It is the motif that fills the long fields of a gebyok, so
+ *   it is the field here.
+ * - **wajikan**, the lozenge: a diamond set where members cross, with a small
+ *   rosette at its centre. It punctuates rather than fills, so it sits on the
+ *   band between the fields.
+ *
+ * The same standing as the Minangkabau panel and the same honesty owed: these
+ * are constructions from description rather than tracings of a carved board,
+ * and the proportions are the author's. Nothing beyond the two is attempted —
+ * Javanese carving is a large and finely graded vocabulary, and inventing
+ * plausible members of it would be worse than showing two real ones plainly.
+ */
+function jawaCarvingCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  ctx.fillStyle = mix(BOLU, RARA, 0.14)
+  ctx.fillRect(0, 0, S, S)
+
+  /** One turn of the vine: a stem arc with a curl closing on itself. */
+  const scroll = (cx: number, cy: number, r: number, flip: number) => {
+    ctx.strokeStyle = mix(KAPUR, RIRI, 0.45)
+    ctx.lineWidth = S * 0.014
+    ctx.beginPath()
+    for (let i = 0; i <= 80; i++) {
+      const t = i / 80
+      const a = flip * (Math.PI * 1.65) * t - Math.PI * 0.4
+      const rr = r * (1 - t * 0.72)
+      const px = cx + Math.cos(a) * rr
+      const py = cy + Math.sin(a) * rr
+      if (i === 0) ctx.moveTo(px, py)
+      else ctx.lineTo(px, py)
+    }
+    ctx.stroke()
+    // The leaf the curl carries.
+    ctx.fillStyle = RIRI
+    ctx.beginPath()
+    ctx.ellipse(cx + flip * r * 0.62, cy - r * 0.5, r * 0.22, r * 0.11, flip * 0.7, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  /** One lozenge, with its rosette. */
+  const wajikan = (cx: number, cy: number, r: number) => {
+    ctx.fillStyle = mix(KAPUR, RIRI, 0.6)
+    ctx.beginPath()
+    ctx.moveTo(cx, cy - r)
+    ctx.lineTo(cx + r * 0.72, cy)
+    ctx.lineTo(cx, cy + r)
+    ctx.lineTo(cx - r * 0.72, cy)
+    ctx.closePath()
+    ctx.fill()
+    ctx.fillStyle = mix(BOLU, RARA, 0.3)
+    ctx.beginPath()
+    ctx.arc(cx, cy, r * 0.26, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  const bandH = S / 4
+  for (let b = 0; b < 4; b++) {
+    const top = b * bandH
+    ctx.fillStyle = mix(KAPUR, RIRI, 0.4)
+    ctx.fillRect(0, top, S, S * 0.008)
+    if (b % 2 === 0) {
+      const n = 4
+      for (let i = 0; i < n; i++) {
+        scroll((S / n) * (i + 0.5), top + bandH * 0.55, bandH * 0.33, i % 2 === 0 ? 1 : -1)
+      }
+    } else {
+      const n = 6
+      for (let i = 0; i < n; i++) wajikan((S / n) * (i + 0.5), top + bandH * 0.5, bandH * 0.26)
+    }
+  }
+  return el
+}
+
 /** River stone: mottled, cool against the timber. */
 function stoneCanvas(): HTMLCanvasElement {
   const S = 256
@@ -437,6 +566,11 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   toraja: ['ukiran', 'tanduk'],
   /** pucuak rabuang and kaluak paku, and woven bamboo in the end walls */
   minang: ['ukiran', 'anyaman'],
+  /**
+   * lung-lungan and wajikan; fired clay rather than thatch; and teak named
+   * rather than called timber, because on a joglo it is named.
+   */
+  jawa: ['ukiran', 'genteng', 'jati'],
 }
 
 /**
@@ -455,9 +589,10 @@ export interface MaterialSet {
 function assemble(
   entries: Record<string, THREE.Material>,
   textures: readonly THREE.Texture[],
+  fallbackKey: string,
 ): MaterialSet {
-  const fallback = entries.kayu
-  if (!fallback) throw new Error('every material set needs kayu as its fallback')
+  const fallback = entries[fallbackKey]
+  if (!fallback) throw new Error(`the fallback material ${fallbackKey} is not in this set`)
   return {
     get(key: string): THREE.Material {
       const found = entries[key]
@@ -482,65 +617,57 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     return t
   }
 
-  /* Shared between the two houses, because both are built of these. */
-  const common: Record<string, THREE.Material> = {
-    kayu: new THREE.MeshStandardMaterial({
-      map: tex(timberCanvas(101, 0, 0)),
-      roughness: 0.82,
-      metalness: 0,
-    }),
-    papan: new THREE.MeshStandardMaterial({
-      map: tex(timberCanvas(202, 1, 0.75)),
-      roughness: 0.86,
-      metalness: 0,
-    }),
-    bambu: new THREE.MeshStandardMaterial({
-      map: tex(bambooCanvas()),
-      roughness: 0.68,
-      metalness: 0,
-    }),
-    ijuk: new THREE.MeshStandardMaterial({
+  const timber = (seed: number, pale: number, straight: number, roughness: number) =>
+    new THREE.MeshStandardMaterial({ map: tex(timberCanvas(seed, pale, straight)), roughness, metalness: 0 })
+
+  /* Generators shared because the substance is: board, bamboo, river stone. */
+  const set: Record<string, THREE.Material> = {
+    papan: timber(202, 1, 0.75, 0.86),
+    bambu: new THREE.MeshStandardMaterial({ map: tex(bambooCanvas()), roughness: 0.68, metalness: 0 }),
+    batu: new THREE.MeshStandardMaterial({ map: tex(stoneCanvas()), roughness: 0.9, metalness: 0 }),
+  }
+
+  /*
+   * Carving is emphatically not shared. The pigments are the project's
+   * register and stay put; the motifs are a specific people's and do not, and
+   * a set split by key while the construction behind the key stayed shared is
+   * how the rumah gadang wore the Toraja sun disc for a whole phase.
+   */
+  if (tradition === 'toraja') {
+    set.kayu = timber(101, 0, 0, 0.82)
+    set.ijuk = new THREE.MeshStandardMaterial({
       map: tex(ijukCanvas()),
       roughness: 0.97,
       metalness: 0,
       side: THREE.DoubleSide,
-    }),
-    batu: new THREE.MeshStandardMaterial({
-      map: tex(stoneCanvas()),
-      roughness: 0.9,
-      metalness: 0,
-    }),
-  }
-
-  /*
-   * Carving is the one material that is emphatically not shared. The pigments
-   * are the project's register and stay put; the motifs are a specific
-   * people's and do not.
-   */
-  const own: Record<string, THREE.Material> = {}
-  own.ukiran = new THREE.MeshStandardMaterial({
-    map: tex(tradition === 'toraja' ? torajaCarvingCanvas() : minangCarvingCanvas()),
-    roughness: 0.7,
-    metalness: 0,
-  })
-
-  if (tradition === 'toraja') {
-    // Horn is waxy rather than matte, so it gets a clearcoat. This is the one
-    // material where the physical response is the recognisable thing about it.
-    own.tanduk = new THREE.MeshPhysicalMaterial({
+    })
+    set.ukiran = new THREE.MeshStandardMaterial({ map: tex(torajaCarvingCanvas()), roughness: 0.7, metalness: 0 })
+    // Horn is waxy rather than matte, so it gets a clearcoat. The one material
+    // whose physical response is the recognisable thing about it.
+    set.tanduk = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(mix(BOLU, KAPUR, 0.2)),
       roughness: 0.42,
       metalness: 0,
       clearcoat: 0.5,
       clearcoatRoughness: 0.35,
     })
-  } else {
-    own.anyaman = new THREE.MeshStandardMaterial({
-      map: tex(anyamanCanvas()),
-      roughness: 0.88,
+  } else if (tradition === 'minang') {
+    set.kayu = timber(101, 0, 0, 0.82)
+    set.ijuk = new THREE.MeshStandardMaterial({
+      map: tex(ijukCanvas()),
+      roughness: 0.97,
       metalness: 0,
+      side: THREE.DoubleSide,
     })
+    set.ukiran = new THREE.MeshStandardMaterial({ map: tex(minangCarvingCanvas()), roughness: 0.7, metalness: 0 })
+    set.anyaman = new THREE.MeshStandardMaterial({ map: tex(anyamanCanvas()), roughness: 0.88, metalness: 0 })
+  } else {
+    // Teak: darker and denser in the grain than the timber the other two are
+    // named for, and named rather than called timber because on a joglo it is.
+    set.jati = timber(303, 0, 0.35, 0.74)
+    set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
+    set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
   }
 
-  return assemble({ ...common, ...own }, textures)
+  return assemble(set, textures, tradition === 'jawa' ? 'jati' : 'kayu')
 }

@@ -116,20 +116,39 @@ describe('the traditions are distinct all the way up', () => {
     expect(() => tradition('nowhere' as never)).toThrow()
   })
 
-  it('does not share parameter names, sources or a site', () => {
-    const [a, b] = TRADITIONS
-    if (!a || !b) throw new Error('two traditions expected')
-    expect(a.params.map((p) => p.param)).not.toEqual(b.params.map((p) => p.param))
-    expect(a.site.name).not.toBe(b.site.name)
-    expect(a.site.tzOffsetHours).not.toBe(b.site.tzOffsetHours)
+  it('does not share parameter names or a site with any other', () => {
+    for (const a of TRADITIONS) {
+      for (const b of TRADITIONS) {
+        if (a.key === b.key) continue
+        expect(a.params.map((p) => p.param)).not.toEqual(b.params.map((p) => p.param))
+        expect(a.site.name).not.toBe(b.site.name)
+      }
+    }
   })
 
-  it('runs the ridge along a different axis in each, which is the whole reason for a scene model', () => {
-    const axes = TRADITIONS.map((t) => t.build(t.defaultQuery).scene.ridgeAxis)
-    expect(new Set(axes).size).toBe(TRADITIONS.length)
+  it('does not agree on which way a house is long, which is why the scene model carries it', () => {
+    /*
+     * Written against two houses, this asserted every tradition had a
+     * different axis — which was true of two and is false of three: the rumah
+     * gadang and the joglo both run their ridge on Z, and the tongkonan runs
+     * it on X. Uniqueness was never the claim worth making. What matters is
+     * that the houses disagree at all, because a renderer cannot then assume
+     * one and the field has to exist.
+     */
+    const axes = new Set(TRADITIONS.map((t) => t.build(t.defaultQuery).scene.ridgeAxis))
+    expect(axes.size).toBeGreaterThan(1)
   })
 
-  it('keeps provenance separate: two bars, never one average', () => {
+  it('does not agree on whether there is a room under the floor', () => {
+    // Two of them stand on posts with a named room beneath; one sits on a
+    // plinth you cannot get under. `underfloorHeight` reports the clearance
+    // honestly in both cases and the traditions differ by an order of
+    // magnitude, which is the difference between a storey and a step.
+    const heights = TRADITIONS.map((t) => t.build(t.defaultQuery).scene.underfloorHeight)
+    expect(Math.max(...heights) / Math.min(...heights)).toBeGreaterThan(3)
+  })
+
+  it('keeps provenance separate: one bar per house, never one average', () => {
     for (const t of TRADITIONS) expect(t.split.total).toBe(t.dims.length)
     const totals = TRADITIONS.map((t) => t.split.total)
     expect(new Set(totals).size).toBe(TRADITIONS.length)

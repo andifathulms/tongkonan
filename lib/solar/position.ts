@@ -50,6 +50,23 @@ export const BUKITTINGGI: Site = {
   tzName: 'WIB',
 }
 
+/**
+ * The third house's sun.
+ *
+ * Yogyakarta is 7.8° south — far enough off the equator that the sun never
+ * passes overhead at all, so this is the first of the three sites with no
+ * zero-shadow day. The presets say so rather than quietly offering a date on
+ * which nothing happens: a tool that computes the light owes the reader the
+ * case where the answer is that there isn't one.
+ */
+export const YOGYAKARTA: Site = {
+  name: 'Yogyakarta',
+  latitude: -7.8,
+  longitude: 110.36,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /* ── Time ─────────────────────────────────────────────────────────────── */
 
 /** Julian day from a UTC instant in milliseconds. */

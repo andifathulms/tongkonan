@@ -29,6 +29,21 @@ export type RuleField<R> =
       readonly key: keyof R & string
       readonly param: string
     }
+  /**
+   * A rule that is present or absent rather than counted.
+   *
+   * Added by the third house, which has one: whether the open pavilion stands
+   * in front. The first two packs had only choices and counts, and a boolean
+   * written as a number would have made `?pendhapa=1` look like a quantity of
+   * pavilions. Written as `1` and `0` all the same, because the query string
+   * is read by people as often as by parsers and `true` in an Indonesian
+   * address would be the odd word out.
+   */
+  | {
+      readonly kind: 'flag'
+      readonly key: keyof R & string
+      readonly param: string
+    }
 
 export interface RulesCodec<R extends object> {
   /** rule key to query parameter name, for anything that needs to say so */
@@ -56,7 +71,9 @@ export function rulesCodec<R extends object>(spec: {
       for (const field of fields) {
         const raw = q.get(field.param)
         if (raw === null) continue
-        if (field.kind === 'choice') {
+        if (field.kind === 'flag') {
+          if (raw === '1' || raw === '0') out[field.key] = raw === '1'
+        } else if (field.kind === 'choice') {
           // The single cast in this file, and it is guarded: the value has to
           // be one the tradition declared before it is written.
           if (field.options.includes(raw)) out[field.key] = raw
@@ -76,7 +93,10 @@ export function rulesCodec<R extends object>(spec: {
     toQuery(rules: R): string {
       const r = normalise(rules) as Record<string, unknown>
       const q = new URLSearchParams()
-      for (const field of fields) q.set(field.param, String(r[field.key]))
+      for (const field of fields) {
+        const value = r[field.key]
+        q.set(field.param, field.kind === 'flag' ? (value ? '1' : '0') : String(value))
+      }
       // No leading `?`. The caller owns the separator, because it is the one
       // that knows whether it is building a URL or comparing against
       // `location.search`.
