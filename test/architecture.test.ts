@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { execSync } from 'node:child_process'
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -101,6 +102,36 @@ describe('the traditions are siblings', () => {
       }
     }
     expect(offenders).toEqual([])
+  })
+})
+
+/**
+ * Two paths differing only in case are one file on macOS and two in CI, so
+ * `./controls` resolved to `Controls.tsx` on the machine that wrote it and to
+ * a directory everywhere else — a green local build and a red remote one.
+ *
+ * Read out of git rather than off the disk, and that is the whole point: a
+ * case-insensitive filesystem cannot hold the collision to be found, so a
+ * test that walked the directory would pass on the machine most likely to
+ * introduce one. Git records both paths whatever the checkout does with them.
+ */
+describe('no two tracked paths differ only in case', () => {
+  it('holds across the repository', () => {
+    const files = execSync('git ls-files', { encoding: 'utf8' }).split('\n').filter(Boolean)
+    const seen = new Map<string, string>()
+    const collisions: string[] = []
+    for (const file of files) {
+      // Every directory prefix counts: the collision that happened was
+      // between a directory and a file, not between two files.
+      const parts = file.split('/')
+      for (let i = 1; i <= parts.length; i++) {
+        const path = parts.slice(0, i).join('/')
+        const previous = seen.get(path.toLowerCase())
+        if (previous && previous !== path) collisions.push(`${previous} vs ${path}`)
+        seen.set(path.toLowerCase(), path)
+      }
+    }
+    expect([...new Set(collisions)]).toEqual([])
   })
 })
 
