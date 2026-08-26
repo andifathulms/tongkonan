@@ -31,6 +31,28 @@ export function Sheet({
   return (
     <div className="flex min-h-dvh flex-col sheet:h-dvh sheet:flex-row">
       {/*
+        The rail comes first in the DOM because it comes first on the page.
+
+        It used to be second and was pulled left with `order`, which meant the
+        first Tab landed on the view switch in the top-right and then jumped
+        back to the far-left rail — focus order running backwards against
+        reading order on every desktop screen. The mobile arrangement is the
+        one that genuinely differs from source order, so that is the one
+        `order` is spent on: the drawing goes above the rail on a phone.
+      */}
+      <aside
+        className={[
+          'flex flex-col bg-film',
+          'sheet:min-h-0 sheet:w-rail sheet:shrink-0 sheet:overflow-y-auto sheet:border-r sheet:border-t-0 sheet:border-hairline',
+          isViewport
+            ? 'order-2 border-t border-hairline sheet:order-none'
+            : 'border-b border-hairline sheet:border-b-0',
+        ].join(' ')}
+      >
+        <TitleBlock locale={locale} route={route} />
+        <div className="flex flex-col">{rail}</div>
+      </aside>
+      {/*
         On a phone a drawing stays stuck to the top of the screen while the
         rail scrolls under it, so changing a rule and seeing the house answer
         does not cost a scroll in each direction. It keeps 55% of the screen:
@@ -38,10 +60,10 @@ export function Sheet({
       */}
       <main
         className={[
-          'sheet:order-2 sheet:h-auto sheet:min-h-0 sheet:flex-1',
+          'sheet:h-auto sheet:min-h-0 sheet:flex-1',
           isViewport
-            ? 'sticky top-0 order-1 h-[55dvh] shrink-0 sheet:static'
-            : 'order-2 min-h-0',
+            ? 'sticky top-0 order-1 h-[55dvh] shrink-0 sheet:static sheet:order-none'
+            : 'min-h-0',
         ].join(' ')}
       >
         <div className={isViewport ? 'relative h-full w-full' : 'relative sheet:h-full'}>
@@ -49,18 +71,6 @@ export function Sheet({
           {isViewport ? <Masthead locale={locale} route={route} /> : null}
         </div>
       </main>
-      <aside
-        className={[
-          'flex flex-col bg-film',
-          'sheet:order-1 sheet:min-h-0 sheet:w-rail sheet:shrink-0 sheet:overflow-y-auto sheet:border-r sheet:border-t-0 sheet:border-hairline',
-          isViewport
-            ? 'order-2 border-t border-hairline'
-            : 'order-1 border-b border-hairline sheet:border-b-0',
-        ].join(' ')}
-      >
-        <TitleBlock locale={locale} route={route} />
-        <div className="flex flex-col">{rail}</div>
-      </aside>
     </div>
   )
 }
