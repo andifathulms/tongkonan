@@ -114,19 +114,33 @@ function Masthead({ locale, route }: { locale: Locale; route: Route }) {
 function TitleBlock({ locale, route }: { locale: Locale; route: Route }) {
   return (
     <header className="px-4 pb-4 pt-4">
-      <div className="flex items-baseline justify-between gap-3">
-        <Link href={href(locale, 'bangun')} className="micro text-bolu">
-          {pick(COPY.appName, locale)}
-        </Link>
-        <LocaleSwitch locale={locale} route={route} />
-      </div>
       {/*
-        The tagline is the largest thing in the rail and the wordmark is the
-        smallest. That inversion is deliberate: a stranger needs the claim
-        before the name, and the name means nothing until they have it.
+        Identity is rendered once per screen, not once per component.
+
+        Under 860px the masthead over the model carries the wordmark, the claim
+        and the language switch, and this block used to carry them again — two
+        wordmarks, two full language controls and four extra tab stops in the
+        same document. So above 860px, where there is no masthead, this is the
+        title block; below it, this is the navigation and the masthead is the
+        title block.
       */}
-      <p className="mt-2 text-lead text-bolu">{pick(COPY.tagline, locale)}</p>
-      <p className="mt-2 text-body text-muted">{pick(COPY.thesis, locale)}</p>
+      <div className="hidden sheet:block">
+        <div className="flex items-baseline justify-between gap-3">
+          <Link href={href(locale, 'bangun')} className="micro text-bolu">
+            {pick(COPY.appName, locale)}
+          </Link>
+          <LocaleSwitch locale={locale} route={route} />
+        </div>
+        {/*
+          The tagline is the largest thing in the rail and the wordmark is the
+          smallest. That inversion is deliberate: a stranger needs the claim
+          before the name, and the name means nothing until they have it.
+        */}
+        <p className="mt-2 text-lead text-bolu">{pick(COPY.tagline, locale)}</p>
+      </div>
+
+      {/* The thesis is wanted on both, and the masthead has no room for it. */}
+      <p className="mt-2 text-body text-muted sheet:mt-2">{pick(COPY.thesis, locale)}</p>
 
       <hr className="rule my-4" />
 
