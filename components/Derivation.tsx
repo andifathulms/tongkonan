@@ -5,7 +5,8 @@ import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { derivation } from '@/lib/tradition/toraja/derivation'
 import type { Step, Term } from '@/lib/tradition/toraja/derivation'
-import type { Rules } from '@/lib/tradition/toraja/types'
+import { rulesFromQuery } from '@/lib/tradition/toraja/address'
+import type { TraditionKey } from '@/lib/tradition/registry'
 import { RailSection } from './Sheet'
 
 /**
@@ -25,7 +26,30 @@ import { RailSection } from './Sheet'
  * Every factor carries where it came from, at the point it is used. Most of
  * them came from nowhere, and that is what the reader should see.
  */
-export function Derivation({ rules, locale }: { rules: Rules; locale: Locale }) {
+export function Derivation({
+  tradition,
+  query,
+  locale,
+}: {
+  tradition: TraditionKey
+  query: string
+  locale: Locale
+}) {
+  /*
+   * Written for one house so far, and rendered for one house only.
+   *
+   * The rumah gadang has no derivation yet — the chain from laras, ruang and
+   * bilik to the metres has not been written out, and inventing a generic one
+   * from the tongkonan's would produce a worked example that was not worked.
+   * A missing section is honest; a section that says the wrong arithmetic
+   * confidently is not. It is a real gap and it is recorded as one.
+   */
+  if (tradition !== 'toraja') return null
+  return <TorajaDerivation query={query} locale={locale} />
+}
+
+function TorajaDerivation({ query, locale }: { query: string; locale: Locale }) {
+  const rules = useMemo(() => rulesFromQuery(query), [query])
   /*
    * Keyed on the rules, because that is all it depends on.
    *

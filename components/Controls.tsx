@@ -2,142 +2,12 @@
 
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { RANKS, bayCountIsUnusual, rankInfo } from '@/lib/tradition/toraja/rules'
-import type { Rules } from '@/lib/tradition/toraja/types'
+import type { Tradition } from '@/lib/tradition/registry'
 import { formatClock } from '@/lib/solar/presets'
 import type { DatePreset } from '@/lib/solar/presets'
+import type { Site } from '@/lib/solar/position'
 import type { ViewKey } from './viewport/scene'
 import { RailSection } from './Sheet'
-
-/**
- * The rule controls.
- *
- * Every control here names a thing a household would say about itself. There
- * is no roof-curvature slider and there will not be one: the roof is
- * downstream of the rules, and if the shape needs adjusting, the rule pack is
- * what changes.
- *
- * A control says what happens when it is used.
- */
-export function RuleControls({
-  rules,
-  onChange,
-  locale,
-}: {
-  rules: Rules
-  onChange: (next: Rules) => void
-  locale: Locale
-}) {
-  const unusual = bayCountIsUnusual(rules)
-  return (
-    <RailSection title={pick(COPY.controls.heading, locale)}>
-      <Choices legend={pick(COPY.controls.rank, locale)}>
-        <div className="flex flex-col gap-px">
-          {RANKS.map((r) => (
-            <Choice
-              key={r.rank}
-              name="pangkat"
-              value={r.rank}
-              checked={rules.rank === r.rank}
-              onSelect={() => onChange({ ...rules, rank: r.rank })}
-              face={[
-                'block rounded px-2 py-1.5 text-left transition-colors duration-state',
-                rules.rank === r.rank ? 'bg-bolu text-kapur' : 'hover:bg-wash',
-              ].join(' ')}
-            >
-              <span className="flex items-baseline justify-between gap-2">
-                <span className="text-body leading-tight">{r.name}</span>
-                {/*
-                  The multiplier, on the control that applies it. Rank was the
-                  one rule whose arithmetic was invisible at the point of use,
-                  so a reader watching the house grow could not tell whether it
-                  had gained bays, height or simply scale.
-                */}
-                <span className="num shrink-0 text-meta">×{r.scale.value.toFixed(2)}</span>
-              </span>
-              <span
-                className={[
-                  'mt-0.5 block text-meta',
-                  rules.rank === r.rank ? 'text-muted-on-ink' : 'text-muted',
-                ].join(' ')}
-              >
-                {locale === 'id' ? r.glossId : r.glossEn}
-              </span>
-              <span
-                className={[
-                  'mt-1 flex items-baseline gap-1.5 text-micro',
-                  rules.rank === r.rank ? 'text-muted-on-ink' : 'text-muted',
-                ].join(' ')}
-              >
-                <span
-                  aria-hidden
-                  className="inline-block h-2 w-2 shrink-0 rounded border"
-                  style={{
-                    background: r.scale.class === 'canon' ? 'var(--riri)' : 'var(--rara)',
-                    borderColor: r.scale.class === 'canon' ? 'var(--riri-ink)' : 'var(--rara)',
-                  }}
-                />
-                {r.scale.source === 'none' ? pick(COPY.sources.none, locale) : r.scale.source}
-              </span>
-            </Choice>
-          ))}
-        </div>
-        <p className="mt-2 text-body text-muted">{pick(COPY.controls.rankHint, locale)}</p>
-      </Choices>
-
-      <Field
-        group
-        label={pick(COPY.controls.bays, locale)}
-        value={String(rules.bays)}
-        hint={
-          locale === 'id'
-            ? 'Membagi badan rumah dari muka ke belakang, dan menentukan jumlah baris tiang.'
-            : 'Divides the body front to rear, and sets the number of post rows.'
-        }
-      >
-        <Stepper
-          min={2}
-          max={5}
-          value={rules.bays}
-          onChange={(bays) => onChange({ ...rules, bays })}
-        />
-        {unusual ? (
-          <p className="mt-2 text-body text-rara">
-            {pick(COPY.controls.unusual, locale)}{' '}
-            <span className="text-muted">
-              {rankInfo(rules.rank).name}: ≤ {rankInfo(rules.rank).maxBays}
-            </span>
-          </p>
-        ) : null}
-      </Field>
-
-      <Field
-        htmlFor="tanduk"
-        label={pick(COPY.controls.horns, locale)}
-        value={`${rules.horns} ${pick(COPY.controls.hornsUnit, locale)}`}
-        hint={
-          locale === 'id'
-            ? 'Menambah satu tanduk pada tulak somba untuk tiap upacara rambu solo yang pernah digelar rumah ini.'
-            : 'Adds one horn to the tulak somba for each funeral this house has held.'
-        }
-      >
-        <input
-          id="tanduk"
-          type="range"
-          min={0}
-          max={32}
-          step={1}
-          value={rules.horns}
-          onChange={(e) => onChange({ ...rules, horns: Number(e.target.value) })}
-          aria-valuetext={fill(pick(COPY.controls.hornsValue, locale), {
-            n: String(rules.horns),
-          })}
-          className="h-control w-full accent-bolu"
-        />
-      </Field>
-    </RailSection>
-  )
-}
 
 /**
  * Orientation, stated on screen.
@@ -146,10 +16,16 @@ export function RuleControls({
  * rather than as a missing feature, and the only way to achieve that is to
  * say so where the controls are.
  */
-export function OrientationNote({ locale }: { locale: Locale }) {
+export function OrientationNote({
+  locale,
+  tradition,
+}: {
+  locale: Locale
+  tradition: Tradition
+}) {
   return (
     <RailSection title={pick(COPY.orientation.heading, locale)}>
-      <p className="text-body text-muted">{pick(COPY.orientation.body, locale)}</p>
+      <p className="text-body text-muted">{tradition.orientation[locale]}</p>
     </RailSection>
   )
 }
@@ -168,11 +44,11 @@ export function OrientationNote({ locale }: { locale: Locale }) {
  * frame for everything below it and a reader should not have to go looking for
  * the answer to "whose house is this".
  */
-export function PlaceNote({ locale }: { locale: Locale }) {
+export function PlaceNote({ locale, tradition }: { locale: Locale; tradition: Tradition }) {
   return (
     <RailSection title={pick(COPY.place.heading, locale)}>
-      <p className="text-body">{pick(COPY.place.body, locale)}</p>
-      <p className="mt-3 text-body text-muted">{pick(COPY.place.caution, locale)}</p>
+      <p className="text-body">{tradition.about[locale]}</p>
+      <p className="mt-3 text-body text-muted">{tradition.caution[locale]}</p>
     </RailSection>
   )
 }
@@ -184,6 +60,7 @@ export function SunControls({
   onPreset,
   onMinutes,
   altitude,
+  site,
   locale,
 }: {
   presets: readonly DatePreset[]
@@ -192,6 +69,8 @@ export function SunControls({
   onPreset: (key: DatePreset['key']) => void
   onMinutes: (minutes: number) => void
   altitude: number
+  /** where the sun is being computed for; named on screen beside the clock */
+  site: Site
   locale: Locale
 }) {
   const active = presets.find((p) => p.key === presetKey) ?? presets[0]
@@ -236,7 +115,7 @@ export function SunControls({
             them.
           */}
           <label className="micro" htmlFor="waktu">
-            {pick(COPY.controls.time, locale)} WITA
+            {pick(COPY.controls.time, locale)} {site.tzName}
           </label>
           <span className="num text-meta">{formatClock(minutes)}</span>
         </div>
@@ -266,11 +145,7 @@ export function SunControls({
           <span className="num text-meta">{altitude.toFixed(1)}°</span>
         </div>
         <p className="mt-2 text-body text-muted">
-          {active
-            ? locale === 'id'
-              ? `Tengah hari pada tanggal ini: ${active.noonAltitude.toFixed(1)}° di atas ufuk. Rantepao 2,97° LS, 119,90° BT.`
-              : `Transit on this date: ${active.noonAltitude.toFixed(1)}° above the horizon. Rantepao 2.97° S, 119.90° E.`
-            : null}
+          {active ? describeTransit(active.noonAltitude, site, locale) : null}
         </p>
       </div>
     </RailSection>
@@ -352,6 +227,23 @@ export function ViewSwitch({
   )
 }
 
+/**
+ * Where and how high, in one sentence.
+ *
+ * The site is a parameter because the sun is computed rather than
+ * art-directed: move the house and the numbers move with it. Rantepao and
+ * Bukittinggi are three degrees and a time zone apart, and the whole reason
+ * for a NOAA implementation is that the difference shows.
+ */
+function describeTransit(altitude: number, site: Site, locale: Locale): string {
+  const lat = Math.abs(site.latitude).toFixed(2)
+  const lon = Math.abs(site.longitude).toFixed(2)
+  if (locale === 'id') {
+    return `Tengah hari pada tanggal ini: ${altitude.toFixed(1)}° di atas ufuk. ${site.name} ${lat.replace('.', ',')}° ${site.latitude < 0 ? 'LS' : 'LU'}, ${lon.replace('.', ',')}° ${site.longitude < 0 ? 'BB' : 'BT'}.`
+  }
+  return `Transit on this date: ${altitude.toFixed(1)}° above the horizon. ${site.name} ${lat}° ${site.latitude < 0 ? 'S' : 'N'}, ${lon}° ${site.longitude < 0 ? 'W' : 'E'}.`
+}
+
 /** Fill {name} placeholders in a copy string. */
 export function fill(template: string, values: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole)
@@ -407,7 +299,7 @@ export function Choice({
  * The same look as `Field`, but a real fieldset and legend, because the label
  * of a radio group has to belong to the group rather than sit above it.
  */
-function Choices({ legend, children }: { legend: string; children: React.ReactNode }) {
+export function Choices({ legend, children }: { legend: string; children: React.ReactNode }) {
   return (
     <fieldset className="mb-5 last:mb-0">
       <legend className="micro mb-2">{legend}</legend>
@@ -424,7 +316,7 @@ function Choices({ legend, children }: { legend: string; children: React.ReactNo
  * inside it — says the same word twice to anyone listening, which is how a
  * group ends up worse off for having been made accessible.
  */
-function Field({
+export function Field({
   label,
   value,
   hint,
@@ -477,7 +369,7 @@ function Field({
   )
 }
 
-function Stepper({
+export function Stepper({
   min,
   max,
   value,
@@ -512,7 +404,7 @@ function Stepper({
   )
 }
 
-function Toggle({
+export function Toggle({
   checked,
   onChange,
   label,

@@ -15,7 +15,9 @@ import type { Locale } from '@/lib/i18n'
  * added this was not allowed to add a dependency to solve a size problem.
  */
 import type { Projection } from '@/lib/draw/orthographic'
-import type { House, Layout } from '@/lib/tradition/toraja/types'
+import type { TraditionKey } from '@/lib/tradition/registry'
+import { buildHouse } from '@/lib/tradition/toraja/assembly'
+import { rulesFromQuery } from '@/lib/tradition/toraja/address'
 
 /**
  * Take the drawing away as lines.
@@ -27,14 +29,30 @@ import type { House, Layout } from '@/lib/tradition/toraja/types'
  * the failure this project exists to avoid.
  */
 export function DrawingExport({
-  house,
-  layout,
+  tradition,
+  query,
   locale,
 }: {
-  house: House
-  layout: Layout
+  tradition: TraditionKey
+  query: string
   locale: Locale
 }) {
+  /*
+   * Orthographic export exists for one house so far.
+   *
+   * `lib/draw/` reads a tongkonan's Layout directly — prows, ijuk courses,
+   * the knee across the slope — and generalising it is a second projection
+   * problem rather than a threading one, because the rumah gadang's ridge
+   * runs on the other axis and its plan is a grid rather than a row of bays.
+   * Offering a button that produced a wrong sheet would be worse than not
+   * offering one, so the section is absent and the gap is recorded.
+   */
+  if (tradition !== 'toraja') return null
+  return <TorajaDrawings query={query} locale={locale} />
+}
+
+function TorajaDrawings({ query, locale }: { query: string; locale: Locale }) {
+  const { house, layout } = buildHouse(rulesFromQuery(query))
   const views: { key: Projection; label: string }[] = [
     { key: 'denah', label: pick(COPY.draw.denah, locale) },
     { key: 'tampak', label: pick(COPY.draw.tampak, locale) },
