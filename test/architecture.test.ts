@@ -69,6 +69,41 @@ describe('the core is tradition-neutral', () => {
   })
 })
 
+/**
+ * Traditions are siblings, not a base class and a subclass.
+ *
+ * The second house is here to say where the first one's shape was a
+ * coincidence, and it can only do that if it cannot reach into it. The moment
+ * `minang/` imports `toraja/` for a helper, the answer to "what generalises"
+ * stops being evidence and starts being whichever file happened to be written
+ * first. Duplication between them is the measurement instrument; when Phase C
+ * extracts something, it goes to the core, not sideways.
+ */
+describe('the traditions are siblings', () => {
+  const traditions = readdirSync('lib/tradition', { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+
+  it('there is more than one, or this test is not yet earning its keep', () => {
+    expect(traditions.length).toBeGreaterThan(1)
+  })
+
+  it('none imports another', () => {
+    const offenders: string[] = []
+    for (const self of traditions) {
+      for (const file of filesUnder(join('lib/tradition', self))) {
+        for (const other of traditions) {
+          if (other === self) continue
+          if (new RegExp(`from '[^']*tradition/${other}/`).test(code(file))) {
+            offenders.push(`${file} → ${other}`)
+          }
+        }
+      }
+    }
+    expect(offenders).toEqual([])
+  })
+})
+
 describe('the generator stays pure', () => {
   const all = [...filesUnder('lib/core'), ...filesUnder('lib/tradition')]
 
