@@ -67,13 +67,14 @@ export function ProvenanceStrip({
 
   return (
     <div>
-      <div
-        className="flex h-3 w-full overflow-hidden rounded"
-        role="img"
-        aria-label={bands
-          .map((b) => `${pick(b.label, locale)}: ${b.n}/${split.total}`)
-          .join('; ')}
-      >
+      {/*
+        Hidden from the accessibility tree, not labelled for it. The bar is a
+        picture of the list immediately below, and that list is already three
+        proper dt/dd pairs with the same three numbers — so an aria-label here
+        made every screen reader user hear the split twice. The marked-up list
+        is the accessible version of this bar.
+      */}
+      <div aria-hidden className="flex h-3 w-full overflow-hidden rounded">
         {bands.map((b) =>
           b.n === 0 ? null : (
             <div key={b.key} style={{ width: `${pct(b.n)}%`, background: b.colour }} />
@@ -117,15 +118,13 @@ export function ProvenanceStrip({
             />
             <dt className="micro text-bolu">{pick(b.label, locale)}</dt>
             <dd className="num ml-auto w-12 text-meta text-bolu">
-              {parts ? (
-                parts[b.key]
-              ) : (
-                // An em dash, not a blank: the column exists and this house
-                // has not been counted that way yet.
-                <span className="text-muted" aria-label="—">
-                  —
-                </span>
-              )}
+              {/*
+                An em dash, not a blank: the column exists and this house has
+                not been counted that way yet. No aria-label — it is ignored on
+                a span with no role, and where it is honoured it repeats the
+                character that is already there.
+              */}
+              {parts ? parts[b.key] : <span className="text-muted">—</span>}
             </dd>
             <dd className="num w-16 text-meta text-bolu">
               {b.n}
