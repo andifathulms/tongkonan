@@ -28,7 +28,12 @@ export interface Term {
   readonly label: string
   readonly labelEn: string
   readonly value: number
-  readonly unit: 'm' | 'ratio' | 'count'
+  /**
+   * `ratio` is a multiplier — rank scale reads ×1.15. `share` is a position
+   * along a run and reads 56%. Both are dimensionless and they are not the
+   * same thing to a reader, which is why they are not the same unit.
+   */
+  readonly unit: 'm' | 'ratio' | 'share' | 'count'
   /** The declared dimension this came from, when it came from one. */
   readonly dim?: Dim
   /** True when the reader chose it. Nothing to cite: it is their number. */
@@ -44,7 +49,7 @@ export interface Step {
   readonly op: 'product' | 'sum' | 'quotient'
   readonly terms: readonly Term[]
   readonly result: number
-  readonly unit: 'm' | 'count'
+  readonly unit: 'm' | 'count' | 'ratio' | 'share'
   /** Why this arithmetic and not some other. */
   readonly why: string
   readonly whyEn: string
@@ -183,6 +188,33 @@ export function derivation(rules: Rules): readonly Step[] {
       why: 'Atap harus melewati kaki tiang, bukan berhenti di dinding. Air yang jatuh dari atap securam ini harus mendarat di luar kaki tiang, dan julur inilah yang menaruhnya di sana.',
       whyEn:
         'The roof has to reach past the post feet, not stop at the wall. Water shed off a pitch this steep has to land clear of them, and the oversail is what puts it there.',
+    },
+    {
+      key: 'breakFraction',
+      label: 'Letak patahan atap',
+      labelEn: 'Where the roof breaks',
+      op: 'quotient',
+      terms: [
+        {
+          label: 'muka tiang terluar',
+          labelEn: 'outer post face',
+          value: layout.bodyWidth / 2 - layout.postSection / 2,
+          unit: 'm',
+          carried: true,
+        },
+        {
+          label: 'jangkauan atap',
+          labelEn: 'roof reach',
+          value: layout.eaveHalfWidth,
+          unit: 'm',
+          carried: true,
+        },
+      ],
+      result: layout.breakFraction,
+      unit: 'share',
+      why: 'Atap berpatah tepat di garis tiang, karena di situlah dua jajar kasau bertemu dan bertumpu pada balok tumpuan. Di atas patahan atap curam; di bawahnya ia melandai keluar ke tepi. Patahan itulah kembang atapnya — dan letaknya bukan pilihan bentuk, melainkan akibat dari di mana tiang berdiri.',
+      whyEn:
+        'The roof breaks exactly on the post line, because that is where the two ranks of rafters meet and bear on the wall plate. Above the break it is steep; below it, it flares out to the eave. That break is the flare — and where it falls is not a shape decision but a consequence of where the posts stand.',
     },
     {
       key: 'ijukCourses',

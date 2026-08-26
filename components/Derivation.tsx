@@ -140,9 +140,10 @@ function operator(step: Step, index: number, term: Term): string {
   return term.value < 0 ? '−' : '+'
 }
 
-function format(value: number, unit: 'm' | 'ratio' | 'count'): string {
+function format(value: number, unit: Term['unit']): string {
   if (unit === 'count') return String(value)
   if (unit === 'ratio') return `×${value.toFixed(2)}`
+  if (unit === 'share') return `${(value * 100).toFixed(0)}%`
   // Negative terms carry their sign in the operator column, not on the number.
   return `${Math.abs(value).toFixed(2)} m`
 }

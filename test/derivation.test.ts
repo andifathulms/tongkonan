@@ -38,9 +38,12 @@ describe('the worked example', () => {
           expect(values.reduce((a, b) => a * b, 1)).toBeCloseTo(step.result, 6)
         } else if (step.op === 'sum') {
           expect(values.reduce((a, b) => a + b, 0)).toBeCloseTo(step.result, 6)
-        } else {
-          // Rounded up, and the reason is stated in the step itself.
+        } else if (step.unit === 'count') {
+          // A count of courses, rounded up — and the step says why it rounds up.
           expect(Math.ceil(values[0]! / values[1]!)).toBe(step.result)
+        } else {
+          // A share of a run, not rounded at all.
+          expect(values[0]! / values[1]!).toBeCloseTo(step.result, 6)
         }
       }
     }
