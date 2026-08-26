@@ -334,3 +334,15 @@ export const COPY = {
 export function pick(dict: Dict, locale: Locale): string {
   return dict[locale]
 }
+
+/**
+ * The document title for a route.
+ *
+ * Every route shipped as "Tongkonan", so a reader with four tabs open, or one
+ * listening to a screen reader announce a page load, could not tell them
+ * apart. The route name comes first because that is what distinguishes the
+ * tab; the app name follows because that is what groups them.
+ */
+export function pageTitle(route: Route, locale: Locale): string {
+  return `${pick(COPY.nav[route], locale)} — ${pick(COPY.appName, locale)}`
+}

@@ -1,7 +1,8 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { RailSection, Sheet } from '@/components/Sheet'
 import { ProvenanceStrip, ProvenanceTag } from '@/components/Provenance'
-import { COPY, LOCALES, isLocale, pick } from '@/lib/i18n'
+import { COPY, DEFAULT_LOCALE, LOCALES, isLocale, pageTitle, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { DIMS, DIM_KEYS, SOURCES, dimsForLayout, sourceFor } from '@/lib/banua/rules'
 import { DEFAULT_RULES } from '@/lib/banua/rules'
@@ -12,6 +13,11 @@ import { ridgeCounterexample } from '@/lib/banua/counterexample'
 import type { Sensitivity } from '@/lib/banua/sensitivity'
 import type { Dim } from '@/lib/banua/types'
 import type { CheckResult } from '@/lib/banua/invariants'
+
+export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+  const locale = isLocale(params.locale) ? params.locale : DEFAULT_LOCALE
+  return { title: pageTitle('sumber', locale) }
+}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }))
@@ -67,7 +73,14 @@ export default function Sumber({ params }: { params: { locale: string } }) {
     >
       <div className="sheet:h-full sheet:overflow-y-auto">
         <div className="mx-auto max-w-3xl px-5 py-8 sheet:px-8">
-          <h1 className="text-title font-medium">{pick(COPY.sources.heading, locale)}</h1>
+          {/*
+            The route's h1 lives in the sheet, where every route has one. This
+            is the same words drawn — a second h1 saying "Sources" underneath
+            the first would be the page announcing itself twice.
+          */}
+          <p className="text-title font-medium" aria-hidden>
+            {pick(COPY.sources.heading, locale)}
+          </p>
           <p className="mt-2 max-w-prose text-body">{pick(COPY.sources.intro, locale)}</p>
 
           <hr className="rule mb-7 mt-12" />

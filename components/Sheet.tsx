@@ -40,6 +40,16 @@ export function Sheet({
         one that genuinely differs from source order, so that is the one
         `order` is spent on: the drawing goes above the rail on a phone.
       */}
+      {/*
+        The page's own name, as its heading.
+
+        Three of the four routes had no h1 at all: five rail sections as h2 and
+        nothing above them, so a screen reader's heading list gave the page's
+        contents and never its title. It is not drawn, because the active nav
+        item below already shows which route this is — this exists to root the
+        heading outline, not to repeat the navigation.
+      */}
+      <h1 className="sr-only">{pick(COPY.nav[route], locale)}</h1>
       <aside
         className={[
           'flex flex-col bg-film',
