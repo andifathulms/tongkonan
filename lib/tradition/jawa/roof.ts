@@ -237,11 +237,25 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
   // where the roof meets something that is not more roof.
   const first = levels[1]
   if (first) {
+    /*
+     * How much timber a rafter presents at the plate, which is not its section
+     * depth.
+     *
+     * A member lying at a pitch is thinner measured vertically than it is
+     * measured square, by the cosine of that pitch — and the engagement was
+     * being sized from the square depth. It fitted at twenty-one degrees with
+     * half a millimetre to spare, and the moment the penanggap was steepened
+     * to twenty-seven it stopped fitting, so the joint claimed more timber
+     * than the rafter had. The check caught it; the arithmetic should not have
+     * needed catching.
+     */
+    const pitch = Math.atan2(first.y - eave.y, Math.abs(eave.halfX - first.halfX))
+    const halfThick = (DIMS.rafterDepth.value / 2) * Math.cos(pitch)
     for (let i = 0; i < perSide; i++) {
       for (const side of [-1, 1] as const) {
         const grip = Math.min(DIMS.rafterWidth.value, DIMS.plateWidth.value) * DIMS.jointEngagement.value
-        const lo = Math.max(eave.y - DIMS.plateDepth.value / 2, eave.y - DIMS.rafterDepth.value / 2)
-        const hi = Math.min(eave.y + DIMS.plateDepth.value / 2, eave.y + DIMS.rafterDepth.value / 2)
+        const lo = Math.max(eave.y - DIMS.plateDepth.value / 2, eave.y - halfThick)
+        const hi = Math.min(eave.y + DIMS.plateDepth.value / 2, eave.y + halfThick)
         const t = perSide === 1 ? 0.5 : i / (perSide - 1)
         joints.push({
           id: `takik-${i}-${side > 0 ? 'a' : 'b'}`,
