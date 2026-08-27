@@ -5,6 +5,7 @@ import type { TraditionKey } from '@/lib/tradition/registry'
 import { TorajaControls } from './toraja'
 import { MinangControls } from './minang'
 import { JawaControls } from './jawa'
+import { ManggaraiControls } from './manggarai'
 
 /**
  * The rule controls, chosen by tradition.
@@ -41,5 +42,7 @@ export function RuleControlsFor({
       return <MinangControls {...props} />
     case 'jawa':
       return <JawaControls {...props} />
+    case 'manggarai':
+      return <ManggaraiControls {...props} />
   }
 }

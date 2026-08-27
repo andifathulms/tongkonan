@@ -27,13 +27,14 @@ import type { Split } from '@/lib/core/provenance'
 import type { AnyHouse, AnyPart, Dim, ProvenanceClass, Source } from '@/lib/core/types'
 import type { Sensitivity } from '@/lib/core/sensitivity'
 import type { Site } from '@/lib/solar/position'
-import { BUKITTINGGI, RANTEPAO, YOGYAKARTA } from '@/lib/solar/position'
+import { BUKITTINGGI, RANTEPAO, WAE_REBO, YOGYAKARTA } from '@/lib/solar/position'
 
 import * as toraja from './toraja/facade'
 import * as minang from './minang/facade'
 import * as jawa from './jawa/facade'
+import * as manggarai from './manggarai/facade'
 
-export const TRADITION_KEYS = ['toraja', 'minang', 'jawa'] as const
+export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai'] as const
 export type TraditionKey = (typeof TRADITION_KEYS)[number]
 
 export function isTraditionKey(value: string): value is TraditionKey {
@@ -154,6 +155,7 @@ export const TRADITIONS: readonly Tradition[] = [
   toraja.tradition(RANTEPAO),
   minang.tradition(BUKITTINGGI),
   jawa.tradition(YOGYAKARTA),
+  manggarai.tradition(WAE_REBO),
 ]
 
 export function tradition(key: TraditionKey): Tradition {
