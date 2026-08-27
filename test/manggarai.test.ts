@@ -112,6 +112,38 @@ describe('what a round house breaks', () => {
   })
 })
 
+describe('the profile', () => {
+  it('leaves the ground with its radius already shrinking', () => {
+    /*
+     * If it widens first, the surface normal at the ground tips downward and
+     * the lowest course of thatch is pushed below grade — which the build
+     * order calls buried, correctly. The swell has to be a bump with no slope
+     * at the ground rather than one that rises straight out of it.
+     */
+    for (const rules of COMBOS) {
+      const { layout } = buildHouse(rules)
+      const [a, b] = [layout.profile[0], layout.profile[1]]
+      expect(b && a && b.r - a.r).toBeLessThan(0)
+    }
+  })
+
+  it('swells low and straightens toward the top', () => {
+    // Peaked at mid-height the fattest part of the building is its waist and
+    // the silhouette reads as a bell rather than as a cone.
+    const { layout } = buildHouse(DEFAULT_RULES)
+    const swellAt = (t: number) => {
+      const p = layout.profile[Math.round(t * (layout.profile.length - 1))]
+      if (!p) return 0
+      return p.r / layout.baseRadius - (1 - p.y / layout.apexY)
+    }
+    expect(swellAt(0.3)).toBeGreaterThan(swellAt(0.6))
+    expect(swellAt(0.6)).toBeGreaterThan(swellAt(0.9))
+    // Present, but not so much that it stops being a cone.
+    expect(swellAt(0.3)).toBeGreaterThan(0.05)
+    expect(swellAt(0.3)).toBeLessThan(0.2)
+  })
+})
+
 describe('the five levels', () => {
   it('are named, canon, and not a rule', () => {
     const { layout } = buildHouse(DEFAULT_RULES)

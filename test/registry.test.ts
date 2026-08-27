@@ -149,8 +149,25 @@ describe('the traditions are distinct all the way up', () => {
   })
 
   it('keeps provenance separate: one bar per house, never one average', () => {
-    for (const t of TRADITIONS) expect(t.split.total).toBe(t.dims.length)
-    const totals = TRADITIONS.map((t) => t.split.total)
-    expect(new Set(totals).size).toBe(TRADITIONS.length)
+    /*
+     * This used to require every pack to have a *different* number of
+     * dimensions, which was true of three by chance and stopped being true at
+     * four. Distinct totals were never the claim: what matters is that each
+     * house counts its own dimensions and that no bar is ever an average over
+     * more than one of them. Two packs arriving at the same count is a
+     * coincidence, not a merge.
+     */
+    for (const t of TRADITIONS) {
+      expect(t.split.total).toBe(t.dims.length)
+      expect(t.split.measured + t.split.canon + t.split.interpolated).toBe(t.split.total)
+    }
+    // Every pack's dimensions are its own objects, whatever the counts are.
+    const seen = new Set<unknown>()
+    for (const t of TRADITIONS) {
+      for (const { dim } of t.dims) {
+        expect(seen.has(dim)).toBe(false)
+        seen.add(dim)
+      }
+    }
   })
 })

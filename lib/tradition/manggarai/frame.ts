@@ -44,15 +44,41 @@ export const meshPart = builders.mesh
 function coneProfile(baseRadius: number, apexY: number): readonly ConePoint[] {
   const steps = Math.max(4, Math.round(DIMS.profileSteps.value))
   const out: ConePoint[] = []
+  /*
+   * The swell, as a bump with a chosen peak and no slope at the ground.
+   *
+   * The first shape that put the peak low was `sin(π · tᵖ)`, and its slope at
+   * the ground is infinite: the outline left the ground going *outward*, so
+   * the surface normal there tipped downward and the lowest course of thatch
+   * was pushed below grade. The build-order check called it buried, correctly.
+   *
+   * A bump built from `tᵃ(1−t)ᵇ` has zero slope at both ends whenever a > 1,
+   * so the outline leaves the ground with its radius already shrinking and the
+   * thatch is pushed outward and up, which is the direction thatch goes.
+   * Normalised so the peak is exactly `coneBelly`.
+   */
+  const peak = DIMS.bellyPeak.value
+  const a = peak * DIMS.bellySpread.value
+  const b = (1 - peak) * DIMS.bellySpread.value
+  const scale = peak ** a * (1 - peak) ** b
+  const swell = (t: number) =>
+    scale <= 0 ? 0 : (DIMS.coneBelly.value * (t ** a * (1 - t) ** b)) / scale
   for (let i = 0; i <= steps; i++) {
     const t = i / steps
     out.push({
-      // Two shapes at once: the shoulder blunts the top, because thatch bunches
-      // there and never ends as a needle, and the belly bows the side out,
-      // because it is laid course on course rather than stretched taut.
-      r:
-        baseRadius * (1 - t) ** DIMS.coneShoulder.value +
-        baseRadius * DIMS.coneBelly.value * Math.sin(Math.PI * t),
+      /*
+       * Two shapes at once, and where the second one peaks is the whole
+       * question.
+       *
+       * The shoulder blunts the top, because thatch bunches there and never
+       * ends as a needle. The belly bows the side out, because the roof is
+       * laid course on course rather than stretched taut — and it bows most
+       * where there is most material, which is low down, where the courses are
+       * longest and there are more of them. Peaked at mid-height instead, the
+       * fattest part of the building is its waist and the silhouette reads as
+       * a bell.
+       */
+      r: baseRadius * ((1 - t) ** DIMS.coneShoulder.value + swell(t)),
       y: apexY * t,
     })
   }
