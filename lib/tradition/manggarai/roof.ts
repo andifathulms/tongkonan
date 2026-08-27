@@ -23,6 +23,7 @@ import type { Joint, Layout, Part, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS } from './rules'
 import { coneAt, coneRun, coneSurface } from './cone'
+import { radiusAtHeight } from './frame'
 import { meshPart } from './frame'
 
 /** Rotate a finished mesh about the vertical axis. */
@@ -220,6 +221,37 @@ export function buildRoofFrame(layout: Layout): RoofFrameResult {
   return { parts, joints }
 }
 
+/**
+ * A shape in the vertical plane, extruded a short way across it.
+ *
+ * The partitions and the door frame are both flat things standing on a bearing,
+ * so both are built at bearing zero and turned into place — which also keeps
+ * them exactly rotatable, the way the rafters are.
+ */
+function extruded(points: readonly (readonly [number, number])[], thickness: number): MeshData {
+  const mesh = emptyMesh()
+  const n = points.length
+  const half = thickness / 2
+  for (const side of [1, -1] as const) {
+    const base = mesh.positions.length / 3
+    for (const p of points) {
+      mesh.positions.push(p[0], p[1], side * half)
+      mesh.normals.push(0, 0, side)
+      mesh.uvs.push(p[0], p[1])
+    }
+    for (let i = 1; i < n - 1; i++) {
+      if (side > 0) mesh.indices.push(base, base + i, base + i + 1)
+      else mesh.indices.push(base, base + i + 1, base + i)
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n
+    mesh.indices.push(i, n + i, j, j, n + i, n + j)
+  }
+  computeNormals(mesh)
+  return mesh
+}
+
 /* ── Inside the cone ──────────────────────────────────────────────────── */
 
 export function buildInterior(layout: Layout): readonly Part[] {
@@ -271,26 +303,45 @@ export function buildInterior(layout: Layout): readonly Part[] {
   ]
   if (lutur) {
     const inner = layout.centrePostSection / 2
-    const outer = lutur.radius
-    const length = outer - inner
+    const top = lutur.y + DIMS.partitionHeight.value
+
+    /*
+     * The outer edge follows the cone, because the cone is what it meets.
+     *
+     * These were rectangles: the same length at every height, run out to the
+     * radius of the floor they stand on. The floor is the widest the building
+     * gets at that level and the roof closes in above it, so by the top of a
+     * partition the wall was half a metre outside the roof and standing
+     * through the thatch. A render showed it as slits round the base.
+     *
+     * A box cannot do this. Anything whose outer edge has to follow a curve
+     * has to be a shape rather than a size.
+     */
+    const outline: (readonly [number, number])[] = [[inner, lutur.y]]
+    const steps = 8
+    for (let i = 0; i <= steps; i++) {
+      const y = lutur.y + ((top - lutur.y) * i) / steps
+      outline.push([radiusAtHeight(layout.profile, y), y])
+    }
+    outline.push([inner, top])
+    const wall = extruded(outline, DIMS.partitionThickness.value)
+
     layout.segmentAngles.forEach((a, k) => {
-      const mid = inner + length / 2
-      parts.push({
-        kind: 'box',
-        id: `sekat-${k}`,
-        name: 'sekat',
-        nameId: `Sekat keluarga ${k + 1}`,
-        nameEn: `Household partition ${k + 1}`,
-        stage: 'sekat',
-        order: k,
-        material: 'papan',
-        dims: partitionDims,
-        center: [Math.cos(a) * mid, lutur.y + DIMS.partitionHeight.value / 2, Math.sin(a) * mid],
-        size: [length, DIMS.partitionHeight.value, DIMS.partitionThickness.value],
-        // Y rotation turns +X toward −Z, so the bearing is negated to aim the
-        // partition outward along its own angle.
-        rotation: [0, -a, 0],
-      })
+      parts.push(
+        meshPart(
+          `sekat-${k}`,
+          {
+            name: 'sekat',
+            nameId: `Sekat keluarga ${k + 1}`,
+            nameEn: `Household partition ${k + 1}`,
+          },
+          'sekat',
+          k,
+          'papan',
+          partitionDims,
+          rotateY(wall, a),
+        ),
+      )
     })
 
     /* The hearth at the centre, which every household sits around. */

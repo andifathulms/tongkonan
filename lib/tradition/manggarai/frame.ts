@@ -47,7 +47,12 @@ function coneProfile(baseRadius: number, apexY: number): readonly ConePoint[] {
   for (let i = 0; i <= steps; i++) {
     const t = i / steps
     out.push({
-      r: baseRadius * (1 - t) + baseRadius * DIMS.coneBelly.value * Math.sin(Math.PI * t),
+      // Two shapes at once: the shoulder blunts the top, because thatch bunches
+      // there and never ends as a needle, and the belly bows the side out,
+      // because it is laid course on course rather than stretched taut.
+      r:
+        baseRadius * (1 - t) ** DIMS.coneShoulder.value +
+        baseRadius * DIMS.coneBelly.value * Math.sin(Math.PI * t),
       y: apexY * t,
     })
   }
@@ -247,6 +252,62 @@ export function buildFrame(layout: Layout): FrameResult {
       halfExtents: [grip / 2, (seat / 2) * 0.9, grip / 2],
     })
   })
+
+  /*
+   * The door: one, and the only thing here that points anywhere.
+   *
+   * Every other house in this project states an orientation in its own form —
+   * a front prow, a gonjong-ended ridge, a molo parallel to the façade. A cone
+   * states nothing, so the whole of this building's direction is carried by a
+   * single opening, and the copy on the reading route says as much. It said so
+   * before this existed, which made the model claim something it did not show.
+   *
+   * At bearing zero, which is where the compang would be.
+   */
+  const doorDims: readonly DimKey[] = ['doorWidth', 'doorHeight', 'jambSection', 'baseRadius', 'oneDoor']
+  const jamb = DIMS.jambSection.value
+  const half = DIMS.doorWidth.value / 2
+  /*
+   * Set at the radius of the cone above the lintel, not at the middle of the
+   * door.
+   *
+   * Written at mid-height first, and `checkInsideCone` — added in the same
+   * sitting, to catch exactly this in the partitions — caught the door instead.
+   * A frame standing plumb in a wall that leans in has to be set by its top or
+   * its head goes through the thatch. Recessed a little at the foot, which is
+   * what a doorway in a thatched cone looks like anyway.
+   */
+  const atDoor = radiusAtHeight(layout.profile, DIMS.doorHeight.value + DIMS.jambSection.value)
+  const bay = [
+    { id: 'kiri', z: half + jamb / 2, size: [jamb, DIMS.doorHeight.value, jamb] as const },
+    { id: 'kanan', z: -(half + jamb / 2), size: [jamb, DIMS.doorHeight.value, jamb] as const },
+  ]
+  bay.forEach((post, i) => {
+    parts.push(
+      box(
+        `pintu-tiang-${post.id}`,
+        { name: 'tiang pintu', nameId: 'Tiang pintu', nameEn: 'Door jamb' },
+        'tiang',
+        900 + i,
+        'kayu',
+        doorDims,
+        [atDoor, DIMS.doorHeight.value / 2, post.z],
+        [post.size[0], post.size[1], post.size[2]],
+      ),
+    )
+  })
+  parts.push(
+    box(
+      'pintu-ambang',
+      { name: 'ambang pintu', nameId: 'Ambang pintu', nameEn: 'Door lintel' },
+      'tiang',
+      902,
+      'kayu',
+      doorDims,
+      [atDoor, DIMS.doorHeight.value + jamb / 2, 0],
+      [jamb, jamb, DIMS.doorWidth.value + jamb * 2],
+    ),
+  )
 
   return { parts, joints }
 }

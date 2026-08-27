@@ -37,6 +37,9 @@ export type { CheckResult, CheckStatus } from '@/lib/core/invariants'
 
 const TOL = 1e-4
 
+/** The things there is exactly one of, which therefore cannot repeat. */
+const SINGULAR = /^(gendang|pintu-)/
+
 /* ── Bound to the Manggarai pack ──────────────────────────────────────── */
 
 export function checkBuildOrder(house: House): CheckResult {
@@ -95,14 +98,13 @@ export function checkRadialRepeat(house: House, layout: Layout): CheckResult {
   /*
    * Everything but the drum.
    *
-   * There is one drum and it hangs in one place, so it does not repeat and
-   * should not — the same shape of exception the rumah gadang's bilik needed,
-   * and for the same reason: a building can be regular in its fabric and
-   * deliberately singular in one thing it contains. The count of what was left
-   * out is printed, so the narrowing is never silent, and `checkDrum` states
-   * the drum's own claim.
+   * There is one drum and one door, and neither repeats. That is not a defect:
+   * a building can be regular in its fabric and deliberately singular in the
+   * few things that give it a use and a direction — the same exception the
+   * rumah gadang's bilik needed. The count of what was left out is printed, so
+   * the narrowing is never silent, and each of the two has its own check.
    */
-  const scoped = house.parts.filter((p) => p.id !== 'gendang')
+  const scoped = house.parts.filter((p) => !SINGULAR.test(p.id))
   const all: number[] = []
   for (const part of scoped) all.push(...vertices(part))
 
@@ -239,40 +241,100 @@ export function checkRound(house: House, layout: Layout): CheckResult {
  *
  * The negative claim this house makes, and the third of its kind in the
  * project after Bodi Caniago's missing step and a joglo with no pendhapa:
- * there is no wall, and the check is that there is nothing standing outside
- * the roof and nothing holding the roof up off the ground.
+ * there is no wall, and the check is that there is nothing holding the roof up
+ * off the ground.
  */
 export function checkThatchToGround(house: House, layout: Layout): CheckResult {
   const courses = house.parts.filter((p) => p.stage === 'ijuk')
   const lowest = courses.length
     ? Math.min(...courses.map((p) => partBounds(p).min[1] ?? Infinity))
     : Infinity
-  const widest = courses.length
-    ? Math.max(...courses.map((p) => Math.max(Math.abs(partBounds(p).min[0] ?? 0), Math.abs(partBounds(p).max[0] ?? 0))))
-    : 0
-  // Anything reaching further out than the thatch would be standing outside
-  // the roof, and on this house there is no outside of the roof.
-  const outside = house.parts.filter((p) => {
-    if (p.stage === 'ijuk' || p.stage === 'puncak') return false
-    const b = partBounds(p)
-    return Math.max(Math.abs(b.min[0] ?? 0), Math.abs(b.max[0] ?? 0)) > widest + TOL
-  })
   // Within the thickness of a course. The thatch beds on the rafters and the
   // rafters rest on the ground, so the lowest course sits a little proud of
   // grade — by less than one course, which is what "reaches the ground" means
   // for something laid in courses.
-  const ok = lowest < DIMS.thatchThickness.value && outside.length === 0
+  const ok = lowest < DIMS.thatchThickness.value
   return {
     key: 'thatch-to-ground',
     titleId: 'Ijuk turun sampai ke tanah; seluruh bangunan adalah atap',
     titleEn: 'The thatch reaches the ground; the whole building is roof',
     status: ok ? 'pass' : 'fail',
     detail: ok
-      ? `Lapis terbawah menyentuh tanah pada ${lowest.toFixed(2)} m dan menjangkau ${widest.toFixed(2)} m dari sumbu; tidak ada satu pun bagian yang berdiri di luarnya, karena tidak ada luar atap.`
-      : `Lapis terbawah pada ${lowest.toFixed(2)} m; ${outside.length} bagian berdiri di luar atap.`,
+      ? `Lapis terbawah menyentuh tanah pada ${lowest.toFixed(2)} m. Tidak ada dinding, tidak ada tepi atap, dan tidak ada yang menahannya di atas tanah.`
+      : `Lapis terbawah pada ${lowest.toFixed(2)} m, terlalu tinggi untuk disebut menyentuh tanah.`,
     detailEn: ok
-      ? `The lowest course meets the ground at ${lowest.toFixed(2)} m and reaches ${widest.toFixed(2)} m from the axis; nothing stands outside it, because there is no outside of the roof.`
-      : `The lowest course sits at ${lowest.toFixed(2)} m; ${outside.length} parts stand outside the roof.`,
+      ? `The lowest course meets the ground at ${lowest.toFixed(2)} m. No wall, no eave, and nothing holding it up off the ground.`
+      : `The lowest course sits at ${lowest.toFixed(2)} m, too high to be said to reach the ground.`,
+  }
+}
+
+/**
+ * Nothing stands through the roof, at any height.
+ *
+ * The general form of a fault this project keeps making in new disguises. The
+ * household partitions were rectangles run out to the radius of the floor they
+ * stand on — correct at the floor, and half a metre outside the roof by their
+ * own tops, because the cone closes in above them and a box does not. They
+ * showed in a render as slits round the base.
+ *
+ * The previous version of the check compared every part against the *widest*
+ * point of the thatch, which is at the ground, so a part could stand well
+ * outside the roof anywhere above that and pass. Compared against the cone at
+ * its own height it cannot — which is the same correction the rumah gadang's
+ * `checkRoofFollowsSection` needed, one house later and one axis over.
+ */
+export function checkInsideCone(house: House, layout: Layout): CheckResult {
+  // What a part is allowed: the thatch stands this far off the frame, so
+  // anything within it is under the roof rather than through it.
+  const skin = DIMS.rafterRadius.value + DIMS.thatchBed.value + DIMS.thatchThickness.value
+  const problems: string[] = []
+  let worst = -Infinity
+  let checked = 0
+
+  for (const part of house.parts) {
+    // The thatch is the roof, the ornament sits on top of it, and the rafters
+    // *are* the cone's own line.
+    if (part.stage === 'ijuk' || part.stage === 'puncak' || part.id.startsWith('kasau-')) continue
+    /*
+     * Vertex by vertex, and against the cone at each vertex's own height.
+     *
+     * The first version took a part's widest reach and compared it against the
+     * cone above its highest point. That is exact for a box, whose reach is the
+     * same at every height, and wrong for anything shaped — the partitions
+     * follow the cone perfectly and were failed for the radius they have at
+     * their feet. A check that cannot tell a wall leaning correctly from one
+     * standing through the roof is not measuring the thing it names.
+     */
+    const points = vertices(part)
+    let over = -Infinity
+    let at = 0
+    for (let i = 0; i < points.length; i += 3) {
+      const y = points[i + 1] ?? 0
+      const reach = Math.hypot(points[i] ?? 0, points[i + 2] ?? 0)
+      const d = reach - (radiusAtHeight(layout.profile, y) + skin)
+      if (d > over) {
+        over = d
+        at = y
+      }
+      checked++
+    }
+    if (over > worst) worst = over
+    if (over > TOL) problems.push(`${part.id}: ${over.toFixed(2)} m through the roof at ${at.toFixed(2)} m`)
+  }
+
+  return {
+    key: 'inside-cone',
+    titleId: 'Tidak ada bagian yang menembus kerucut, pada ketinggian mana pun',
+    titleEn: 'Nothing stands through the cone, at any height',
+    status: problems.length === 0 ? 'pass' : 'fail',
+    detail:
+      problems.length === 0
+        ? `${checked} titik diuji terhadap kerucut pada ketinggiannya masing-masing; yang paling dekat ke luar masih ${Math.abs(worst).toFixed(2)} m di dalamnya.`
+        : problems.slice(0, 6).join('; '),
+    detailEn:
+      problems.length === 0
+        ? `${checked} points tested against the cone at each one's own height; the closest comes within ${Math.abs(worst).toFixed(2)} m of it.`
+        : problems.slice(0, 6).join('; '),
   }
 }
 
@@ -408,6 +470,37 @@ export function checkDrum(house: House, layout: Layout): CheckResult {
   }
 }
 
+/**
+ * One door, and it is the only direction this building has.
+ *
+ * Worth its own check because the reading route says so in words. A round form
+ * holds no orientation in itself; the door is where the claim lives, and for a
+ * while the claim was made in prose over a house that did not have one.
+ */
+export function checkOneDoor(house: House, layout: Layout): CheckResult {
+  const jambs = house.parts.filter((p) => p.id.startsWith('pintu-tiang-'))
+  const lintel = house.parts.find((p) => p.id === 'pintu-ambang')
+  const ok = jambs.length === 2 && Boolean(lintel)
+  const bearing = jambs.length
+    ? Math.atan2(
+        jambs.reduce((sum, p) => sum + (p.kind === 'box' ? p.center[2] : 0), 0) / jambs.length,
+        jambs.reduce((sum, p) => sum + (p.kind === 'box' ? p.center[0] : 0), 0) / jambs.length,
+      )
+    : 0
+  return {
+    key: 'one-door',
+    titleId: 'Satu pintu, dan hanya itulah arah yang dimiliki bangunan ini',
+    titleEn: 'One door, and it is the only direction this building has',
+    status: ok ? 'pass' : 'fail',
+    detail: ok
+      ? `Selebar ${DIMS.doorWidth.value.toFixed(2)} m pada arah ${((bearing * 180) / Math.PI).toFixed(0)}°, menghadap compang. Bentuk yang bundar tidak menyimpan arah; pintu inilah yang menyatakannya, dan hanya ada satu.`
+      : `${jambs.length} tiang pintu dan ${lintel ? 'satu' : 'tidak ada'} ambang.`,
+    detailEn: ok
+      ? `${DIMS.doorWidth.value.toFixed(2)} m wide on a bearing of ${((bearing * 180) / Math.PI).toFixed(0)}°, facing the compang. A round form holds no direction; this door is what states it, and there is one.`
+      : `${jambs.length} door jambs and ${lintel ? 'one' : 'no'} lintel.`,
+  }
+}
+
 /** Thatch courses lap with no bare ring, and the apex is covered. */
 export function checkThatchCoverage(house: House, layout: Layout): CheckResult {
   const bands = thatchBands(layout)
@@ -458,10 +551,12 @@ export function runInvariants(house: House, layout: Layout): readonly CheckResul
     checkMeshes(house),
     checkRound(house, layout),
     checkThatchToGround(house, layout),
+    checkInsideCone(house, layout),
     checkFiveLevels(layout),
     checkCentrePost(house, layout),
     checkSegments(house, layout),
     checkDrum(house, layout),
+    checkOneDoor(house, layout),
     checkThatchCoverage(house, layout),
     checkPartProvenance(house),
     checkAgainstSurvey(),

@@ -85,11 +85,30 @@ describe('what a round house breaks', () => {
     expect(facetsFor(8, 48) % 8).toBe(0)
   })
 
-  it('is roof all the way to the ground, with nothing standing outside it', () => {
+  it('is roof all the way to the ground', () => {
     const { house, layout } = buildHouse(DEFAULT_RULES)
     const check = runInvariants(house, layout).find((c) => c.key === 'thatch-to-ground')
     expect(check?.status).toBe('pass')
-    expect(check?.detailEn).toContain('there is no outside of the roof')
+  })
+
+  it('keeps every part inside the cone at its own height, not merely inside its widest ring', () => {
+    /*
+     * The household partitions were boxes run out to the radius of the floor
+     * they stand on: right at the floor, half a metre outside the roof by
+     * their own tops. The check that was supposed to catch it compared each
+     * part against the *widest* point of the thatch — which is at the ground —
+     * so anything could stand outside the roof above that and pass.
+     */
+    for (const rules of COMBOS) {
+      const { house, layout } = buildHouse(rules)
+      expect(runInvariants(house, layout).find((c) => c.key === 'inside-cone')?.status).toBe('pass')
+    }
+  })
+
+  it('has one door, which is the only direction a round building has', () => {
+    const { house, layout } = buildHouse(DEFAULT_RULES)
+    expect(house.parts.filter((p) => p.id.startsWith('pintu-')).length).toBe(3)
+    expect(runInvariants(house, layout).find((c) => c.key === 'one-door')?.status).toBe('pass')
   })
 })
 
