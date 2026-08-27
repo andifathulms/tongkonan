@@ -60,6 +60,8 @@ describe('the core is tradition-neutral', () => {
     const forbidden = [
       'tongkonan', 'toraja', 'ijuk', 'ariri', 'tulak', 'somba', 'tanduk',
       'banua', 'pa’ssura', 'gadang', 'gonjong', 'minang',
+      'joglo', 'soko', 'tumpang', 'pendhapa', 'senthong', 'brunjung',
+      'niang', 'lutur', 'gendang', 'manggarai', 'mbaru',
     ]
     const offenders: string[] = []
     for (const file of core) {
