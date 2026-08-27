@@ -571,6 +571,17 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * rather than called timber, because on a joglo it is named.
    */
   jawa: ['ukiran', 'genteng', 'jati'],
+  /**
+   * Nothing. The first house here that owns no material of its own.
+   *
+   * A mbaru niang carries no carving, so there is no `ukiran` to make its own
+   * version of, and everything it is built from — timber, board, bamboo, river
+   * stone, ijuk — is a substance one of the other three already builds with.
+   * An empty list is the honest entry, and it is worth having a field that can
+   * be empty: the alternative would have been inventing a Manggarai carving to
+   * fill a slot the other three happen to have.
+   */
+  manggarai: [],
 }
 
 /**
@@ -661,12 +672,23 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(minangCarvingCanvas()), roughness: 0.7, metalness: 0 })
     set.anyaman = new THREE.MeshStandardMaterial({ map: tex(anyamanCanvas()), roughness: 0.88, metalness: 0 })
-  } else {
+  } else if (tradition === 'jawa') {
     // Teak: darker and denser in the grain than the timber the other two are
     // named for, and named rather than called timber because on a joglo it is.
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else {
+    // Nothing of its own: see OWN_MATERIALS. A house with no carving needs no
+    // carving generator, and inventing one to fill the slot would be the same
+    // fault as putting another people's motif on it.
+    set.kayu = timber(101, 0, 0, 0.82)
+    set.ijuk = new THREE.MeshStandardMaterial({
+      map: tex(ijukCanvas()),
+      roughness: 0.97,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
   }
 
   return assemble(set, textures, tradition === 'jawa' ? 'jati' : 'kayu')

@@ -607,7 +607,15 @@ export class HouseScene {
 /* ── Rain ─────────────────────────────────────────────────────────────── */
 
 /** Write a triple into a flat array with the ridge axis chosen at runtime. */
-function alongRidge(ridgeAxis: 0 | 2, along: number, y: number, across: number): [number, number, number] {
+function alongRidge(
+  ridgeAxis: 0 | 2 | null,
+  along: number,
+  y: number,
+  across: number,
+): [number, number, number] {
+  // A house with no ridge is laid out along Z, which is the same choice
+  // `sectionAxis` makes and for the same reason: on a round house every
+  // bearing is the same bearing.
   return ridgeAxis === 0 ? [along, y, across] : [across, y, along]
 }
 

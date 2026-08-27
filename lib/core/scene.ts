@@ -34,16 +34,26 @@ export interface Zone {
 
 export interface SceneModel {
   /**
-   * The axis the ridge runs on. 0 = X, 2 = Z.
+   * The axis the ridge runs on. 0 = X, 2 = Z, or null for a house with no
+   * ridge at all.
    *
-   * The tongkonan's runs on X and it mirrors across it; the rumah gadang's
-   * runs on Z and it mirrors along it. Everything directional below is stated
-   * against this, and the section is cut on the other axis — a cut across the
-   * ridge shows a bay, a cut along it shows the whole house in one face.
+   * The tongkonan's runs on X and it mirrors across it; the rumah gadang's and
+   * the joglo's run on Z. The fourth house is round: a cone has no ridge, no
+   * face and no corner, so there is no axis to name and every vertical cut
+   * through it is the same cut.
+   *
+   * `null` rather than a default, because a default would be a quiet lie. The
+   * field was `0 | 2` while every house happened to have a ridge, which looked
+   * like a fact about houses and was a fact about the three that existed.
    */
-  readonly ridgeAxis: 0 | 2
+  readonly ridgeAxis: 0 | 2 | null
 
-  /** plan extent of the body, per axis, metres */
+  /**
+   * Plan extent of the body, per axis, metres.
+   *
+   * A plan for the three rectangular houses and a bounding box for the round
+   * one, where the two numbers are equal and neither is a side of anything.
+   */
   readonly footprint: { readonly x: number; readonly z: number }
 
   /**
@@ -76,7 +86,13 @@ export interface SceneModel {
   readonly figureAt: Vec3
 }
 
-/** The axis the section plane's normal runs on: the one the ridge does not. */
+/**
+ * The axis the section plane's normal runs on: the one the ridge does not.
+ *
+ * A house with no ridge is cut on Z, and the choice is arbitrary in the way
+ * the building is arbitrary about it — every vertical plane through the axis
+ * of a cone gives the same section, so any of them is the right one.
+ */
 export function sectionAxis(model: SceneModel): 0 | 2 {
   return model.ridgeAxis === 0 ? 2 : 0
 }

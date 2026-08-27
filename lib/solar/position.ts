@@ -67,6 +67,24 @@ export const YOGYAKARTA: Site = {
   tzName: 'WIB',
 }
 
+/**
+ * The fourth house's sun.
+ *
+ * Wae Rebo is at 8.7° south, further from the equator than any of the other
+ * three, so like Yogyakarta it has no zenith passage and no zero-shadow day —
+ * and unlike any of them, the building it lights has no wall for the sun to
+ * rake across. What the light does here is model a cone, which is a different
+ * job from modelling a plane and is why computing it rather than art-directing
+ * it goes on mattering.
+ */
+export const WAE_REBO: Site = {
+  name: 'Wae Rebo',
+  latitude: -8.72,
+  longitude: 120.29,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /* ── Time ─────────────────────────────────────────────────────────────── */
 
 /** Julian day from a UTC instant in milliseconds. */
