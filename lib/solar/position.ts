@@ -149,6 +149,19 @@ export const PARE_PARE: Site = {
   tzName: 'WITA',
 }
 
+/**
+ * Anggi, in the Arfak Mountains of West Papua. The easternmost site in this
+ * project by a long way, and the reason its clock is WIT rather than WIB —
+ * Indonesia is three time zones wide and this is the far end of it.
+ */
+export const ANGGI: Site = {
+  name: 'Anggi',
+  latitude: -1.1,
+  longitude: 133.9,
+  tzOffsetHours: 9,
+  tzName: 'WIT',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,

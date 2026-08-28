@@ -791,6 +791,50 @@ function nipahCanvas(): HTMLCanvasElement {
   return el
 }
 
+/**
+ * Kulit kayu: bark, taken off in a sheet and flattened.
+ *
+ * Not a board and not a plait. Bark keeps the tree's own fibre — long, roughly
+ * parallel, and interrupted by the knots and lenticels the trunk had — so what
+ * reads is a continuous grain with irregular dark marks in it rather than the
+ * repeating unit of a manufactured material. It is the only wall in this
+ * project that was never cut to a size.
+ */
+function kulitCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  const r = rng(20318)
+  const base = mix(mix(BOLU, RARA, 0.34), KAPUR, 0.22)
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, S, S)
+  // The fibre: long, near-parallel, and never quite straight.
+  for (let i = 0; i < 900; i++) {
+    const x = r() * S
+    ctx.strokeStyle = mix(base, r() > 0.5 ? KAPUR : BOLU, 0.03 + r() * 0.14)
+    ctx.lineWidth = 0.5 + r() * 1.4
+    ctx.beginPath()
+    ctx.moveTo(x, 0)
+    let y = 0
+    let cx = x
+    while (y < S) {
+      const step = 24 + r() * 40
+      cx += (r() - 0.5) * 6
+      ctx.lineTo(cx, y + step)
+      y += step
+    }
+    ctx.stroke()
+  }
+  // Lenticels and knots: what the trunk had, still there.
+  for (let i = 0; i < 60; i++) {
+    ctx.fillStyle = mix(base, BOLU, 0.22 + r() * 0.2)
+    const w = 2 + r() * 9
+    ctx.beginPath()
+    ctx.ellipse(r() * S, r() * S, w, w * (0.2 + r() * 0.3), r() * 0.4 - 0.2, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  return el
+}
+
 const clampByte = (v: number) => Math.min(255, Math.max(0, v))
 
 /* ── The material sets ────────────────────────────────────────────────── */
@@ -899,6 +943,20 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'arfak') {
+    set.kayu = timber(1010, 0.3, 0.45, 0.86)
+    set.kulit = new THREE.MeshStandardMaterial({
+      map: tex(kulitCanvas()),
+      roughness: 0.96,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
+    set.alang = new THREE.MeshStandardMaterial({
+      map: tex(alangCanvas()),
+      roughness: 0.95,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
   } else if (tradition === 'bugis') {
     set.kayu = timber(909, 0.25, 0.6, 0.8)
     set.nipah = new THREE.MeshStandardMaterial({

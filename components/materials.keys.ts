@@ -103,6 +103,16 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * happen for the fifth time.
    */
   bugis: ['nipah'],
+  /**
+   * Bark sheet, and it is both the wall and the floor.
+   *
+   * The fifth distinct wall material here, and unlike board, woven bamboo,
+   * paras or brick it is neither sawn nor fired nor plaited — it is taken off a
+   * tree in one piece and flattened. It reads as a broad soft sheet with the
+   * tree's own fibre still running through it, which nothing else in the set
+   * does.
+   */
+  arfak: ['kulit'],
 }
 
 /**
@@ -127,6 +137,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   sumba: 'kayu',
   palembang: 'tembesu',
   bugis: 'kayu',
+  arfak: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

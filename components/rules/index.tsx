@@ -12,6 +12,7 @@ import { DayakControls } from './dayak'
 import { SumbaControls } from './sumba'
 import { PalembangControls } from './palembang'
 import { BugisControls } from './bugis'
+import { ArfakControls } from './arfak'
 
 /**
  * The rule controls, chosen by tradition.
@@ -62,5 +63,7 @@ export function RuleControlsFor({
       return <PalembangControls {...props} />
     case 'bugis':
       return <BugisControls {...props} />
+    case 'arfak':
+      return <ArfakControls {...props} />
   }
 }
