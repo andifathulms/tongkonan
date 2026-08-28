@@ -88,6 +88,23 @@ export const COPY = {
   ),
   computed: t('Dihitung dari aturan', 'Computed from the rules'),
 
+  /* The first tab stop on the working routes, for keyboard readers: the rail
+     holds every control, and the drawing should not cost a walk through all
+     of them. */
+  skip: t('Langsung ke isi', 'Skip to content'),
+
+  /*
+   * The 404, written for both readers at once: the page that answers a wrong
+   * address cannot know which language its reader asked in.
+   */
+  notFound: {
+    heading: t('Halaman tidak ditemukan', 'Page not found'),
+    line: t(
+      'Alamat ini tidak menunjuk ke halaman mana pun. Rumah-rumahnya masih di tempatnya.',
+      'This address does not point at any page. The houses are where they were.',
+    ),
+  },
+
   /*
    * The landing page. The collection's own copy: what this is, how it came to
    * be more than one house, and where each house stands. Counts are never

@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import '../globals.css'
-import { BASE_PATH, DEFAULT_LOCALE, SITE_ORIGIN } from '@/lib/i18n'
+import { BASE_PATH, COPY, DEFAULT_LOCALE, SITE_ORIGIN, pick } from '@/lib/i18n'
 
 export const metadata: Metadata = {
   metadataBase: new URL(`${SITE_ORIGIN}${BASE_PATH}/`),
-  title: 'Tongkonan',
+  // The one place the old name survived the rename.
+  title: pick(COPY.appName, DEFAULT_LOCALE),
 }
 
 export const viewport: Viewport = {
