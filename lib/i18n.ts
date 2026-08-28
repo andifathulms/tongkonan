@@ -290,16 +290,13 @@ export const COPY = {
   },
 
   tradition: {
-    /* Names the group for a screen reader; the labels are the house names. */
-    legend: t('Rumah adat', 'Tradition'),
-    heading: t('Rumah yang lain', 'The other house'),
     /*
-     * Said where the switch is, because a reader who has just watched one
-     * house rebuild from its rules will assume the other is the same house
+     * Said where the houses are listed, because a reader who has just watched
+     * one house rebuild from its rules will assume the next is the same house
      * with different numbers. It is not, and the app would be lying by layout
-     * if it did not say so.
+     * if it did not say so. Written without a count, so the next house cannot
+     * turn it into a lie.
      */
-    /* Written without a count, so the next house cannot turn it into a lie. */
     note: t(
       'Setiap tradisi membawa pak aturan dan tabel sumbernya sendiri. Angka-angkanya tidak pernah digabung, dan tidak ada rumah yang berubah menjadi rumah lain.',
       'Every tradition carries its own rule pack and its own source table. The figures are never merged, and no house turns into another.',

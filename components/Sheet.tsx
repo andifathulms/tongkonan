@@ -1,8 +1,15 @@
 import Link from 'next/link'
-import { COPY, LOCALES, LOCALE_NAMES, ROUTES, href, pick } from '@/lib/i18n'
+import { LocaleSwitch } from '@/components/LocaleSwitch'
+import { COPY, LOCALES, ROUTES, homeHref, houseHref, href, pick } from '@/lib/i18n'
 import type { Locale, Route } from '@/lib/i18n'
-import { TRADITIONS } from '@/lib/tradition/registry'
 import type { Tradition } from '@/lib/tradition/registry'
+
+/** The same page, in the other language. */
+function localeTargets(route: Route, tradition: Tradition): Record<Locale, string> {
+  return Object.fromEntries(
+    LOCALES.map((l) => [l, `${href(l, tradition.slug, route)}/`]),
+  ) as Record<Locale, string>
+}
 
 /**
  * The surveyor's sheet: title block on the left, drawing on the right.
@@ -111,11 +118,20 @@ function Masthead({
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex min-h-[var(--masthead-h)] flex-col justify-center border-t border-hairline bg-veil px-3 py-2 backdrop-blur-[2px] sheet:hidden">
       <div className="flex items-center justify-between gap-3">
-        <span className="micro text-bolu">
-          {pick(COPY.appName, locale)} · {tradition.house[locale]}
-        </span>
+        {/*
+          The house, not the app: on a band this narrow one of them has to go,
+          and the reader is inside a house. The way back up to the collection
+          is the wordmark in the title block, which on a phone sits with the
+          rail below the viewport.
+        */}
+        <Link
+          href={`${houseHref(locale, tradition.slug)}/`}
+          className="pointer-events-auto micro text-bolu"
+        >
+          {tradition.house[locale]}
+        </Link>
         <div className="pointer-events-auto">
-          <LocaleSwitch locale={locale} route={route} tradition={tradition} />
+          <LocaleSwitch locale={locale} targets={localeTargets(route, tradition)} />
         </div>
       </div>
       {/* Two lines is the contract --masthead-h is sized for. */}
@@ -149,10 +165,11 @@ function TitleBlock({
       */}
       <div className="hidden sheet:block">
         <div className="flex items-baseline justify-between gap-3">
-          <Link href={href(locale, tradition.slug, 'bangun')} className="micro text-bolu">
+          {/* The wordmark is the way back up: the collection is the landing page. */}
+          <Link href={`${homeHref(locale)}/`} className="micro text-bolu">
             {pick(COPY.appName, locale)}
           </Link>
-          <LocaleSwitch locale={locale} route={route} tradition={tradition} />
+          <LocaleSwitch locale={locale} targets={localeTargets(route, tradition)} />
         </div>
         {/*
           The tagline is the largest thing in the rail and the wordmark is the
@@ -162,7 +179,7 @@ function TitleBlock({
         <p className="mt-2 text-lead text-bolu">{pick(COPY.tagline, locale)}</p>
       </div>
 
-      <TraditionSwitch locale={locale} route={route} tradition={tradition} />
+      <HouseCrumb locale={locale} tradition={tradition} />
 
       {/* The thesis is wanted on both, and the masthead has no room for it. */}
       <p className="mt-2 text-body text-muted sheet:mt-2">{pick(COPY.thesis, locale)}</p>
@@ -205,98 +222,32 @@ function TitleBlock({
 }
 
 /**
- * The language switch.
+ * Which house this is, and the way back up.
  *
- * Half the readers this is built for cannot read the locale it defaults to,
- * so the way out has to be findable without reading anything: full ink on the
- * inactive side, a rule between the two, and a target you can hit with a
- * thumb. The label of each side is written in its own language, because a
- * reader looking for English is looking for the word English.
+ * This used to be a tab row over every tradition, which stopped scaling the
+ * moment there were four; the collection now lives on the landing page, and
+ * the rail states only where you are. Leaving a house goes up through the
+ * index rather than sideways: the switch is a cut, and the address's query
+ * half — this house's rules — does not survive it, because `?pangkat=layuk`
+ * means nothing to a rumah gadang.
  */
-function LocaleSwitch({
-  locale,
-  route,
-  tradition,
-}: {
-  locale: Locale
-  route: Route
-  tradition: Tradition
-}) {
+function HouseCrumb({ locale, tradition }: { locale: Locale; tradition: Tradition }) {
   return (
-    <div className="flex items-stretch overflow-hidden rounded border border-hairline">
-      {LOCALES.map((l, i) => (
-        <Link
-          key={l}
-          href={href(l, tradition.slug, route)}
-          hrefLang={l}
-          lang={l}
-          aria-label={`${LOCALE_NAMES[l]} — ${pick(COPY.openIn, l)}`}
-          title={pick(COPY.openIn, l)}
-          aria-current={l === locale ? 'true' : undefined}
-          className={[
-            'micro flex min-h-control items-center px-2 transition-colors duration-state',
-            i > 0 ? 'border-l border-hairline' : '',
-            l === locale ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
-          ].join(' ')}
-        >
-          {l.toUpperCase()}
-        </Link>
-      ))}
+    <div className="mt-4 flex items-baseline justify-between gap-3">
+      <Link
+        href={`${houseHref(locale, tradition.slug)}/`}
+        className="min-w-0 rounded transition-colors duration-state hover:bg-wash"
+      >
+        <span className="block text-body leading-tight text-bolu">{tradition.house[locale]}</span>
+        <span className="mt-0.5 block text-meta text-muted">{tradition.place[locale]}</span>
+      </Link>
+      <Link
+        href={`${homeHref(locale)}/`}
+        className="micro shrink-0 text-bolu underline underline-offset-4"
+      >
+        {pick(COPY.tradition.all, locale)} <span aria-hidden>→</span>
+      </Link>
     </div>
-  )
-}
-
-/**
- * Which house you are looking at, and the way to the other one.
- *
- * It sits directly under the tagline, above the route navigation, because it
- * is a bigger move than changing route: the routes are four views of one
- * building and this is a different building, with its own rule pack, its own
- * sources and its own bar. Putting it in the same list as the routes would say
- * they were the same kind of choice.
- *
- * The link keeps the route and drops the query. A `?pangkat=layuk` means
- * nothing to a rumah gadang, and carrying it across would hand the reader an
- * address that silently described a different house from the one they left.
- */
-function TraditionSwitch({
-  locale,
-  route,
-  tradition,
-}: {
-  locale: Locale
-  route: Route
-  tradition: Tradition
-}) {
-  return (
-    <fieldset className="mt-4">
-      <legend className="micro mb-2">{pick(COPY.tradition.legend, locale)}</legend>
-      <div className="flex items-stretch overflow-hidden rounded border border-hairline">
-        {TRADITIONS.map((t, i) => (
-          <Link
-            key={t.key}
-            href={`${href(locale, t.slug, route)}/`}
-            aria-current={t.key === tradition.key ? 'page' : undefined}
-            className={[
-              'flex min-h-control flex-1 flex-col justify-center px-2 py-1 transition-colors duration-state',
-              i > 0 ? 'border-l border-hairline' : '',
-              t.key === tradition.key ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
-            ].join(' ')}
-          >
-            <span className="text-body leading-tight">{t.house[locale]}</span>
-            <span
-              className={[
-                'mt-0.5 text-meta',
-                t.key === tradition.key ? 'text-muted-on-ink' : 'text-muted',
-              ].join(' ')}
-            >
-              {t.place[locale]}
-            </span>
-          </Link>
-        ))}
-      </div>
-      <p className="mt-2 text-body text-muted">{pick(COPY.tradition.note, locale)}</p>
-    </fieldset>
   )
 }
 
