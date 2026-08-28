@@ -1,0 +1,264 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import {
+  COPY,
+  DEFAULT_LOCALE,
+  LOCALES,
+  LOCALE_NAMES,
+  homeHref,
+  houseHref,
+  isLocale,
+  landingMetadata,
+  pick,
+} from '@/lib/i18n'
+import type { Locale } from '@/lib/i18n'
+import { TRADITIONS } from '@/lib/tradition/registry'
+import type { Tradition } from '@/lib/tradition/registry'
+
+export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+  const locale = isLocale(params.locale) ? params.locale : DEFAULT_LOCALE
+  return landingMetadata(locale, TRADITIONS.map((t) => t.house[locale]).join(' · '))
+}
+
+/**
+ * The collection's front door.
+ *
+ * While there was one house the site could open inside it; with several, the
+ * first page has to be the shelf and not one of the books. Everything here is
+ * read from the registry, so a fifth house appears on the map and in the index
+ * without this file changing — the copy is written without counts for the
+ * same reason.
+ *
+ * The houses are built here, at export time, because the honest number on
+ * each card — how much of the house the author invented — is a property of a
+ * built house, not of a description of one.
+ */
+export default function Landing({ params }: { params: { locale: string } }) {
+  if (!isLocale(params.locale)) notFound()
+  const locale = params.locale
+  const built = TRADITIONS.map((t) => ({ t, b: t.build(t.defaultQuery) }))
+
+  return (
+    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col px-6 py-10">
+      <header className="flex items-baseline justify-between gap-3">
+        <p className="micro text-bolu">{pick(COPY.appName, locale)}</p>
+        <LocaleSwitch locale={locale} />
+      </header>
+
+      {/*
+        The claim before the name, as everywhere else: the tagline is the
+        largest thing on the page and the wordmark is the smallest. The h1 is
+        the tagline because that is what this page is about; the name is
+        already in the title bar.
+      */}
+      <h1 className="mt-8 text-display text-bolu">{pick(COPY.tagline, locale)}</h1>
+      <p className="mt-4 text-body text-muted">{pick(COPY.landing.lede, locale)}</p>
+
+      <hr className="rule my-8" />
+
+      <section>
+        <h2 className="micro mb-4">{pick(COPY.landing.storyHeading, locale)}</h2>
+        <div className="flex flex-col gap-4">
+          {COPY.landing.story.map((p, i) => (
+            <p key={i} className="text-body text-bolu">
+              {pick(p, locale)}
+            </p>
+          ))}
+        </div>
+      </section>
+
+      <hr className="rule my-8" />
+
+      <section>
+        <h2 className="micro mb-4">{pick(COPY.landing.sitesHeading, locale)}</h2>
+        <SiteMap locale={locale} />
+        <p className="mt-3 text-body text-muted">{pick(COPY.landing.sitesNote, locale)}</p>
+      </section>
+
+      <hr className="rule my-8" />
+
+      <section>
+        <h2 className="micro mb-4">{pick(COPY.landing.housesHeading, locale)}</h2>
+        {/*
+          The legend for the card bars, drawn once above the index rather than
+          once per card: no colour may carry a meaning only the code knows.
+        */}
+        <dl className="mb-4 flex flex-wrap gap-x-5 gap-y-1">
+          {(
+            [
+              ['measured', 'var(--bolu)'],
+              ['canon', 'var(--riri)'],
+              ['interpolated', 'var(--rara)'],
+            ] as const
+          ).map(([key, colour]) => (
+            <div key={key} className="flex items-center gap-2">
+              <dt className="h-2 w-2 rounded-none" style={{ background: colour }} aria-hidden />
+              <dd className="micro">{pick(COPY.provenance[key], locale)}</dd>
+            </div>
+          ))}
+        </dl>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {built.map(({ t, b }) => (
+            <HouseCard
+              key={t.key}
+              locale={locale}
+              tradition={t}
+              parts={b.house.parts.length}
+              joints={b.house.joints.length}
+            />
+          ))}
+        </ul>
+        <p className="mt-4 text-body text-muted">{pick(COPY.tradition.note, locale)}</p>
+      </section>
+    </main>
+  )
+}
+
+function HouseCard({
+  locale,
+  tradition,
+  parts,
+  joints,
+}: {
+  locale: Locale
+  tradition: Tradition
+  parts: number
+  joints: number
+}) {
+  const split = tradition.split
+  const pct = (n: number) => (split.total === 0 ? 0 : (n / split.total) * 100)
+  const share = Math.round(pct(split.interpolated))
+  return (
+    <li className="h-full">
+      <Link
+        href={`${houseHref(locale, tradition.slug)}/`}
+        className="flex h-full flex-col gap-2 rounded border border-hairline px-4 py-4 transition-colors duration-state hover:bg-wash"
+      >
+        <span className="micro">
+          {tradition.people[locale]} · {tradition.place[locale]}
+        </span>
+        <span className="text-title text-bolu">{tradition.house[locale]}</span>
+        <span className="font-mono text-meta text-muted">
+          {parts} {pick(COPY.landing.parts, locale)} · {joints}{' '}
+          {pick(COPY.landing.joints, locale)}
+        </span>
+        {/* Each house's own bar. Never a merged one — see the note below the index. */}
+        <span className="mt-auto flex h-1 w-full overflow-hidden rounded" aria-hidden>
+          <span style={{ width: `${pct(split.measured)}%`, background: 'var(--bolu)' }} />
+          <span style={{ width: `${pct(split.canon)}%`, background: 'var(--riri)' }} />
+          <span style={{ width: `${pct(split.interpolated)}%`, background: 'var(--rara)' }} />
+        </span>
+        <span className="font-mono text-meta text-muted">
+          {pick(COPY.landing.interpolatedShare, locale).replace('{pct}', String(share))}
+        </span>
+        <span className="text-body text-bolu underline underline-offset-4">
+          {pick(COPY.landing.enter, locale)} <span aria-hidden>→</span>
+        </span>
+      </Link>
+    </li>
+  )
+}
+
+/**
+ * The sites, plotted. A graticule and the equator, not a coastline: inventing
+ * a plausible outline of the archipelago by hand would be an interpolated
+ * drawing presented as a measured one, which is the exact move this project
+ * refuses everywhere else. The coordinates are the same ones the solar
+ * arithmetic runs on, read from each tradition's registry entry.
+ *
+ * aria-hidden because everything it shows — which houses, where — is written
+ * out in the index below it.
+ */
+function SiteMap({ locale }: { locale: Locale }) {
+  // Degrees of the frame, and viewBox units per degree.
+  const LON_MIN = 94
+  const LON_MAX = 142
+  const LAT_MIN = -12
+  const LAT_MAX = 8
+  const S = 10
+  const w = (LON_MAX - LON_MIN) * S
+  const h = (LAT_MAX - LAT_MIN) * S
+  const x = (lon: number) => (lon - LON_MIN) * S
+  const y = (lat: number) => (LAT_MAX - lat) * S
+  const meridians = [100, 110, 120, 130, 140]
+
+  return (
+    <svg
+      viewBox={`0 0 ${w} ${h}`}
+      className="w-full rounded border border-hairline"
+      aria-hidden="true"
+    >
+      {meridians.map((lon) => (
+        <g key={lon}>
+          <line x1={x(lon)} y1={0} x2={x(lon)} y2={h} stroke="var(--hairline)" />
+          <text x={x(lon) + 4} y={h - 6} className="micro" fill="var(--muted)">
+            {lon}°
+          </text>
+        </g>
+      ))}
+      {/* The equator, named: two of these sites sit close enough to it for a zero-shadow day. */}
+      <line x1={0} y1={y(0)} x2={w} y2={y(0)} stroke="var(--muted)" />
+      <text x={w - 8} y={y(0) - 6} textAnchor="end" className="micro" fill="var(--muted)">
+        {pick(COPY.landing.equator, locale)} 0°
+      </text>
+      {TRADITIONS.map((t) => (
+        <g key={t.key}>
+          <rect
+            x={x(t.site.longitude) - 3}
+            y={y(t.site.latitude) - 3}
+            width={6}
+            height={6}
+            fill="var(--bolu)"
+          />
+          <text
+            x={x(t.site.longitude) + 9}
+            y={y(t.site.latitude) + 4}
+            className="micro"
+            fill="var(--bolu)"
+          >
+            {t.house[locale]}
+          </text>
+          <text
+            x={x(t.site.longitude) + 9}
+            y={y(t.site.latitude) + 17}
+            className="micro"
+            fill="var(--muted)"
+          >
+            {t.site.name} {Math.abs(t.site.latitude).toFixed(1)}°{t.site.latitude < 0 ? 'S' : 'N'}
+          </text>
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+/**
+ * The language switch, landing-local: the same face as the one in the rail,
+ * but its links go to the landing page in the other language rather than to a
+ * route of a house this page is not inside.
+ */
+function LocaleSwitch({ locale }: { locale: Locale }) {
+  return (
+    <div className="flex items-stretch overflow-hidden rounded border border-hairline">
+      {LOCALES.map((l, i) => (
+        <Link
+          key={l}
+          href={`${homeHref(l)}/`}
+          hrefLang={l}
+          lang={l}
+          aria-label={`${LOCALE_NAMES[l]} — ${pick(COPY.openIn, l)}`}
+          title={pick(COPY.openIn, l)}
+          aria-current={l === locale ? 'true' : undefined}
+          className={[
+            'micro flex min-h-control items-center px-2 transition-colors duration-state',
+            i > 0 ? 'border-l border-hairline' : '',
+            l === locale ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
+          ].join(' ')}
+        >
+          {l.toUpperCase()}
+        </Link>
+      ))}
+    </div>
+  )
+}

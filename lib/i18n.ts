@@ -36,6 +36,16 @@ export function href(locale: Locale, tradition: string, route: Route): string {
   return `/${locale}/${tradition}/${route}`
 }
 
+/** The landing page: the whole collection, in one language. */
+export function homeHref(locale: Locale): string {
+  return `/${locale}`
+}
+
+/** A house's own front door, above its four routes. */
+export function houseHref(locale: Locale, tradition: string): string {
+  return `/${locale}/${tradition}`
+}
+
 type Dict = Record<Locale, string>
 
 const t = (id: string, en: string): Dict => ({ id, en })
@@ -77,6 +87,52 @@ export const COPY = {
     'Drag or arrow keys to rotate · scroll or +/− to zoom',
   ),
   computed: t('Dihitung dari aturan', 'Computed from the rules'),
+
+  /*
+   * The landing page. The collection's own copy: what this is, how it came to
+   * be more than one house, and where each house stands. Counts are never
+   * written into these sentences — a fifth house must not turn any of them
+   * into a lie.
+   */
+  landing: {
+    lede: t(
+      'Setiap rumah di sini dibangkitkan dari aturan sosialnya sendiri — sebuah pangkat, jumlah ruang, catatan upacara — bukan dari gambar bentuknya. Ubah satu aturan, dan rumah dihitung ulang dari aturan itu.',
+      'Every house here is generated from its own social rules — a rank, a bay count, a tally of ceremonies — rather than from a drawing of its shape. Change one rule, and the house is recomputed from it.',
+    ),
+    storyHeading: t('Ceritanya', 'The story'),
+    story: [
+      t(
+        'Mulanya satu rumah: tongkonan. Tiga aturan sosial — pangkat, jumlah ruang, catatan upacara pada tanduk di tiangnya — menghasilkan setiap ukuran, dan dari ukuran itu berdirilah modelnya.',
+        'It began with one house: the tongkonan. Three social rules — rank, bay count, the tally of funerals on the horns of its post — produce every dimension, and from those dimensions the model stands.',
+      ),
+      t(
+        'Lalu rumah gadang, yang menolak menyerupainya; lalu joglo, yang bahkan tidak berdiri di atas tiang; lalu mbaru niang, yang bulat. Penolakan itulah gunanya: tiap rumah membawa pak aturannya sendiri, dan tidak ada yang dipaksa memakai bentuk rumah lain.',
+        'Then the rumah gadang, which refused to resemble it; then the joglo, which does not even stand on posts; then the mbaru niang, which is round. The refusal is the point: each house carries its own rule pack, and none is made to wear another’s shape.',
+      ),
+      t(
+        'Setiap ukuran menyatakan asalnya — terukur, kanon, atau perkiraan penulis — dan angka tiap rumah tidak pernah dirata-ratakan dengan rumah lain. Yang bersumber adalah logika bentuknya; ukurannya sebagian besar belum.',
+        'Every dimension states where it came from — measured, canon, or the author’s own — and no house’s figures are ever averaged with another’s. What is sourced is the logic of each shape; the sizes mostly are not.',
+      ),
+      t(
+        'Belum satu pun rumah ini disurvei. Bilah asal ukuran pada tiap halaman adalah tolok kemajuan proyek ini, dan hari ini bilah itu hampir seluruhnya merah. Ia dibiarkan terlihat, karena gambar tiga dimensi yang mulus menyiratkan ketelitian yang tidak dimiliki sumbernya.',
+        'Not one of these houses has been surveyed yet. The provenance bar on every page is this project’s progress metric, and today it is almost entirely red. It stays in view, because a smooth 3D render implies a precision the sources do not have.',
+      ),
+    ],
+    sitesHeading: t('Tapak', 'The sites'),
+    sitesNote: t(
+      'Matahari pada tiap model dihitung untuk tapak rumahnya sendiri. Garis lintang pada peta ini adalah masukan perhitungan itu, bukan hiasan.',
+      'The sun in each model is computed for that house’s own site. The latitudes on this map are inputs to that arithmetic, not decoration.',
+    ),
+    equator: t('Khatulistiwa', 'Equator'),
+    housesHeading: t('Rumah-rumahnya', 'The houses'),
+    parts: t('bagian', 'parts'),
+    joints: t('sambungan', 'joints'),
+    interpolatedShare: t(
+      '{pct}% ukuran perkiraan penulis',
+      '{pct}% of dimensions the author’s own',
+    ),
+    enter: t('Masuk', 'Enter'),
+  },
   modelLabel: t(
     'Model tongkonan, dihitung dari aturannya',
     'Tongkonan model, generated from its rules',
@@ -242,10 +298,12 @@ export const COPY = {
      * with different numbers. It is not, and the app would be lying by layout
      * if it did not say so.
      */
+    /* Written without a count, so the next house cannot turn it into a lie. */
     note: t(
-      'Dua tradisi, dua pak aturan, dua tabel sumber. Keduanya tidak pernah digabung dan tidak ada di antaranya yang berubah menjadi yang lain.',
-      'Two traditions, two rule packs, two source tables. They are never merged, and neither one turns into the other.',
+      'Setiap tradisi membawa pak aturan dan tabel sumbernya sendiri. Angka-angkanya tidak pernah digabung, dan tidak ada rumah yang berubah menjadi rumah lain.',
+      'Every tradition carries its own rule pack and its own source table. The figures are never merged, and no house turns into another.',
     ),
+    all: t('Semua rumah', 'All houses'),
   },
 
   zones: {
@@ -406,31 +464,36 @@ export function pageUrl(route: Route, locale: Locale, tradition: string): string
   return `${SITE_ORIGIN}${BASE_PATH}/${locale}/${tradition}/${route}/`
 }
 
+/** The absolute address of the landing page. */
+export function landingUrl(locale: Locale): string {
+  return `${SITE_ORIGIN}${BASE_PATH}${homeHref(locale)}/`
+}
+
+/** The absolute address of a house's front door. */
+export function houseUrl(locale: Locale, tradition: string): string {
+  return `${SITE_ORIGIN}${BASE_PATH}${houseHref(locale, tradition)}/`
+}
+
 /** OpenGraph's locale format, which is not the one in our URLs. */
 const OG_LOCALE: Record<Locale, string> = { id: 'id_ID', en: 'en_US' }
 
 /**
- * Everything a route needs in its head, from one call.
+ * Everything a page needs in its head, from one call.
  *
- * Kept in one place so the four routes cannot describe themselves four
- * different ways, and so canonical, alternates and the share card are always
- * generated together — the failure mode is adding one of them and forgetting
- * the rest.
+ * Kept in one place so the pages cannot describe themselves several different
+ * ways, and so canonical, alternates and the share card are always generated
+ * together — the failure mode is adding one of them and forgetting the rest.
+ * `urlFor` is a function of the locale because the alternates are the same
+ * page in the other language, whatever kind of page it is.
  */
-export function routeMetadata(
-  route: Route,
-  locale: Locale,
-  tradition: { slug: string; house: string },
-) {
-  const title = pageTitle(route, locale, tradition.house)
-  const description = pageDescription(route, locale, tradition.house)
-  const url = pageUrl(route, locale, tradition.slug)
+function head(locale: Locale, title: string, description: string, urlFor: (l: Locale) => string) {
+  const url = urlFor(locale)
   return {
     title,
     description,
     alternates: {
       canonical: url,
-      languages: Object.fromEntries(LOCALES.map((l) => [l, pageUrl(route, l, tradition.slug)])),
+      languages: Object.fromEntries(LOCALES.map((l) => [l, urlFor(l)])),
     },
     openGraph: {
       type: 'website' as const,
@@ -447,4 +510,40 @@ export function routeMetadata(
       description,
     },
   }
+}
+
+export function routeMetadata(
+  route: Route,
+  locale: Locale,
+  tradition: { slug: string; house: string },
+) {
+  return head(
+    locale,
+    pageTitle(route, locale, tradition.house),
+    pageDescription(route, locale, tradition.house),
+    (l) => pageUrl(route, l, tradition.slug),
+  )
+}
+
+/** The landing page's head. `houses` is the house names, joined, from the registry. */
+export function landingMetadata(locale: Locale, houses: string) {
+  return head(
+    locale,
+    pick(COPY.appName, locale),
+    `${pick(COPY.tagline, locale)} ${houses}.`,
+    (l) => landingUrl(l),
+  )
+}
+
+/** A house front door's head. */
+export function houseMetadata(
+  locale: Locale,
+  tradition: { slug: string; house: string; place: string },
+) {
+  return head(
+    locale,
+    `${tradition.house} — ${pick(COPY.appName, locale)}`,
+    `${tradition.house}, ${tradition.place}. ${pick(COPY.tagline, locale)}`,
+    (l) => houseUrl(l, tradition.slug),
+  )
 }

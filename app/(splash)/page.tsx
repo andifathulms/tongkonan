@@ -1,22 +1,21 @@
 import Link from 'next/link'
-import { COPY, LOCALES, LOCALE_NAMES, href, pick } from '@/lib/i18n'
-import { DEFAULT_TRADITION, TRADITIONS, tradition } from '@/lib/tradition/registry'
+import { COPY, LOCALES, LOCALE_NAMES, homeHref, pick } from '@/lib/i18n'
+import { TRADITIONS } from '@/lib/tradition/registry'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 /**
- * The root sends you to the Indonesian generator.
+ * The root sends you to the Indonesian landing page.
  *
  * A static export has no server to redirect from, so this is a real page with
  * a real link rather than a redirect that silently fails when JavaScript does.
  *
  * Nobody sees it for more than a frame when the refresh works, and everybody
  * sees it when it does not — a slow connection, a blocked meta refresh, a
- * reader arriving from a search result. So it says the same thing the rail
+ * reader arriving from a search result. So it says the same thing the landing
  * says, in both languages, rather than being a bare pair of links.
  */
 export default function Index() {
-  const first = tradition(DEFAULT_TRADITION)
   return (
     <main className="mx-auto flex min-h-full max-w-xl flex-col justify-center gap-6 px-6 py-24">
       <p className="micro text-bolu">{pick(COPY.appName, 'id')}</p>
@@ -33,7 +32,7 @@ export default function Index() {
             key={l}
             lang={l}
             hrefLang={l}
-            href={`${href(l, first.slug, 'bangun')}/`}
+            href={`${homeHref(l)}/`}
             className="text-body underline underline-offset-4"
           >
             {pick(COPY.openIn, l)} <span aria-hidden>→</span>
@@ -51,7 +50,7 @@ export default function Index() {
       <p className="text-body text-muted">
         {TRADITIONS.map((t) => t.house.id).join(' · ')}
       </p>
-      <meta httpEquiv="refresh" content={`${BASE}${href('id', first.slug, 'bangun')}/`.replace(/^/, '0; url=')} />
+      <meta httpEquiv="refresh" content={`0; url=${BASE}${homeHref('id')}/`} />
     </main>
   )
 }

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { LOCALES, ROUTES, pageUrl } from '@/lib/i18n'
+import { LOCALES, ROUTES, houseUrl, landingUrl, pageUrl } from '@/lib/i18n'
 import { TRADITIONS } from '@/lib/tradition/registry'
 
 /**
@@ -19,7 +19,21 @@ import { TRADITIONS } from '@/lib/tradition/registry'
  * changed when it did not.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return LOCALES.flatMap((locale) =>
+  const landing = LOCALES.map((locale) => ({
+    url: landingUrl(locale),
+    alternates: {
+      languages: Object.fromEntries(LOCALES.map((l) => [l, landingUrl(l)])),
+    },
+  }))
+  const homes = LOCALES.flatMap((locale) =>
+    TRADITIONS.map((tradition) => ({
+      url: houseUrl(locale, tradition.slug),
+      alternates: {
+        languages: Object.fromEntries(LOCALES.map((l) => [l, houseUrl(l, tradition.slug)])),
+      },
+    })),
+  )
+  const routes = LOCALES.flatMap((locale) =>
     TRADITIONS.flatMap((tradition) =>
       ROUTES.map((route) => ({
         url: pageUrl(route, locale, tradition.slug),
@@ -31,4 +45,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       })),
     ),
   )
+  return [...landing, ...homes, ...routes]
 }
