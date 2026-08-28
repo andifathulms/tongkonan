@@ -198,6 +198,57 @@ body {
     font-variant-numeric: tabular-nums;
     text-align: right;
   }
+
+  /*
+   * The sliders, drawn as one instrument: a hairline rail and a soot cursor.
+   *
+   * The user agent's default is a grey pill on a grey groove — the one
+   * control on the sheet that did not look drawn, and its thumb was under
+   * the 24px target floor everything else clears. The cursor is the full
+   * control height, so the finger target is the token rather than whatever
+   * the browser ships. No progress fill on either engine: position is the
+   * cursor, the way it is on a slide rule, and only Firefox could have
+   * drawn the fill anyway — a control that says more in one browser than
+   * another would be a bug wearing a feature's clothes.
+   *
+   * The focus ring comes from the global :focus-visible rule on the input
+   * itself, so it needs nothing here.
+   */
+  input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: var(--control-target);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 2px;
+    background: var(--hairline);
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: var(--control-target);
+    margin-top: calc((2px - var(--control-target)) / 2);
+    border: 0;
+    border-radius: 2px;
+    background: var(--bolu);
+  }
+
+  input[type='range']::-moz-range-track {
+    height: 2px;
+    background: var(--hairline);
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 12px;
+    height: var(--control-target);
+    border: 0;
+    border-radius: 2px;
+    background: var(--bolu);
+  }
 }
 
 :focus-visible {
