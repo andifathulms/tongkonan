@@ -754,96 +754,15 @@ const clampByte = (v: number) => Math.min(255, Math.max(0, v))
 
 /* ── The material sets ────────────────────────────────────────────────── */
 
-/**
- * Which materials are the same substance in both houses, and which only share
- * a name.
- *
- * Timber is timber and thatch is thatch: the generators are shared because the
- * material is. Carving is not. `ukiran` names a carved board in both packs and
- * the *motif* is a specific people's, so it is listed as each tradition's own
- * even though both houses have one — which is the distinction the first split
- * missed, because it split the set by key and left the construction behind the
- * key shared.
- *
- * Declared as data so it can be checked from a test that has no DOM to build
- * a texture in.
+/*
+ * The key lists moved to `materials.keys.ts`, which imports no three.js, so a
+ * test can read them. See the note there: they were unreachable to any check
+ * while they sat beside the generators, and the fault that cost was a route
+ * that threw on load.
  */
-export const SHARED_MATERIALS: readonly string[] = ['kayu', 'papan', 'bambu', 'ijuk', 'batu']
+import { FALLBACK_MATERIAL } from './materials.keys'
+export { FALLBACK_MATERIAL, OWN_MATERIALS, SHARED_MATERIALS, materialKeysFor } from './materials.keys'
 
-export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
-  /** pa'ssura, and buffalo horn on the tulak somba */
-  toraja: ['ukiran', 'tanduk'],
-  /** pucuak rabuang and kaluak paku, and woven bamboo in the end walls */
-  minang: ['ukiran', 'anyaman'],
-  /**
-   * lung-lungan and wajikan; fired clay rather than thatch; and teak named
-   * rather than called timber, because on a joglo it is named.
-   */
-  jawa: ['ukiran', 'genteng', 'jati'],
-  /**
-   * Nothing. The first house here that owns no material of its own.
-   *
-   * A mbaru niang carries no carving, so there is no `ukiran` to make its own
-   * version of, and everything it is built from — timber, board, bamboo, river
-   * stone, ijuk — is a substance one of the other three already builds with.
-   * An empty list is the honest entry, and it is worth having a field that can
-   * be empty: the alternative would have been inventing a Manggarai carving to
-   * fill a slot the other three happen to have.
-   */
-  manggarai: [],
-  /**
-   * Paras, brick and alang-alang.
-   *
-   * The first house here to own three, and none of them is a carving. Paras is
-   * a quarried, cut stone rather than the river stone the others seat posts
-   * on; brick is a substance no other house in this project builds with at
-   * all; and alang-alang is grass where the two thatched houses use black palm
-   * fibre. All three are listed as this tradition's own because the generators
-   * genuinely differ, not because the keys do.
-   *
-   * What is *not* here is `ukiran`, and on a Balinese building that is a real
-   * absence rather than a tidy one. See the caution in `bali/facade.ts`.
-   */
-  bali: ['paras', 'bata', 'alang'],
-  /**
-   * Sago-palm thatch, and a dressed standing stone.
-   *
-   * Three roofs in this project are now thatched and no two of them are the
-   * same plant: ijuk is black palm fibre, alang-alang is grass, rumbia is
-   * sago leaf laid in overlapping fronds. They read differently and they are
-   * generated differently.
-   *
-   * `behu` is listed apart from `batu` for the reason the carving split was
-   * made: a dressed, standing, worked stone is not the river cobble a post
-   * foot sits on, and giving them one generator because both are "stone" is
-   * the split-by-name mistake in its original form.
-   */
-  nias: ['rumbia', 'behu'],
-  /**
-   * Ironwood, and shingles split from it.
-   *
-   * `ulin` is named rather than called timber for the same reason the joglo's
-   * `jati` is: on this building the species is the point. It is why a house
-   * eighty metres long survives decades in a climate that eats other wood, and
-   * a generic timber would say nothing about that.
-   *
-   * `sirap` is the fourth roof covering in this project and the first that is
-   * not a plant laid in courses — it is split wood, thin and hard-edged, and
-   * it reads as a grid of shadows rather than as a texture of strands.
-   */
-  dayak: ['ulin', 'sirap'],
-  /**
-   * Nothing of its own, and it is the second house here to own nothing.
-   *
-   * An uma is thatched in alang-alang — the same plant as the bale, so the
-   * same generator, because it genuinely is the same substance. Timber, board,
-   * bamboo and river stone are all substances another house already builds
-   * with. The list is empty because there is nothing here that differs, which
-   * is a better reason for an empty list than the mbaru niang's was: there,
-   * what was missing was a carving; here, nothing is missing at all.
-   */
-  sumba: [],
-}
 
 /**
  * The materials one tradition builds from.
@@ -987,5 +906,5 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     })
   }
 
-  return assemble(set, textures, tradition === 'jawa' ? 'jati' : 'kayu')
+  return assemble(set, textures, FALLBACK_MATERIAL[tradition])
 }
