@@ -629,6 +629,82 @@ function alangCanvas(): HTMLCanvasElement {
   return el
 }
 
+/**
+ * Rumbia: sago-palm leaf, laid as overlapping fronds.
+ *
+ * The third thatch in this project and the third generator, because it is the
+ * third plant. Ijuk is loose dark fibre and stands out in tufts; alang-alang
+ * is fine combed grass; a sago frond is a broad leaf folded over a batten, so
+ * what reads is a repeating scallop rather than a texture of strands.
+ */
+function rumbiaCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  const r = rng(20315)
+  const base = mix(mix(RIRI, BOLU, 0.52), RARA, 0.18)
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, S, S)
+  const rows = 7
+  const h = S / rows
+  for (let j = 0; j < rows; j++) {
+    const across = 9
+    for (let i = -1; i < across + 1; i++) {
+      const w = S / across
+      const x = i * w + (j % 2 === 0 ? 0 : w / 2)
+      ctx.fillStyle = mix(base, r() > 0.5 ? KAPUR : BOLU, 0.04 + r() * 0.16)
+      ctx.beginPath()
+      // A frond: flat at the batten, rounded where it hangs.
+      ctx.moveTo(x, j * h)
+      ctx.lineTo(x + w, j * h)
+      ctx.quadraticCurveTo(x + w / 2, j * h + h * 1.5, x, j * h)
+      ctx.fill()
+    }
+    // The batten line the next course is tied to.
+    ctx.strokeStyle = mix(base, BOLU, 0.34)
+    ctx.lineWidth = 1.1
+    ctx.beginPath()
+    ctx.moveTo(0, j * h)
+    ctx.lineTo(S, j * h)
+    ctx.stroke()
+  }
+  return el
+}
+
+/**
+ * Behu: a dressed standing stone, not a river cobble.
+ *
+ * Separate from `stoneCanvas` because it is separate in fact — this stone was
+ * quarried, worked and stood up on purpose, and it carries tool marks where a
+ * cobble carries none. Sharing the generator would have been the same fault as
+ * sharing a carving between two peoples: one key, two things.
+ */
+function behuCanvas(): HTMLCanvasElement {
+  const S = 256
+  const { ctx, el } = canvas(S)
+  const r = rng(5502)
+  const base = mix(GROUND, BOLU, 0.58)
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, S, S)
+  for (let i = 0; i < 1800; i++) {
+    ctx.fillStyle = mix(base, r() > 0.5 ? KAPUR : BOLU, 0.04 + r() * 0.10)
+    ctx.beginPath()
+    ctx.arc(r() * S, r() * S, 0.6 + r() * 2.0, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  // Tool marks: short, roughly parallel, and only on the worked face.
+  for (let i = 0; i < 90; i++) {
+    const x = r() * S
+    const y = r() * S
+    ctx.strokeStyle = mix(base, BOLU, 0.14 + r() * 0.12)
+    ctx.lineWidth = 0.7 + r() * 0.9
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(x + 4 + r() * 9, y + (r() - 0.5) * 3)
+    ctx.stroke()
+  }
+  return el
+}
+
 const clampByte = (v: number) => Math.min(255, Math.max(0, v))
 
 /* ── The material sets ────────────────────────────────────────────────── */
@@ -684,6 +760,20 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * absence rather than a tidy one. See the caution in `bali/facade.ts`.
    */
   bali: ['paras', 'bata', 'alang'],
+  /**
+   * Sago-palm thatch, and a dressed standing stone.
+   *
+   * Three roofs in this project are now thatched and no two of them are the
+   * same plant: ijuk is black palm fibre, alang-alang is grass, rumbia is
+   * sago leaf laid in overlapping fronds. They read differently and they are
+   * generated differently.
+   *
+   * `behu` is listed apart from `batu` for the reason the carving split was
+   * made: a dressed, standing, worked stone is not the river cobble a post
+   * foot sits on, and giving them one generator because both are "stone" is
+   * the split-by-name mistake in its original form.
+   */
+  nias: ['rumbia', 'behu'],
 }
 
 /**
@@ -780,6 +870,15 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'nias') {
+    set.kayu = timber(505, 0.15, 0.4, 0.8)
+    set.rumbia = new THREE.MeshStandardMaterial({
+      map: tex(rumbiaCanvas()),
+      roughness: 0.95,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
+    set.behu = new THREE.MeshStandardMaterial({ map: tex(behuCanvas()), roughness: 0.86, metalness: 0 })
   } else if (tradition === 'bali') {
     set.kayu = timber(404, 0.35, 0.55, 0.78)
     set.paras = new THREE.MeshStandardMaterial({ map: tex(parasCanvas()), roughness: 0.93, metalness: 0 })

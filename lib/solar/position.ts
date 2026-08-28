@@ -91,6 +91,19 @@ export const UBUD: Site = {
   tzName: 'WITA',
 }
 
+/**
+ * Bawömataluo, in South Nias. North of the equator by half a degree — the only
+ * site in this project that is, and a reminder that "Indonesia" is not one
+ * latitude.
+ */
+export const BAWOMATALUO: Site = {
+  name: 'Bawömataluo',
+  latitude: 0.58,
+  longitude: 97.79,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,

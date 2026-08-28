@@ -7,6 +7,7 @@ import { MinangControls } from './minang'
 import { JawaControls } from './jawa'
 import { ManggaraiControls } from './manggarai'
 import { BaliControls } from './bali'
+import { NiasControls } from './nias'
 
 /**
  * The rule controls, chosen by tradition.
@@ -47,5 +48,7 @@ export function RuleControlsFor({
       return <ManggaraiControls {...props} />
     case 'bali':
       return <BaliControls {...props} />
+    case 'nias':
+      return <NiasControls {...props} />
   }
 }
