@@ -118,6 +118,19 @@ export const PALANGKA_RAYA: Site = {
   tzName: 'WIB',
 }
 
+/**
+ * Waingapu, in East Sumba. The southernmost site in this project at 9.66° S —
+ * still inside the tropics, like every other, and the one place where that is
+ * least obvious from a glance at the map.
+ */
+export const WAINGAPU: Site = {
+  name: 'Waingapu',
+  latitude: -9.66,
+  longitude: 120.26,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,

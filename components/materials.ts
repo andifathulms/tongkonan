@@ -832,6 +832,17 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * it reads as a grid of shadows rather than as a texture of strands.
    */
   dayak: ['ulin', 'sirap'],
+  /**
+   * Nothing of its own, and it is the second house here to own nothing.
+   *
+   * An uma is thatched in alang-alang — the same plant as the bale, so the
+   * same generator, because it genuinely is the same substance. Timber, board,
+   * bamboo and river stone are all substances another house already builds
+   * with. The list is empty because there is nothing here that differs, which
+   * is a better reason for an empty list than the mbaru niang's was: there,
+   * what was missing was a carving; here, nothing is missing at all.
+   */
+  sumba: [],
 }
 
 /**
@@ -928,6 +939,14 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'sumba') {
+    set.kayu = timber(707, 0.2, 0.35, 0.82)
+    set.alang = new THREE.MeshStandardMaterial({
+      map: tex(alangCanvas()),
+      roughness: 0.95,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
   } else if (tradition === 'dayak') {
     // Ironwood: darker and greyer than the other timbers here, because it
     // weathers to it and because that is how a betang reads from a distance.
