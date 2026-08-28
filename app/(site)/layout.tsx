@@ -10,7 +10,7 @@ import { BASE_PATH, SITE_ORIGIN } from '@/lib/i18n'
  */
 export const metadata: Metadata = {
   metadataBase: new URL(`${SITE_ORIGIN}${BASE_PATH}/`),
-  title: { default: 'Pasak', template: '%s' },
+  title: { default: 'Rumah Adat Nusantara', template: '%s' },
 }
 
 export const viewport: Viewport = {

@@ -42,16 +42,16 @@ const t = (id: string, en: string): Dict => ({ id, en })
 
 export const COPY = {
   /*
-   * The project is named for the peg, not for either house.
+   * The project is named for what it holds.
    *
-   * It was called Tongkonan while there was one, which stopped being a name
-   * and became a claim the moment there were two. A pasak is the wooden peg
-   * that pins a mortise and tenon; it is ordinary Indonesian, it belongs to no
-   * one tradition, and both of these houses go up without a nail in them. It
-   * names the join rather than the building, which is the right size for what
-   * this is.
+   * It was called Tongkonan while there was one house, and Pasak — the peg
+   * that pins a mortise and tenon — while the point was that two houses met
+   * one core. With four houses and more intended, the collection is the
+   * subject, and the name says plainly what a visitor finds: the traditional
+   * houses of the archipelago, each generated from its own rules. It is a
+   * proper name, so it is the same in both locales.
    */
-  appName: t('Pasak', 'Pasak'),
+  appName: t('Rumah Adat Nusantara', 'Rumah Adat Nusantara'),
   tagline: t(
     'Rumah yang dihitung dari aturannya, bukan digambar.',
     'A house generated from its rules, not drawn.',
