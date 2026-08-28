@@ -81,7 +81,7 @@ export function resolveLayout(rules: Rules): Layout {
   const deckDepth = m.principal(s, 'deckDepth', 'dalam bale-bale', 'depth of the sitting deck', DIMS.deckDepthUnits.value, 'hasta')
   const stepRise = m.principal(s, 'stepRise', 'tinggi anak tangga', 'rise of a step', DIMS.stepRiseUnits.value, 'musti')
 
-  const sakaSection = m.stock(s, DIMS.sakaSectionUnits.value, 'musti')
+  const sakaSection = m.stock(s, DIMS.sakaSectionUnits.value, 'nyari')
   const sendiHeight = m.stock(s, DIMS.sendiHeightUnits.value, 'nyari')
 
   // The post grid. Rows run across X, columns along Z.
