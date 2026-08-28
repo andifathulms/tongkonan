@@ -26,6 +26,13 @@
   --riri: #c8912b; /* turmeric      — fill only: on --film 1.93:1 */
   --riri-ink: #7a5510; /* turmeric, dropped in value for strokes and labels: 4.63:1 */
   --kapur: #e9e3d2; /* slaked lime   — on --bolu 14.24:1 */
+  /*
+   * Ink over a turmeric fill. Riri is the one pigment that keeps its value
+   * after dark, so text on it must stay near-black in both registers — a
+   * token that follows --bolu would go light at night and land at 2.3:1.
+   * 6.55:1 on the fill, both ways.
+   */
+  --on-riri: #17150f;
 
   /* Interface neutrals */
   --film: #d8d7cd; /* drafting film — the page */
@@ -146,6 +153,53 @@
   --t-state: 150ms;
   --t-layout: 400ms;
   --t-orchestrated: 1100ms;
+}
+
+/*
+ * ── The night register ───────────────────────────────────────────────────
+ *
+ * Galeri malam: the same four pigments after dark. Soot and lime swap roles —
+ * soot becomes the ground and kapur becomes the ink, which the palette always
+ * permitted — and no token gains a hue: rara is lifted in value for dark
+ * ground the same way riri already dropped for light, and riri needs no ink
+ * variant at all up here, so it is its own.
+ *
+ * It follows the system preference and nothing else. There is no toggle: the
+ * site keeps no state anywhere, and a theme control would be its first.
+ *
+ * The 3D model does not read these tokens — the renderer carries its own
+ * constants and its light comes from the solar arithmetic — so the house
+ * stays a physical object in computed daylight and the dark chrome meets the
+ * viewport like a mat around a print. That is the design, not a limitation.
+ *
+ * Contrast, restated for the dark pairs the interface uses: ink on ground
+ * 14.84:1, on sheet 13.79:1; muted on ground 7.16:1, on sheet 6.65:1; rara
+ * (lifted) on ground 5.01:1, on sheet 4.66:1; riri on ground 6.77:1;
+ * muted-on-ink over the light chips 5.98:1. Every text pair clears 4.5:1.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bolu: #eae4d2; /* the ink is lime now */
+    --rara: #c76a48; /* red earth, lifted for dark ground: 5.01:1 */
+    --riri: #c8912b; /* turmeric holds */
+    --riri-ink: #c8912b; /* and needs no drop on a dark ground: 6.77:1 */
+    --kapur: #141109; /* reversed text on the now-light chips */
+
+    --film: #141109; /* soot becomes the page */
+    --sheet: #1d1910; /* a vitrine on the soot: 1.08:1 against it — depth, not a message */
+    --ground: #262114;
+    --muted: #a79f8b; /* on --film 7.16:1 */
+    --muted-on-ink: #575349; /* over a light chip: 5.98:1 */
+
+    --focus: #eae4d2;
+    --focus-contrast: #141109;
+
+    --hairline: rgba(234, 228, 210, 0.18);
+    --wash: rgba(234, 228, 210, 0.07);
+    /* The floating panels go dark with the chrome — a mat over the daylight
+       print. Ink on the composite stays far above the floor. */
+    --veil: rgba(20, 17, 9, 0.94);
+  }
 }
 
 html,

@@ -43,6 +43,14 @@ Interface neutrals sit outside the pigment set on purpose, so pigment always rea
 
 **Rara is the only accent and it is expensive.** It marks exactly two things: a number that has no source, and where rainwater lands. Both are arguments. If it starts appearing on hover states, it has been spent.
 
+## The night register
+
+The same four pigments after dark, following `prefers-color-scheme` and nothing else — there is no toggle, because the site keeps no state anywhere and a theme control would be its first. Soot and lime swap roles: soot `#141109` becomes the ground (vitrine surface `#1D1910`), kapur becomes the ink. No token gains a hue — rara is lifted in value for dark ground (`#C76A48`, 5.01:1) exactly the way riri already dropped for light, and riri needs no ink variant at night because the pigment itself clears 6.77:1. Text over a riri fill uses `--on-riri`, which stays near-black in both registers, because riri is the one pigment that never changes value.
+
+**The model does not go dark.** The renderer carries its own colour constants and its light comes from the solar arithmetic, so the house stays a physical object in computed daylight and the dark chrome meets the viewport like a mat around a print. That is the design: the interface has a night, the building has a sun.
+
+Every dark pair's ratio is stated in `globals.css` beside the token, the same contract as the light set. Text pairs clear 4.5:1 in both registers.
+
 ## Typography
 
 No display serif. The register is a measured drawing, so the mono face does the expressive work and the sans stays quiet.

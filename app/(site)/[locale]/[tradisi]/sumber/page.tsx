@@ -343,15 +343,17 @@ function Tally({ label, value }: { label: string; value: number }) {
  * already — the second had no skip case at all. Colours come from the token
  * classes, so the next change to the palette reaches both.
  *
- * Contrast, on the film: kapur on bolu 14.24:1, kapur on rara 5.85:1, bolu on
- * riri 6.55:1.
+ * Contrast, on the film: kapur on bolu 14.24:1, kapur on rara 5.85:1, on-riri
+ * on riri 6.55:1. The skip chip uses --on-riri rather than --bolu because
+ * riri is the one pigment that keeps its value after dark — ink that followed
+ * --bolu would go light at night and land at 2.3:1 on the same fill.
  */
 function CheckChip({ status, locale }: { status: CheckResult['status']; locale: Locale }) {
   const face =
     status === 'fail'
       ? 'bg-rara text-kapur'
       : status === 'skip'
-        ? 'bg-riri text-bolu'
+        ? 'bg-riri text-on-riri'
         : 'bg-bolu text-kapur'
   const label =
     status === 'fail'
