@@ -37,15 +37,21 @@ export function datePresets(site: Site = RANTEPAO): readonly DatePreset[] {
   /*
    * The first zenith passage of the year; the second is its mirror.
    *
-   * There may not be one. The first two houses sit within three degrees of the
-   * equator and the sun goes overhead twice a year at both; the third is at
-   * 7.8° south, where it never does. The third preset used to fall back to
-   * March the twentieth and keep the label "zero-shadow day", which would have
-   * printed a date on which nothing happens and called it the thing the whole
-   * preset exists to show. So the fallback is the December solstice — the day
-   * the sun does get highest here — and it says plainly that the zenith is
-   * never reached. A tool that computes the light owes the reader the case
-   * where the answer is that there isn't one.
+   * There may not be one, and the fallback below is for that case. It has
+   * never yet been taken, and the comment that used to stand here said
+   * otherwise: it claimed the joglo's site at 7.8° south never sees the sun
+   * overhead. That is false. The tropic runs to 23.44°, so every site in this
+   * project is inside it, and `zeroShadowDays` duly returns two dates for
+   * Yogyakarta — the 28th of February and the 13th of October in 2025. The
+   * app has been printing the right one all along; only the reason given for
+   * the branch was wrong, which is its own kind of error in a project whose
+   * subject is where numbers come from.
+   *
+   * The fallback stays, because a site outside the tropics is a real case and
+   * the honest answer there is that there is no zero-shadow day to offer — the
+   * original code fell back to a March date and kept the label, which would
+   * have printed a day on which nothing happens and called it the thing the
+   * preset exists to show. It is simply untested by any site here.
    */
   const zenith = zeroShadowDays(SOLAR_YEAR, site)[0]
 

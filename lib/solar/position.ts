@@ -77,6 +77,20 @@ export const YOGYAKARTA: Site = {
  * job from modelling a plane and is why computing it rather than art-directing
  * it goes on mattering.
  */
+/**
+ * Ubud, in Gianyar. Chosen over Denpasar because the compound form this models
+ * survives in the villages rather than in the city, and because the kaja
+ * direction — toward Gunung Agung — is legible from here as a bearing rather
+ * than as an abstraction.
+ */
+export const UBUD: Site = {
+  name: 'Ubud',
+  latitude: -8.51,
+  longitude: 115.26,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,
