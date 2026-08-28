@@ -541,6 +541,94 @@ function stoneCanvas(): HTMLCanvasElement {
   return el
 }
 
+/**
+ * Paras: the soft volcanic sandstone a bataran is faced in.
+ *
+ * Not the river stone the other houses seat their posts on, and the difference
+ * is worth drawing rather than tinting. Paras is quarried and cut, so it has
+ * bed lines and a sawn face; a river stone is rounded and even. Same substance
+ * class, different history, so it gets its own generator rather than
+ * `stoneCanvas` with the colour turned down — which is the split-by-name
+ * mistake this file already made once.
+ */
+function parasCanvas(): HTMLCanvasElement {
+  const S = 256
+  const { ctx, el } = canvas(S)
+  const r = rng(31607)
+  const base = mix(mix(GROUND, BOLU, 0.30), KAPUR, 0.18)
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, S, S)
+  for (let i = 0; i < 2200; i++) {
+    ctx.fillStyle = mix(base, r() > 0.5 ? KAPUR : BOLU, 0.03 + r() * 0.07)
+    ctx.beginPath()
+    ctx.arc(r() * S, r() * S, 0.5 + r() * 1.8, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  // The bed lines of a quarried block, faint and horizontal.
+  for (let k = 1; k < 4; k++) {
+    ctx.strokeStyle = mix(base, BOLU, 0.10 + r() * 0.05)
+    ctx.lineWidth = 0.8
+    const y = (k / 4) * S + (r() - 0.5) * 5
+    ctx.beginPath()
+    ctx.moveTo(0, y)
+    ctx.lineTo(S, y)
+    ctx.stroke()
+  }
+  return el
+}
+
+/** Brick, in the body of the bataran behind its facing. */
+function bataCanvas(): HTMLCanvasElement {
+  const S = 256
+  const { ctx, el } = canvas(S)
+  const r = rng(31608)
+  const courses = 8
+  const h = S / courses
+  ctx.fillStyle = mix(GROUND, BOLU, 0.42)
+  ctx.fillRect(0, 0, S, S)
+  for (let j = 0; j < courses; j++) {
+    const offset = j % 2 === 0 ? 0 : h
+    for (let i = -1; i < 4; i++) {
+      ctx.fillStyle = mix(mix(RARA, BOLU, 0.34), KAPUR, 0.08 + r() * 0.10)
+      ctx.fillRect(i * h * 2 + offset + 1.2, j * h + 1.2, h * 2 - 2.4, h - 2.4)
+    }
+  }
+  return el
+}
+
+/**
+ * Alang-alang: grass thatch, not the black palm fibre two other houses use.
+ *
+ * The same construction as `ijukCanvas` would have been the easy answer and
+ * the wrong one — ijuk is dark, coarse and stands out in tufts; alang-alang is
+ * straw-coloured, fine and lies in combed courses. Drawing one from the other
+ * with a colour change is exactly the fault that put a Toraja sun disc on a
+ * rumah gadang.
+ */
+function alangCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  const r = rng(20314)
+  const base = mix(mix(RIRI, KAPUR, 0.42), BOLU, 0.26)
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, S, S)
+  for (let i = 0; i < 2600; i++) {
+    const x = r() * S
+    const y = r() * S
+    // Combed: long, near-parallel and only slightly out of line, where ijuk
+    // leans every which way.
+    const len = 20 + r() * 40
+    const lean = (r() - 0.5) * 3
+    ctx.strokeStyle = mix(base, r() > 0.45 ? KAPUR : BOLU, 0.05 + r() * 0.20)
+    ctx.lineWidth = 0.5 + r() * 0.9
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(x + lean, y + len)
+    ctx.stroke()
+  }
+  return el
+}
+
 const clampByte = (v: number) => Math.min(255, Math.max(0, v))
 
 /* ── The material sets ────────────────────────────────────────────────── */
@@ -582,6 +670,20 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * fill a slot the other three happen to have.
    */
   manggarai: [],
+  /**
+   * Paras, brick and alang-alang.
+   *
+   * The first house here to own three, and none of them is a carving. Paras is
+   * a quarried, cut stone rather than the river stone the others seat posts
+   * on; brick is a substance no other house in this project builds with at
+   * all; and alang-alang is grass where the two thatched houses use black palm
+   * fibre. All three are listed as this tradition's own because the generators
+   * genuinely differ, not because the keys do.
+   *
+   * What is *not* here is `ukiran`, and on a Balinese building that is a real
+   * absence rather than a tidy one. See the caution in `bali/facade.ts`.
+   */
+  bali: ['paras', 'bata', 'alang'],
 }
 
 /**
@@ -678,6 +780,19 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'bali') {
+    set.kayu = timber(404, 0.35, 0.55, 0.78)
+    set.paras = new THREE.MeshStandardMaterial({ map: tex(parasCanvas()), roughness: 0.93, metalness: 0 })
+    set.bata = new THREE.MeshStandardMaterial({ map: tex(bataCanvas()), roughness: 0.95, metalness: 0 })
+    set.alang = new THREE.MeshStandardMaterial({
+      map: tex(alangCanvas()),
+      roughness: 0.95,
+      metalness: 0,
+      // Open on every side, so the underside of the roof is in plain view from
+      // outside — the one house here where the inner face of the thatch is
+      // part of what a reader sees rather than something behind a wall.
+      side: THREE.DoubleSide,
+    })
   } else {
     // Nothing of its own: see OWN_MATERIALS. A house with no carving needs no
     // carving generator, and inventing one to fill the slot would be the same

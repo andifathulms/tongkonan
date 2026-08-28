@@ -6,6 +6,7 @@ import { TorajaControls } from './toraja'
 import { MinangControls } from './minang'
 import { JawaControls } from './jawa'
 import { ManggaraiControls } from './manggarai'
+import { BaliControls } from './bali'
 
 /**
  * The rule controls, chosen by tradition.
@@ -21,7 +22,7 @@ import { ManggaraiControls } from './manggarai'
  * control surface means there is one representation rather than two that can
  * disagree.
  *
- * A `switch` and not a lookup table, so adding a third house is a type error
+ * A `switch` and not a lookup table, so adding a house is a type error
  * here rather than a blank rail at runtime.
  */
 export interface RuleControlProps {
@@ -44,5 +45,7 @@ export function RuleControlsFor({
       return <JawaControls {...props} />
     case 'manggarai':
       return <ManggaraiControls {...props} />
+    case 'bali':
+      return <BaliControls {...props} />
   }
 }
