@@ -705,6 +705,51 @@ function behuCanvas(): HTMLCanvasElement {
   return el
 }
 
+/**
+ * Sirap: ironwood shingles, split rather than sawn.
+ *
+ * The fourth roof covering here and the first that is not a plant. Ijuk is
+ * fibre, alang-alang is grass, rumbia is leaf; a shingle is a flat rectangle
+ * of hard wood with a split edge, so what reads is a grid of butt joints and
+ * the shadow under each course, not a texture of strands. Drawing it from one
+ * of the thatch generators with the colour changed would have been the
+ * split-by-name mistake for the fourth time.
+ */
+function sirapCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  const r = rng(20316)
+  const base = mix(mix(BOLU, RARA, 0.24), KAPUR, 0.30)
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, S, S)
+  const rows = 10
+  const h = S / rows
+  const across = 6
+  const w = S / across
+  for (let j = 0; j < rows; j++) {
+    for (let i = -1; i < across + 1; i++) {
+      // Broken bond, like every shingled roof: no joint sits over another.
+      const x = i * w + (j % 2 === 0 ? 0 : w / 2)
+      ctx.fillStyle = mix(base, r() > 0.5 ? KAPUR : BOLU, 0.03 + r() * 0.14)
+      ctx.fillRect(x + 0.8, j * h + 0.8, w - 1.6, h - 1.6)
+      // The split edge: one ragged line down the face of a shingle.
+      if (r() > 0.55) {
+        ctx.strokeStyle = mix(base, BOLU, 0.16 + r() * 0.1)
+        ctx.lineWidth = 0.6
+        const sx = x + w * (0.25 + r() * 0.5)
+        ctx.beginPath()
+        ctx.moveTo(sx, j * h + 1)
+        ctx.lineTo(sx + (r() - 0.5) * 3, j * h + h - 1)
+        ctx.stroke()
+      }
+    }
+    // The shadow the course above casts on this one.
+    ctx.fillStyle = mix(base, BOLU, 0.30)
+    ctx.fillRect(0, j * h, S, 1.6)
+  }
+  return el
+}
+
 const clampByte = (v: number) => Math.min(255, Math.max(0, v))
 
 /* ── The material sets ────────────────────────────────────────────────── */
@@ -774,6 +819,19 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * the split-by-name mistake in its original form.
    */
   nias: ['rumbia', 'behu'],
+  /**
+   * Ironwood, and shingles split from it.
+   *
+   * `ulin` is named rather than called timber for the same reason the joglo's
+   * `jati` is: on this building the species is the point. It is why a house
+   * eighty metres long survives decades in a climate that eats other wood, and
+   * a generic timber would say nothing about that.
+   *
+   * `sirap` is the fourth roof covering in this project and the first that is
+   * not a plant laid in courses — it is split wood, thin and hard-edged, and
+   * it reads as a grid of shadows rather than as a texture of strands.
+   */
+  dayak: ['ulin', 'sirap'],
 }
 
 /**
@@ -870,6 +928,11 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'dayak') {
+    // Ironwood: darker and greyer than the other timbers here, because it
+    // weathers to it and because that is how a betang reads from a distance.
+    set.ulin = timber(606, 0, 0.5, 0.84)
+    set.sirap = new THREE.MeshStandardMaterial({ map: tex(sirapCanvas()), roughness: 0.88, metalness: 0 })
   } else if (tradition === 'nias') {
     set.kayu = timber(505, 0.15, 0.4, 0.8)
     set.rumbia = new THREE.MeshStandardMaterial({

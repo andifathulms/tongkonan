@@ -104,6 +104,20 @@ export const BAWOMATALUO: Site = {
   tzName: 'WIB',
 }
 
+/**
+ * Palangka Raya, in Central Kalimantan. Within two degrees of the equator,
+ * like the first two sites — the longhouse is the third building here whose
+ * sun barely moves through the year, and the second whose deep overhang is
+ * doing work a slider labelled "sun angle" would never show.
+ */
+export const PALANGKA_RAYA: Site = {
+  name: 'Palangka Raya',
+  latitude: -1.68,
+  longitude: 113.38,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,
