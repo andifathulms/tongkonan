@@ -21,6 +21,25 @@ import type { ConePoint } from './types'
 
 const DEGENERATE = 1e-9
 
+/** How far up the outline a given height sits, 0 at the ground and 1 at the apex. */
+export function coneFractionAt(profile: readonly ConePoint[], y: number): number {
+  const total = coneRun(profile)
+  let walked = 0
+  for (let i = 1; i < profile.length; i++) {
+    const a = profile[i - 1]
+    const b = profile[i]
+    if (!a || !b) continue
+    const run = Math.hypot(a.r - b.r, a.y - b.y)
+    if (y <= b.y || i === profile.length - 1) {
+      const span = b.y - a.y
+      const t = span === 0 ? 0 : Math.max(0, Math.min(1, (y - a.y) / span))
+      return total === 0 ? 0 : (walked + run * t) / total
+    }
+    walked += run
+  }
+  return 1
+}
+
 /** Distance along the outline between two points on it. */
 export function coneRun(profile: readonly ConePoint[]): number {
   let total = 0
@@ -80,6 +99,16 @@ export interface ConeOptions {
   /** the slice of the outline to build, 0 at the ground and 1 at the apex */
   readonly fFrom?: number
   readonly fTo?: number
+  /**
+   * An arc to leave out, in radians. This is how a doorway is made.
+   *
+   * A surface of revolution has no natural way to be interrupted, and a door
+   * is exactly an interruption. Given a gap the ring is built as an arc from
+   * the far side of it round to the near side, so the two ends never meet and
+   * the opening is the space between them. Without one the arc closes and
+   * there is no seam.
+   */
+  readonly gap?: { readonly from: number; readonly to: number }
 }
 
 export function coneSurface(profile: readonly ConePoint[], o: ConeOptions): MeshData {
@@ -110,13 +139,17 @@ export function coneSurface(profile: readonly ConePoint[], o: ConeOptions): Mesh
     return { point: pushed(raw, other, raw, push), f }
   })
 
+  // Round the whole way, or from the far lip of the gap back to the near one.
+  const start = o.gap ? o.gap.to : 0
+  const span = o.gap ? Math.PI * 2 - (o.gap.to - o.gap.from) : Math.PI * 2
+
   const stride = o.facets + 1
   for (const ring of rings) {
     for (let k = 0; k <= o.facets; k++) {
-      const a = (k / o.facets) * Math.PI * 2
+      const a = start + (k / o.facets) * span
       mesh.positions.push(Math.cos(a) * ring.point.r, ring.point.y, Math.sin(a) * ring.point.r)
       mesh.normals.push(0, 0, 0) // filled in by computeNormals
-      mesh.uvs.push(((k / o.facets) * Math.PI * 2 * ring.point.r) / o.uvScale, (ring.f * total) / o.uvScale)
+      mesh.uvs.push(((k / o.facets) * span * ring.point.r) / o.uvScale, (ring.f * total) / o.uvScale)
     }
   }
 

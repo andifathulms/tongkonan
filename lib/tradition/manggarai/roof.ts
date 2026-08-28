@@ -23,7 +23,7 @@ import type { Joint, Layout, Part, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS } from './rules'
 import { coneAt, coneRun, coneSurface } from './cone'
-import { radiusAtHeight } from './frame'
+import { doorOpening, radiusAtHeight } from './frame'
 import { meshPart } from './frame'
 
 /** Rotate a finished mesh about the vertical axis. */
@@ -421,14 +421,23 @@ export function buildThatch(layout: Layout): readonly Part[] {
     'thatchToGround',
   ]
   let order = 0
+  const door = doorOpening(layout)
 
   for (const band of thatchBands(layout)) {
     const from = 1 - band.foot
     const to = 1 - band.head
     const span = Math.max(1e-6, to - from)
+    /*
+     * The courses the door reaches into stop short of bearing zero and pick up
+     * again on the far side. Without this the ijuk closes over the doorway and
+     * the frame stands behind an unbroken roof — which is what it did, and
+     * `checkOneDoor` passed the whole time because it counted three pieces of
+     * timber and never asked whether anything was open behind them.
+     */
+    const opens = from < door.fTop
     parts.push(
       meshPart(
-        `ijuk-${band.course}`,
+        opens ? `ijuk-pintu-${band.course}` : `ijuk-${band.course}`,
         {
           name: 'ijuk',
           nameId: `Lapis ijuk ${band.course + 1}`,
@@ -443,6 +452,7 @@ export function buildThatch(layout: Layout): readonly Part[] {
           uvScale: 0.5,
           fFrom: from,
           fTo: to,
+          ...(opens ? { gap: door.gap } : {}),
           // Flush at the head, standing proud at the foot: the step between
           // courses is the shadow line, and on a cone it rings the building.
           offsetAt: (f) => bed + thickness * (1 - clamp01((f - from) / span)),

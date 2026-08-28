@@ -25,7 +25,7 @@ import type { MeshData } from '@/lib/core/geometry'
 import type { ConePoint, Joint, Layout, Level, ManggaraiKinds, Part, Rules, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS, LEVELS, facetsFor, peranInfo } from './rules'
-import { coneAt, coneRun } from './cone'
+import { coneAt, coneFractionAt, coneRun } from './cone'
 
 const builders = partBuilders<ManggaraiKinds>()
 const box = builders.box
@@ -292,21 +292,29 @@ export function buildFrame(layout: Layout): FrameResult {
    */
   const doorDims: readonly DimKey[] = ['doorWidth', 'doorHeight', 'jambSection', 'baseRadius', 'oneDoor']
   const jamb = DIMS.jambSection.value
-  const half = DIMS.doorWidth.value / 2
+  const door = doorOpening(layout)
+
   /*
-   * Set at the radius of the cone above the lintel, not at the middle of the
-   * door.
+   * The frame leans with the wall it stands in.
    *
-   * Written at mid-height first, and `checkInsideCone` — added in the same
-   * sitting, to catch exactly this in the partitions — caught the door instead.
-   * A frame standing plumb in a wall that leans in has to be set by its top or
-   * its head goes through the thatch. Recessed a little at the foot, which is
-   * what a doorway in a thatched cone looks like anyway.
+   * It was plumb first, set at the radius above the lintel so its head would
+   * not push through the thatch — and that put the whole thing behind the
+   * roof, because the cone is wider at the foot than at the head and the
+   * thatch stands 0.20 m outside the cone at every height. A door recessed
+   * everywhere is a door nobody can see or walk through. Following the slope
+   * lets it sit in the thatch for its whole length instead of under it.
    */
-  const atDoor = radiusAtHeight(layout.profile, DIMS.doorHeight.value + DIMS.jambSection.value)
+  const rise = door.headY
+  const lean = Math.atan2(door.rFoot - door.rHead, rise)
+  // The foot is cut square to the jamb's own axis, so on a leaning member its
+  // downhill corner is what touches the ground; the axis starts that much up.
+  const footY = (jamb / 2) * Math.sin(lean)
+  const length = (rise - footY) / Math.cos(lean)
+  const midR = (radiusAtHeight(layout.profile, footY) + door.rHead) / 2 + door.set
+
   const bay = [
-    { id: 'kiri', z: half + jamb / 2, size: [jamb, DIMS.doorHeight.value, jamb] as const },
-    { id: 'kanan', z: -(half + jamb / 2), size: [jamb, DIMS.doorHeight.value, jamb] as const },
+    { id: 'kiri', z: DIMS.doorWidth.value / 2 + jamb / 2 },
+    { id: 'kanan', z: -(DIMS.doorWidth.value / 2 + jamb / 2) },
   ]
   bay.forEach((post, i) => {
     parts.push(
@@ -317,8 +325,9 @@ export function buildFrame(layout: Layout): FrameResult {
         900 + i,
         'kayu',
         doorDims,
-        [atDoor, DIMS.doorHeight.value / 2, post.z],
-        [post.size[0], post.size[1], post.size[2]],
+        [midR, (footY + rise) / 2, post.z],
+        [jamb, length, jamb],
+        [0, 0, lean],
       ),
     )
   })
@@ -330,7 +339,7 @@ export function buildFrame(layout: Layout): FrameResult {
       902,
       'kayu',
       doorDims,
-      [atDoor, DIMS.doorHeight.value + jamb / 2, 0],
+      [door.rHead + door.set, rise - jamb / 2, 0],
       [jamb, jamb, DIMS.doorWidth.value + jamb * 2],
     ),
   )
@@ -396,3 +405,43 @@ export function surfacePoint(layout: Layout, f: number, angle: number): Vec3 {
 }
 
 export { tubeMesh }
+
+/**
+ * Where the one door is, as both the frame needs it and the thatch needs it.
+ *
+ * Two places used to decide this independently — the frame set itself against
+ * the cone, and the thatch went round unbroken — which is how the building
+ * ended up with a door drawn behind its own roof. One function now, and the
+ * opening in the ijuk is cut from the same numbers the jambs stand on.
+ */
+export function doorOpening(layout: Layout): {
+  readonly headY: number
+  readonly rFoot: number
+  readonly rHead: number
+  /** how far out of the cone the frame is set, to sit in the thatch rather than under it */
+  readonly set: number
+  readonly halfAngle: number
+  readonly gap: { readonly from: number; readonly to: number }
+  /** the door's reach up the outline, 0 at the ground and 1 at the apex */
+  readonly fTop: number
+} {
+  const jamb = DIMS.jambSection.value
+  const headY = DIMS.doorHeight.value + jamb
+  const rFoot = radiusAtHeight(layout.profile, 0)
+  const rHead = radiusAtHeight(layout.profile, headY)
+  // Mid-thickness of the thatch: proud enough to read as an opening, still
+  // inside the skin `checkInsideCone` allows.
+  const set = (DIMS.rafterRadius.value + DIMS.thatchBed.value + DIMS.thatchThickness.value) / 2
+  // Wide enough to clear the frame, so the jambs edge the hole instead of
+  // being buried in what remains of the course.
+  const halfAngle = Math.atan2(DIMS.doorWidth.value / 2 + jamb, rHead)
+  return {
+    headY,
+    rFoot,
+    rHead,
+    set,
+    halfAngle,
+    gap: { from: -halfAngle, to: halfAngle },
+    fTop: coneFractionAt(layout.profile, headY),
+  }
+}

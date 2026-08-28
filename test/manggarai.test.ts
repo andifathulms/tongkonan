@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { buildHouse, buildTimeline, placedAt } from '@/lib/tradition/manggarai/assembly'
-import { runInvariants, summarise } from '@/lib/tradition/manggarai/invariants'
+import { ringBounds, runInvariants, summarise } from '@/lib/tradition/manggarai/invariants'
 import {
   ALL_DIMS,
   DEFAULT_RULES,
@@ -54,8 +54,9 @@ describe('what a round house breaks', () => {
   it('is as wide one way as the other, to within one facet of a polygon', () => {
     for (const rules of COMBOS) {
       const { house, layout } = buildHouse(rules)
-      const spanX = (house.bounds.max[0] ?? 0) - (house.bounds.min[0] ?? 0)
-      const spanZ = (house.bounds.max[2] ?? 0) - (house.bounds.min[2] ?? 0)
+      // Over what closes: the courses the door opens through are arcs, and
+      // the facet they stop short of is the doorway rather than slack.
+      const { spanX, spanZ } = ringBounds(house)
       // The building is a circle; the mesh is a polygon inscribed in it, and
       // the shortfall is the sagitta of one facet rather than slack.
       const sagitta = spanX * (1 - Math.cos(Math.PI / layout.facets))

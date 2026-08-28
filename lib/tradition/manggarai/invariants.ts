@@ -27,7 +27,7 @@ import {
 } from '@/lib/core/invariants'
 import type { CheckResult } from '@/lib/core/invariants'
 import type { House, Layout, Part } from './types'
-import { radiusAtHeight } from './frame'
+import { doorOpening, radiusAtHeight } from './frame'
 import { coneRun } from './cone'
 import { thatchBands } from './roof'
 import { DIMS, LEVELS, PACK, peranInfo } from './rules'
@@ -38,7 +38,7 @@ export type { CheckResult, CheckStatus } from '@/lib/core/invariants'
 const TOL = 1e-4
 
 /** The things there is exactly one of, which therefore cannot repeat. */
-const SINGULAR = /^(gendang|pintu-)/
+const SINGULAR = /^(gendang|pintu-|ijuk-pintu-)/
 
 /* ── Bound to the Manggarai pack ──────────────────────────────────────── */
 
@@ -206,11 +206,32 @@ function vertices(part: Part): number[] {
  * are a bounding box round a circle. The check is what keeps that from
  * quietly becoming a rectangle.
  */
+/**
+ * The extent of the parts that go the whole way round.
+ *
+ * `house.bounds` cannot answer a question about roundness any more, because
+ * the courses the door opens through are arcs rather than rings and stop a
+ * facet short of bearing zero. That shortfall is the doorway, not slack in the
+ * circle, so the claim is measured over what actually closes.
+ */
+export function ringBounds(house: House): { readonly spanX: number; readonly spanZ: number } {
+  let minX = Infinity
+  let maxX = -Infinity
+  let minZ = Infinity
+  let maxZ = -Infinity
+  for (const part of house.parts) {
+    if (SINGULAR.test(part.id)) continue
+    const b = partBounds(part)
+    minX = Math.min(minX, b.min[0])
+    maxX = Math.max(maxX, b.max[0])
+    minZ = Math.min(minZ, b.min[2])
+    maxZ = Math.max(maxZ, b.max[2])
+  }
+  return { spanX: maxX - minX, spanZ: maxZ - minZ }
+}
+
 export function checkRound(house: House, layout: Layout): CheckResult {
-  const [minX, , minZ] = house.bounds.min
-  const [maxX, , maxZ] = house.bounds.max
-  const spanX = maxX - minX
-  const spanZ = maxZ - minZ
+  const { spanX, spanZ } = ringBounds(house)
   const off = Math.abs(spanX - spanZ)
   /*
    * How square a polygon's bounding box can be.
@@ -222,8 +243,8 @@ export function checkRound(house: House, layout: Layout): CheckResult {
    * between the two spans. That is arithmetic about drawing, not slack in the
    * claim, so it is computed rather than guessed at.
    */
-  // Measured against the widest ring actually built, which is the thatch
-  // standing proud of the frame rather than the frame itself.
+  // Measured against the widest closed ring, which is the thatch standing
+  // proud of the frame rather than the frame itself.
   const sagitta = spanX * (1 - Math.cos(Math.PI / layout.facets))
   const ok = off <= sagitta + 1e-9 && layout.levels.every((l) => l.radius > 0)
   return {
@@ -480,24 +501,58 @@ export function checkDrum(house: House, layout: Layout): CheckResult {
 export function checkOneDoor(house: House, layout: Layout): CheckResult {
   const jambs = house.parts.filter((p) => p.id.startsWith('pintu-tiang-'))
   const lintel = house.parts.find((p) => p.id === 'pintu-ambang')
-  const ok = jambs.length === 2 && Boolean(lintel)
+  const door = doorOpening(layout)
+  const faults: string[] = []
+  if (jambs.length !== 2 || !lintel) {
+    faults.push(`${jambs.length} door jambs and ${lintel ? 'one' : 'no'} lintel`)
+  }
+
+  /*
+   * The part of this check that matters, and the part it did not have.
+   *
+   * Counting three pieces of timber says a door was built; it does not say a
+   * door can be seen or walked through. This model had a frame standing behind
+   * an unbroken thatch cone and passed. So: no thatch may cross the doorway,
+   * and the frame must stand proud of the bare cone rather than under it.
+   */
+  const blocked = house.parts.filter((p) => {
+    if (p.kind !== 'mesh' || p.stage !== 'ijuk') return false
+    for (let i = 0; i < p.positions.length; i += 3) {
+      const x = p.positions[i] ?? 0
+      const y = p.positions[i + 1] ?? 0
+      const z = p.positions[i + 2] ?? 0
+      if (y < TOL || y > door.headY - TOL) continue
+      if (Math.abs(Math.atan2(z, x)) < door.halfAngle / 2) return true
+    }
+    return false
+  })
+  if (blocked.length) faults.push(`${blocked.length} thatch courses close over the opening`)
+
+  const buried = jambs.filter((p) => {
+    if (p.kind !== 'box') return false
+    return p.center[0] <= radiusAtHeight(layout.profile, p.center[1]) + TOL
+  })
+  if (buried.length) faults.push(`${buried.length} jambs stand inside the cone, behind the thatch`)
+
+  const ok = faults.length === 0
   const bearing = jambs.length
     ? Math.atan2(
         jambs.reduce((sum, p) => sum + (p.kind === 'box' ? p.center[2] : 0), 0) / jambs.length,
         jambs.reduce((sum, p) => sum + (p.kind === 'box' ? p.center[0] : 0), 0) / jambs.length,
       )
     : 0
+  const openWidth = 2 * door.rHead * Math.sin(door.halfAngle)
   return {
     key: 'one-door',
-    titleId: 'Satu pintu, dan hanya itulah arah yang dimiliki bangunan ini',
-    titleEn: 'One door, and it is the only direction this building has',
+    titleId: 'Satu pintu yang benar-benar berlubang, dan hanya itulah arah yang dimiliki bangunan ini',
+    titleEn: 'One door that is actually open, and it is the only direction this building has',
     status: ok ? 'pass' : 'fail',
     detail: ok
-      ? `Selebar ${DIMS.doorWidth.value.toFixed(2)} m pada arah ${((bearing * 180) / Math.PI).toFixed(0)}°, menghadap compang. Bentuk yang bundar tidak menyimpan arah; pintu inilah yang menyatakannya, dan hanya ada satu.`
-      : `${jambs.length} tiang pintu dan ${lintel ? 'satu' : 'tidak ada'} ambang.`,
+      ? `Selebar ${DIMS.doorWidth.value.toFixed(2)} m pada arah ${((bearing * 180) / Math.PI).toFixed(0)}°, menghadap compang; ijuk terpotong selebar ${openWidth.toFixed(2)} m sampai ketinggian ${door.headY.toFixed(2)} m. Bentuk yang bundar tidak menyimpan arah; pintu inilah yang menyatakannya, dan hanya ada satu.`
+      : faults.join('; '),
     detailEn: ok
-      ? `${DIMS.doorWidth.value.toFixed(2)} m wide on a bearing of ${((bearing * 180) / Math.PI).toFixed(0)}°, facing the compang. A round form holds no direction; this door is what states it, and there is one.`
-      : `${jambs.length} door jambs and ${lintel ? 'one' : 'no'} lintel.`,
+      ? `${DIMS.doorWidth.value.toFixed(2)} m wide on a bearing of ${((bearing * 180) / Math.PI).toFixed(0)}°, facing the compang; the thatch is cut back ${openWidth.toFixed(2)} m to a height of ${door.headY.toFixed(2)} m. A round form holds no direction; this door is what states it, and there is one.`
+      : faults.join('; '),
   }
 }
 
