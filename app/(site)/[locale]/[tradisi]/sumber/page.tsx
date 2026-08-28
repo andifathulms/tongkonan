@@ -111,7 +111,7 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           <p className="mt-2 max-w-prose text-body text-muted">
             {fill(pick(COPY.sources.sensitivityIntro, locale), { pct })}
           </p>
-          <ol className="mt-5 flex flex-col">
+          <ol className="reveal mt-5 flex flex-col">
             {sensitivity
               .filter((s) => s.worst > 0)
               .slice(0, 8)
@@ -144,7 +144,7 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           </p>
 
           {comparison && worst ? (
-            <figure className="mt-6">
+            <figure className="reveal mt-6">
               <h3 className="micro">{pick(COPY.sources.compareHeading, locale)}</h3>
               <div
                 className="mt-3 rounded border border-hairline p-3"
@@ -168,7 +168,7 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           <h2 className="text-lead font-medium text-bolu">
             {pick(COPY.sources.tableHeading, locale)}
           </h2>
-          <div className="mt-4 overflow-x-auto">
+          <div className="reveal mt-4 overflow-x-auto">
             <table className="w-full min-w-table border-collapse text-left">
               <thead>
                 <tr className="border-b border-hairline">
@@ -226,7 +226,7 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           <p className="mt-2 max-w-prose text-body text-muted">
             {pick(COPY.checks.line, locale)}
           </p>
-          <ul className="mt-4 flex flex-col">
+          <ul className="reveal mt-4 flex flex-col">
             {results.map((r) => (
               /*
                 The chip is a column, so the detail line aligns under the title
@@ -257,7 +257,7 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           </p>
           <p className="mt-3 max-w-prose text-body">{counter.why[locale]}</p>
 
-          <div className="mt-5 grid gap-px overflow-hidden rounded border border-hairline bg-hairline sheet:grid-cols-2">
+          <div className="reveal mt-5 grid gap-px overflow-hidden rounded border border-hairline bg-hairline sheet:grid-cols-2">
             <CounterCase
               title={pick(COPY.checks.counterSound, locale)}
               result={counter.sound}
@@ -282,7 +282,7 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           <h2 className="text-lead font-medium text-bolu">
             {pick(COPY.sources.sourceHeading, locale)}
           </h2>
-          <ul className="mt-4 flex flex-col gap-4">
+          <ul className="reveal mt-4 flex flex-col gap-4">
             {t0.sources.filter((s) => s.key !== 'none').map((s) => (
               <li key={s.key}>
                 <p className="micro">

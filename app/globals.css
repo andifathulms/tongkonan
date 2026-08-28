@@ -249,6 +249,76 @@ body {
     border-radius: 2px;
     background: var(--bolu);
   }
+
+  /*
+   * ── Choreography ────────────────────────────────────────────────────
+   * The ban is on idle motion, not on motion: everything below runs once,
+   * on arrival or on the reader's own scroll, and then stands still.
+   */
+
+  /*
+   * A silhouette rises out of the ground line when the page arrives — the
+   * landing's small echo of the frame-raising. Scaled about its own base,
+   * because a house grows up from where it stands; `backwards` holds it
+   * unraised through its stagger delay.
+   */
+  .house-raise {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: house-raise var(--t-layout) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @keyframes house-raise {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  /* The ground line draws itself before the houses stand on it. */
+  .rule-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    animation: rule-draw var(--t-layout) ease-out;
+  }
+
+  @keyframes rule-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  /* A pressed control gives a millimetre, like a thing with mass. */
+  .press:active {
+    transform: translateY(1px);
+  }
+
+  /* Every chip is a Choice, so every chip presses through one rule. */
+  .choice:active .choice-face {
+    transform: translateY(1px);
+  }
+
+  /*
+   * Document blocks rise as the reader reaches them. Scroll-driven and
+   * CSS-only, so the page still needs no runtime: engines without
+   * animation-timeline simply show the finished page, which is the same
+   * complete alternative reduced motion gets.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        animation: reveal-rise var(--t-layout) ease-out both;
+        animation-timeline: view();
+        animation-range: entry 5% entry 35%;
+      }
+    }
+  }
+
+  @keyframes reveal-rise {
+    from {
+      opacity: 0;
+      transform: translateY(var(--sp-3));
+    }
+  }
 }
 
 :focus-visible {
@@ -269,5 +339,16 @@ body {
   *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+
+  /*
+   * The duration clamp above is not enough for the staggered entrances: a
+   * 0.001ms animation still waits out its delay, so the houses would pop in
+   * one after another over blank ground. The complete alternative is the
+   * finished drawing, immediately.
+   */
+  .house-raise,
+  .rule-draw {
+    animation: none !important;
   }
 }

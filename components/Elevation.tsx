@@ -94,9 +94,23 @@ export function ElevationShelf({
             y2={f(baseY)}
             stroke="var(--muted)"
             vectorEffect="non-scaling-stroke"
+            pathLength={1}
+            className="rule-draw"
           />
-          {placed.map((p) => (
-            <path key={p.key} d={pathOf(p.s, p.ox, baseY)} fill="var(--bolu)" fillRule="evenodd" />
+          {/*
+            The houses rise in shelf order once the ground line has drawn,
+            one state-timing apart — the landing's echo of the frame-raising,
+            run once on arrival. Reduced motion gets the finished drawing.
+          */}
+          {placed.map((p, i) => (
+            <path
+              key={p.key}
+              d={pathOf(p.s, p.ox, baseY)}
+              fill="var(--bolu)"
+              fillRule="evenodd"
+              className="house-raise"
+              style={{ animationDelay: `calc(var(--t-layout) + ${i} * var(--t-state))` }}
+            />
           ))}
         </svg>
         <div className="relative h-control">
@@ -138,8 +152,16 @@ export function ElevationSheet({ s, caption }: { s: Silhouette; caption: string 
           y2={f(baseY)}
           stroke="var(--muted)"
           vectorEffect="non-scaling-stroke"
+          pathLength={1}
+          className="rule-draw"
         />
-        <path d={pathOf(s, PAD, baseY)} fill="var(--bolu)" fillRule="evenodd" />
+        <path
+          d={pathOf(s, PAD, baseY)}
+          fill="var(--bolu)"
+          fillRule="evenodd"
+          className="house-raise"
+          style={{ animationDelay: 'var(--t-layout)' }}
+        />
       </svg>
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-2 border-t border-hairline py-3">
         <ScaleBar viewW={W} />
