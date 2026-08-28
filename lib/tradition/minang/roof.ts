@@ -22,6 +22,7 @@ import {
   lerp,
   mergeMeshes,
   mirrorZ,
+  swapXZ,
   sweepSurface,
   tubeMesh,
 } from '@/lib/core/geometry'
@@ -41,31 +42,13 @@ import { meshPart, ridgeOf, sAtZ } from './frame'
  */
 const STATIONS = 61
 
-/**
- * A quarter turn about Y, applied to a finished mesh.
- *
- * Swapping two axes is a reflection, so the triangle winding has to be
- * reversed or every face would end up pointing into the roof. The normals are
- * recomputed rather than swapped for the same reason.
+/*
+ * `swapXZ` moved to `lib/core/geometry.ts` when a second pack needed the
+ * same turn for a different primitive. The note it carried about the axis
+ * belonging in `SweepOptions` moved with it, and its condition is still
+ * unmet: one house sweeps on Z.
  */
-export function swapXZ(mesh: MeshData): MeshData {
-  const out: MeshData = {
-    positions: mesh.positions.slice(),
-    normals: mesh.normals.slice(),
-    uvs: mesh.uvs.slice(),
-    indices: [],
-  }
-  for (let i = 0; i < out.positions.length; i += 3) {
-    const x = out.positions[i] ?? 0
-    out.positions[i] = out.positions[i + 2] ?? 0
-    out.positions[i + 2] = x
-  }
-  for (let i = 0; i < mesh.indices.length; i += 3) {
-    out.indices.push(mesh.indices[i + 2] ?? 0, mesh.indices[i + 1] ?? 0, mesh.indices[i] ?? 0)
-  }
-  computeNormals(out)
-  return out
-}
+export { swapXZ } from '@/lib/core/geometry'
 
 /**
  * The roof's section at one point along the ridge.

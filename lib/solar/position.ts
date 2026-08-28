@@ -184,6 +184,15 @@ export const WAMENA: Site = {
   tzName: 'WIT',
 }
 
+/** Banjarmasin, on the Barito delta in South Kalimantan. */
+export const BANJARMASIN: Site = {
+  name: 'Banjarmasin',
+  latitude: -3.32,
+  longitude: 114.59,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,

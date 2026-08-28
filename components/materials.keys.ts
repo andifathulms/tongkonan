@@ -31,6 +31,8 @@ import type { TraditionKey } from '@/lib/tradition/registry'
  */
 export const SHARED_MATERIALS: readonly string[] = [
   'kayu',
+  'ulin',
+  'sirap',
   'papan',
   'bambu',
   'ijuk',
@@ -74,7 +76,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   /** sago-palm leaf, and a dressed standing stone that is not a river cobble */
   nias: ['rumbia', 'behu'],
   /** ironwood, named because the species is the point, and shingles split from it */
-  dayak: ['ulin', 'sirap'],
+  /** the ironwood moved to the shared list when a second Bornean house used it */
+  dayak: [],
   /**
    * Nothing, and for a better reason than the mbaru niang's.
    *
@@ -128,6 +131,14 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * distinctive for its size and its purpose, not for what it is made of.
    */
   dani: [],
+  /**
+   * Nothing of its own: ironwood and its shingles are the betang's, off the
+   * same generators, because the same forest and the same water. Two Bornean
+   * buildings far apart in form, sharing a material for a reason — which is
+   * exactly when a key belongs in the shared list rather than in either
+   * house's own.
+   */
+  banjar: [],
 }
 
 /**
@@ -155,6 +166,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   arfak: 'kayu',
   sasak: 'kayu',
   dani: 'kayu',
+  banjar: 'ulin',
 }
 
 /** Every key a tradition is entitled to use. */

@@ -417,6 +417,57 @@ export function mirrorZ(mesh: MeshData): MeshData {
   return out
 }
 
+/**
+ * A quarter turn about Y, applied to a finished mesh.
+ *
+ * Swapping two axes is a reflection, so the triangle winding has to be
+ * reversed or every face ends up pointing into the surface. The normals are
+ * recomputed rather than swapped for the same reason.
+ *
+ * It was written tradition-side, to turn a swept roof whose ridge runs the
+ * other way, with a note saying that a third house doing the same would mean
+ * the axis belonged in `SweepOptions`. **That condition is still unmet and this
+ * is not it.** What a second pack needed was the turn, on a different
+ * primitive — a stepped hip rather than a sweep. So the operation moves here,
+ * where it always belonged, and the axis flag stays exactly where it was:
+ * one house sweeps on Z, and turning a different primitive is not a second
+ * vote about `SweepOptions`.
+ */
+export function swapXZ(mesh: MeshData): MeshData {
+  const out: MeshData = {
+    positions: mesh.positions.slice(),
+    normals: mesh.normals.slice(),
+    uvs: mesh.uvs.slice(),
+    indices: [],
+  }
+  for (let i = 0; i < out.positions.length; i += 3) {
+    const x = out.positions[i] ?? 0
+    out.positions[i] = out.positions[i + 2] ?? 0
+    out.positions[i + 2] = x
+  }
+  for (let i = 0; i < mesh.indices.length; i += 3) {
+    out.indices.push(mesh.indices[i + 2] ?? 0, mesh.indices[i + 1] ?? 0, mesh.indices[i] ?? 0)
+  }
+  computeNormals(out)
+  return out
+}
+
+/** Slide a finished mesh along one axis. */
+export function shiftMesh(mesh: MeshData, dx: number, dy: number, dz: number): MeshData {
+  const out: MeshData = {
+    positions: mesh.positions.slice(),
+    normals: mesh.normals.slice(),
+    uvs: mesh.uvs.slice(),
+    indices: mesh.indices.slice(),
+  }
+  for (let i = 0; i < out.positions.length; i += 3) {
+    out.positions[i] = (out.positions[i] ?? 0) + dx
+    out.positions[i + 1] = (out.positions[i + 1] ?? 0) + dy
+    out.positions[i + 2] = (out.positions[i + 2] ?? 0) + dz
+  }
+  return out
+}
+
 export function mergeMeshes(meshes: readonly MeshData[]): MeshData {
   const out = emptyMesh()
   for (const m of meshes) {
