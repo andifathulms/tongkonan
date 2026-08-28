@@ -160,11 +160,14 @@ export interface Level {
   readonly glossEn: string
 }
 
-/** A point on the cone's profile: a radius at a height. */
-export interface ConePoint {
-  readonly r: number
-  readonly y: number
-}
+/**
+ * A point on the cone's profile: a radius at a height.
+ *
+ * It moved to the core with `coneSurface` when a second house turned out to be
+ * round, and comes back from there.
+ */
+import type { ConePoint } from '@/lib/core/cone'
+export type { ConePoint }
 
 export interface Layout {
   readonly rules: Rules

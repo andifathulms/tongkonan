@@ -14,7 +14,7 @@ import {
   provenanceSplit,
 } from '@/lib/tradition/manggarai/rules'
 import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/tradition/manggarai/address'
-import { coneAt, coneRun, coneSurface } from '@/lib/tradition/manggarai/cone'
+import { coneAt, coneRun, coneSurface } from '@/lib/core/cone'
 import { sceneModel } from '@/lib/tradition/manggarai/scene'
 import { STAGE_ORDER } from '@/lib/tradition/manggarai/types'
 import type { Rules } from '@/lib/tradition/manggarai/types'
@@ -292,7 +292,6 @@ describe('provenance', () => {
     const sources = [
       'lib/tradition/manggarai/frame.ts',
       'lib/tradition/manggarai/roof.ts',
-      'lib/tradition/manggarai/cone.ts',
     ].map((f) => [f, readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')] as const)
     const offenders: string[] = []
     for (const [file, src] of sources) {

@@ -7,17 +7,26 @@
  * from four houses is that there is no single primitive underneath them —
  * there are roof *kinds*, and each one wants its own.
  *
- * It lives here rather than in the core because one house is round. If a
- * second one is, this moves.
+ * It said it would move to the core when a second house was round, and a
+ * second house is round: a honai, which is also thatched to the ground and is
+ * a low cap over four metres of floor where the first is a fifteen-metre cone
+ * over eleven. Nothing in here knew about five stacked stores or a point that
+ * high, which is the evidence the extraction was worth making — and the two
+ * buildings together show that roundness on its own says nothing at all.
  *
  * The profile runs from the ground outward-most first to the apex last, as a
  * radius at a height. The apex is simply the point whose radius is zero, which
  * is what collapses each quad in the top band into a single triangle.
  */
 
-import { computeNormals, emptyMesh, lerp } from '@/lib/core/geometry'
-import type { MeshData } from '@/lib/core/geometry'
-import type { ConePoint } from './types'
+import { computeNormals, emptyMesh, lerp } from './geometry'
+import type { MeshData } from './geometry'
+
+/** A point on the profile: a radius at a height. */
+export interface ConePoint {
+  readonly r: number
+  readonly y: number
+}
 
 const DEGENERATE = 1e-9
 

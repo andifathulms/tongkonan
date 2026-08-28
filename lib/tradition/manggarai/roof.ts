@@ -22,7 +22,7 @@ import { emptyMesh, computeNormals } from '@/lib/core/geometry'
 import type { Joint, Layout, Part, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS } from './rules'
-import { coneAt, coneRun, coneSurface } from './cone'
+import { coneAt, coneRun, coneSurface } from '@/lib/core/cone'
 import { doorOpening, radiusAtHeight } from './frame'
 import { meshPart } from './frame'
 

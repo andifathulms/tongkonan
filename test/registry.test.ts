@@ -43,7 +43,17 @@ describe('every tradition answers the same questions', () => {
         expect(s.footprint.x).toBeGreaterThan(0)
         expect(s.footprint.z).toBeGreaterThan(0)
         expect(s.ridgeReach).toBeGreaterThan(0)
-        expect(s.underfloorHeight).toBeGreaterThan(0)
+        /*
+         * Non-negative, not positive.
+         *
+         * Asserted as "greater than zero" while every building here stood on
+         * posts or masonry, which made it look like a fact about buildings. It
+         * was a fact about the twelve that existed. A honai sits on the earth
+         * because the ground holds heat, and its zero is a decision rather than
+         * a missing value — the third time in this project a test has been
+         * over-fitted to the examples it was written against.
+         */
+        expect(s.underfloorHeight).toBeGreaterThanOrEqual(0)
         expect(s.weatherTop).toBeGreaterThan(s.underfloorHeight)
         // The section is cut on the axis the ridge does not run along.
         expect(sectionAxis(s)).not.toBe(s.ridgeAxis)
@@ -140,12 +150,20 @@ describe('the traditions are distinct all the way up', () => {
   })
 
   it('does not agree on whether there is a room under the floor', () => {
-    // Two of them stand on posts with a named room beneath; one sits on a
-    // plinth you cannot get under. `underfloorHeight` reports the clearance
-    // honestly in both cases and the traditions differ by an order of
-    // magnitude, which is the difference between a storey and a step.
+    /*
+     * Some stand on posts with a named room beneath; some on a plinth you
+     * cannot get under; one on a low platform you sit on the edge of; and one
+     * flat on the earth, on purpose, because the ground holds heat.
+     * `underfloorHeight` reports the clearance honestly in every case, and the
+     * spread across them is the whole range from a storey to nothing at all.
+     *
+     * Stated as a difference rather than a ratio now, because a ratio needs a
+     * non-zero smallest and the smallest is now zero — which is itself the
+     * answer this test is asking about.
+     */
     const heights = TRADITIONS.map((t) => t.build(t.defaultQuery).scene.underfloorHeight)
-    expect(Math.max(...heights) / Math.min(...heights)).toBeGreaterThan(3)
+    expect(Math.min(...heights)).toBe(0)
+    expect(Math.max(...heights) - Math.min(...heights)).toBeGreaterThan(2)
   })
 
   it('keeps provenance separate: one bar per house, never one average', () => {

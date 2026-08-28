@@ -28,7 +28,7 @@ import {
 import type { CheckResult } from '@/lib/core/invariants'
 import type { House, Layout, Part } from './types'
 import { doorOpening, radiusAtHeight } from './frame'
-import { coneRun } from './cone'
+import { coneRun } from '@/lib/core/cone'
 import { thatchBands } from './roof'
 import { DIMS, LEVELS, PACK, peranInfo } from './rules'
 

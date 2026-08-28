@@ -25,7 +25,7 @@ import type { MeshData } from '@/lib/core/geometry'
 import type { ConePoint, Joint, Layout, Level, ManggaraiKinds, Part, Rules, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS, LEVELS, facetsFor, peranInfo } from './rules'
-import { coneAt, coneFractionAt, coneRun } from './cone'
+import { coneAt, coneFractionAt, coneRun } from '@/lib/core/cone'
 
 const builders = partBuilders<ManggaraiKinds>()
 const box = builders.box

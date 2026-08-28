@@ -171,6 +171,19 @@ export const MATARAM: Site = {
   tzName: 'WITA',
 }
 
+/**
+ * Wamena, in the Baliem valley. Sixteen hundred metres up and on the equator —
+ * the only site here whose altitude matters more than its latitude, and the
+ * reason one building in this project is shaped by cold.
+ */
+export const WAMENA: Site = {
+  name: 'Wamena',
+  latitude: -4.08,
+  longitude: 138.95,
+  tzOffsetHours: 9,
+  tzName: 'WIT',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,

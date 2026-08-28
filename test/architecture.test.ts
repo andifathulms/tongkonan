@@ -70,6 +70,7 @@ describe('the core is tradition-neutral', () => {
       'timpa laja', 'saoraja', 'alliri', 'pattolo', 'rakkeang', 'ale bola', 'nipah',
       'kaki seribu', 'arfak', 'igkojei',
       'lumbung', 'sasak', 'penghalang tikus',
+      'honai', 'ebei', 'wamai', 'dani', 'baliem',
     ]
     const offenders: string[] = []
     for (const file of core) {

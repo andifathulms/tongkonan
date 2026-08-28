@@ -18,7 +18,7 @@
  */
 
 import type { SceneModel, Zone } from '@/lib/core/scene'
-import { coneAt } from './cone'
+import { coneAt } from '@/lib/core/cone'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 

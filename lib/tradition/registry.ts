@@ -30,7 +30,7 @@ import type { Split } from '@/lib/core/provenance'
 import type { AnyHouse, AnyPart, Dim, ProvenanceClass, Source } from '@/lib/core/types'
 import type { Sensitivity } from '@/lib/core/sensitivity'
 import type { Site } from '@/lib/solar/position'
-import { ANGGI, BAWOMATALUO, MATARAM, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, UBUD, WAE_REBO, WAINGAPU, YOGYAKARTA } from '@/lib/solar/position'
+import { ANGGI, BAWOMATALUO, MATARAM, WAMENA, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, UBUD, WAE_REBO, WAINGAPU, YOGYAKARTA } from '@/lib/solar/position'
 
 import * as toraja from './toraja/facade'
 import * as minang from './minang/facade'
@@ -44,8 +44,9 @@ import * as palembang from './palembang/facade'
 import * as bugis from './bugis/facade'
 import * as arfak from './arfak/facade'
 import * as sasak from './sasak/facade'
+import * as dani from './dani/facade'
 
-export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak'] as const
+export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak', 'dani'] as const
 export type TraditionKey = (typeof TRADITION_KEYS)[number]
 
 export function isTraditionKey(value: string): value is TraditionKey {
@@ -175,6 +176,7 @@ export const TRADITIONS: readonly Tradition[] = [
   bugis.tradition(PARE_PARE),
   arfak.tradition(ANGGI),
   sasak.tradition(MATARAM),
+  dani.tradition(WAMENA),
 ]
 
 export function tradition(key: TraditionKey): Tradition {

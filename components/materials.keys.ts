@@ -122,6 +122,12 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * rather than a material, and the empty list says so.
    */
   sasak: [],
+  /**
+   * Nothing of its own either — timber, board, grass thatch and hearth stone,
+   * all of them substances another building here already uses. A honai is
+   * distinctive for its size and its purpose, not for what it is made of.
+   */
+  dani: [],
 }
 
 /**
@@ -148,6 +154,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   bugis: 'kayu',
   arfak: 'kayu',
   sasak: 'kayu',
+  dani: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
