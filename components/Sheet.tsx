@@ -61,6 +61,18 @@ export function Sheet({
         item below already shows which route this is — this exists to root the
         heading outline, not to repeat the navigation.
       */}
+      {/*
+        The first tab stop. The rail holds every control on these routes, so
+        without this a keyboard reader pays a walk through all of them to
+        reach the thing the controls are about. Visible only while focused,
+        drawn like any other primary control.
+      */}
+      <a
+        href="#isi"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-20 focus:rounded focus:bg-bolu focus:px-3 focus:py-2 focus:text-body focus:text-kapur"
+      >
+        {pick(COPY.skip, locale)}
+      </a>
       <h1 className="sr-only">{pick(COPY.nav[route], locale)}</h1>
       <aside
         className={[
@@ -81,6 +93,7 @@ export function Sheet({
         the drawing is the argument, and it never becomes the caption.
       */}
       <main
+        id="isi"
         className={[
           'sheet:h-auto sheet:min-h-0 sheet:flex-1',
           isViewport

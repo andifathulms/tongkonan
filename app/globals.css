@@ -137,6 +137,22 @@ body {
   height: 100%;
 }
 
+/*
+ * The browser's own line breaking, asked to try harder: headings balance
+ * their lines and prose avoids leaving one word alone on the last one.
+ * Progressive — an engine without these keeps its default breaking.
+ */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+figcaption {
+  text-wrap: pretty;
+}
+
 body {
   background: var(--film);
   color: var(--bolu);
