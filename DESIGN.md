@@ -10,7 +10,7 @@ Same layer as the sibling apps. Anything below that contradicts this section is 
 - Legend contract: any encoding shown to the reader is named on screen. No colour or symbol carries meaning that only the code knows.
 - Citation line: every screen can state where its numbers came from without the reader asking.
 - 16px type floor for body copy. Mono micro-labels may go to 10px because they are labels, not reading.
-- Zero runtime network. System font stacks, vendored three.js, textures generated at runtime. The app works with the wifi off.
+- Zero runtime network. Vendored fonts served same-origin, vendored three.js, textures generated at runtime. The app works with the wifi off.
 - `prefers-reduced-motion` gets a **complete alternative**, not a disabled feature.
 
 ## The register
@@ -39,7 +39,7 @@ The four traditional pa'ssura colours. The palette is closed: no fifth colour, n
 | Riri | `#C8912B` | turmeric / bile | carved highlight, rosette centre |
 | Kapur | `#E9E3D2` | slaked lime | reversed text, carved white |
 
-Interface neutrals sit outside the pigment set on purpose, so pigment always reads as *content*: drafting film `#D8D7CD`, ground plane `#C3BDA9`, muted ink `#6B675C`.
+Interface neutrals sit outside the pigment set on purpose, so pigment always reads as *content*: drafting film `#D8D7CD`, sheet `#E3E0D1` (a sheet lying on the film — cards, the rail, drawing frames; a surface step, not a hue), ground plane `#C3BDA9`, muted ink `#6B675C`.
 
 **Rara is the only accent and it is expensive.** It marks exactly two things: a number that has no source, and where rainwater lands. Both are arguments. If it starts appearing on hover states, it has been spent.
 
@@ -47,11 +47,14 @@ Interface neutrals sit outside the pigment set on purpose, so pigment always rea
 
 No display serif. The register is a measured drawing, so the mono face does the expressive work and the sans stays quiet.
 
-- Sans (`system-ui`): body copy and headings. One heading weight (500), one body weight (400).
-- Mono (`ui-monospace`): every number, every stage name, every control label, every provenance tag. Uppercase with `0.1em` tracking for micro-labels only.
-- Numbers are always mono, always right-aligned in a readout, always with their unit.
+The face is **IBM Plex**, the clause below finally exercised: a technical grotesque drawn for engineering documentation, which is what this site pretends every page is. Vendored into the repo (latin subsets, ~60KB total, OFL licence beside the files), served same-origin via `next/font` — the zero-runtime-network rule holds and the app still works with the wifi off. The system stacks remain as declared fallbacks.
 
-There is no webfont because of the zero-network rule, and that is not a loss: the layout carries the identity — a title-block rail against a viewport, ruled hairlines, mono data. If a webfont is added later it must be a grotesque or a technical face, never a high-contrast serif.
+- Sans (IBM Plex Sans, variable): body copy and headings. Body 400, headings 600, display 600.
+- Mono (IBM Plex Mono, 400/500): every number, every stage name, every control label, every provenance tag. Uppercase with `0.1em` tracking for micro-labels only.
+- Numbers are always mono, always right-aligned in a readout, always with their unit.
+- The display step is fluid — `clamp(34px … 58px)` — because the claim on a landing and the house name on a front door are headlines, not labels. It is still one step of the six-step scale.
+
+The original rule stands for any future addition: a grotesque or a technical face, never a high-contrast serif.
 
 ## Layout
 

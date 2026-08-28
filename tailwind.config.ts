@@ -26,6 +26,7 @@ const config: Config = {
         'riri-ink': 'var(--riri-ink)', // turmeric dropped in value, for strokes and labels
         kapur: 'var(--kapur)', // slaked lime
         film: 'var(--film)', // drafting film
+        sheet: 'var(--sheet)', // a sheet lying on the film: cards, the rail
         ground: 'var(--ground)', // ground plane
         muted: 'var(--muted)', // muted ink
         'muted-on-ink': 'var(--muted-on-ink)', // muted ink, over a soot field
@@ -34,9 +35,24 @@ const config: Config = {
         veil: 'var(--veil)', // panels floating over the model
       },
       fontFamily: {
-        // Two families, both from the system. Sans reads; mono measures.
-        sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+        // Two families and no more: vendored IBM Plex, system stacks behind it.
+        // Sans reads; mono measures. The variables come from app/fonts.ts.
+        sans: [
+          'var(--font-sans)',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'sans-serif',
+        ],
+        mono: [
+          'var(--font-mono)',
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'Consolas',
+          'monospace',
+        ],
       },
       height: {
         // The minimum pointer target, from the tokens.
@@ -85,7 +101,14 @@ const config: Config = {
         body: ['var(--fs-body)', { lineHeight: 'var(--lh-body)' }],
         lead: ['var(--fs-lead)', { lineHeight: 'var(--lh-snug)' }],
         title: ['var(--fs-title)', { lineHeight: 'var(--lh-tight)' }],
-        display: ['var(--fs-display)', { lineHeight: 'var(--lh-tight)' }],
+        display: [
+          'var(--fs-display)',
+          {
+            lineHeight: 'var(--lh-display)',
+            letterSpacing: 'var(--ls-display)',
+            fontWeight: '600',
+          },
+        ],
       },
     },
   },

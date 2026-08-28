@@ -76,7 +76,7 @@ export function Sheet({
       <h1 className="sr-only">{pick(COPY.nav[route], locale)}</h1>
       <aside
         className={[
-          'flex flex-col bg-film',
+          'flex flex-col bg-sheet',
           'sheet:min-h-0 sheet:w-rail sheet:shrink-0 sheet:overflow-y-auto sheet:border-r sheet:border-t-0 sheet:border-hairline',
           isViewport
             ? 'order-2 border-t border-hairline sheet:order-none'

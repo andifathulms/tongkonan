@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import '../globals.css'
+import { fontVariables } from '@/app/fonts'
 import { BASE_PATH, COPY, DEFAULT_LOCALE, SITE_ORIGIN, pick } from '@/lib/i18n'
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export const viewport: Viewport = {
  */
 export default function SplashLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={DEFAULT_LOCALE}>
+    <html lang={DEFAULT_LOCALE} className={fontVariables}>
       <body>{children}</body>
     </html>
   )

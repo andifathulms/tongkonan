@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { fontVariables } from '@/app/fonts'
 import { LOCALES, isLocale } from '@/lib/i18n'
 
 export function generateStaticParams() {
@@ -28,7 +29,7 @@ export default function LocaleLayout({
 }) {
   if (!isLocale(params.locale)) notFound()
   return (
-    <html lang={params.locale}>
+    <html lang={params.locale} className={fontVariables}>
       <body className="min-h-dvh">{children}</body>
     </html>
   )
