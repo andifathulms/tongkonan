@@ -91,6 +91,14 @@
   --sp-8: 64px;
 
   /*
+   * The narrowest the landing's same-scale elevation shelf may render. All
+   * the houses share one svg so one viewBox scales them together; below this
+   * width the smallest house is a smudge, so the sheet keeps this width and
+   * pans instead of shrinking further.
+   */
+  --shelf-min: 640px;
+
+  /*
    * Height reserved for the masthead band that sits over the foot of the
    * model under 860px.
    *

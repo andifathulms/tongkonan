@@ -118,6 +118,19 @@ export const COPY = {
         'Not one of these houses has been surveyed yet. The provenance bar on every page is this project’s progress metric, and today it is almost entirely red. It stays in view, because a smooth 3D render implies a precision the sources do not have.',
       ),
     ],
+    /*
+     * The same-scale elevation shelf. The caption states the two claims the
+     * drawing makes — one scale, drawn from the model's own parts — because
+     * a silhouette without them is just a logo.
+     */
+    shelfCaption: t(
+      'Satu skala untuk semua rumah, digambar dari bagian-bagian model itu sendiri.',
+      'One scale for every house, drawn from the model’s own parts.',
+    ),
+    elevationCaption: t(
+      'Tampak, digambar dari bagian-bagian model pada aturan bakunya.',
+      'The elevation, drawn from the model’s parts at its default rules.',
+    ),
     sitesHeading: t('Tapak', 'The sites'),
     sitesNote: t(
       'Matahari pada tiap model dihitung untuk tapak rumahnya sendiri. Garis lintang pada peta ini adalah masukan perhitungan itu, bukan hiasan.',

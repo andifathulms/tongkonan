@@ -45,6 +45,10 @@ const config: Config = {
       minHeight: {
         control: 'var(--control-target)',
       },
+      minWidth: {
+        // The same-scale elevation shelf pans below this rather than shrinking.
+        shelf: 'var(--shelf-min)',
+      },
       spacing: {
         // 4px grid. Tailwind's default scale is already on it; this is the
         // rail width the surveyor's-sheet layout needs.

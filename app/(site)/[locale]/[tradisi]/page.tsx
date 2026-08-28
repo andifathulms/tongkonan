@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
+import { ElevationSheet } from '@/components/Elevation'
 import { SplitBar, SplitLegend } from '@/components/split'
+import { silhouette } from '@/lib/core/silhouette'
 import {
   COPY,
   DEFAULT_LOCALE,
@@ -40,11 +42,18 @@ export function generateMetadata({
  * This page is those words first — whose house, where it stands, which way it
  * must face, and how much of it the author invented — with the four routes
  * as described doors rather than four bare nouns.
+ *
+ * The house is built here, at export time, for the drawing and the figures:
+ * the elevation is the default house's own parts projected and traced, and
+ * the readouts are the generator's outputs, so neither can drift from the
+ * model the routes open onto.
  */
 export default function House({ params }: { params: { locale: string; tradisi: string } }) {
   if (!isLocale(params.locale) || !isTraditionKey(params.tradisi)) notFound()
   const locale = params.locale
   const t = tradition(params.tradisi)
+  const b = t.build(t.defaultQuery)
+  const s = silhouette(b.house, b.scene.ridgeAxis ?? 0)
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-2xl flex-col px-6 py-10">
@@ -74,6 +83,23 @@ export default function House({ params }: { params: { locale: string; tradisi: s
       </p>
       <p className="mt-4 text-body text-bolu">{t.about[locale]}</p>
       <p className="mt-3 text-body text-muted">{t.caution[locale]}</p>
+
+      <div className="mt-6">
+        <ElevationSheet s={s} caption={pick(COPY.landing.elevationCaption, locale)} />
+      </div>
+
+      {/*
+        The generator's own figures for the default house. Mono, right-aligned,
+        with their units — outputs of the same run the drawing above traces.
+      */}
+      <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
+        {b.readout.map((r) => (
+          <div key={r.label.en} className="flex items-baseline justify-between gap-4">
+            <dt className="micro">{r.label[locale]}</dt>
+            <dd className="num text-meta text-bolu">{r.value}</dd>
+          </div>
+        ))}
+      </dl>
 
       <hr className="rule my-8" />
 
