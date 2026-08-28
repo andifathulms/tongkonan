@@ -310,7 +310,7 @@ export function Viewport({
       <p
         id={hintId}
         className={[
-          'micro pointer-events-none absolute bottom-[calc(var(--masthead-h)+0.75rem)] right-3 select-none text-right transition-opacity duration-layout sheet:bottom-3',
+          'micro pointer-events-none absolute bottom-masthead-clear right-3 select-none text-right transition-opacity duration-layout sheet:bottom-3',
           touched ? 'opacity-0' : 'opacity-100',
         ].join(' ')}
       >
@@ -331,7 +331,7 @@ function ScaleBar({ metres, pixels }: { metres: number; pixels: number }) {
     // Lifted clear of the masthead band on a narrow screen, by the height the
     // band reserves rather than by a number guessed here. That band only
     // exists under 860px, so above it the bar sits back on the bottom edge.
-    <div className="pointer-events-none absolute bottom-[calc(var(--masthead-h)+0.75rem)] left-3 select-none sheet:bottom-3">
+    <div className="pointer-events-none absolute bottom-masthead-clear left-3 select-none sheet:bottom-3">
       <div
         className="h-2 border-b border-l border-r border-bolu"
         style={{ width: `${pixels}px` }}

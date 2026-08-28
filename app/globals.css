@@ -111,6 +111,21 @@
    * can never be taller.
    */
   --masthead-h: 92px;
+  /* Clearance for anything floated above the masthead band: its height plus
+     one grid step of air. Written down once so an overlay and the band cannot
+     disagree about where the band ends. */
+  --masthead-clear: calc(var(--masthead-h) + 12px);
+
+  /*
+   * The sizes that used to live in component class brackets. A bracketed size
+   * in a component escapes this file the same way a hardcoded dimension
+   * escapes provenance, so the last of them were moved here and named.
+   */
+  --viewport-h: 55dvh; /* the drawing keeps over half a phone screen */
+  --veil-blur: 2px; /* the veil panels' backdrop blur */
+  --table-min: 38rem; /* the source table pans below this, never reflows */
+  --readout-max: 240px; /* the computed-figures panel over the viewport */
+  --caption-max: 30rem; /* the stage caption over the viewport */
 
   --t-state: 150ms;
   --t-layout: 400ms;

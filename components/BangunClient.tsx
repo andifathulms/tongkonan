@@ -295,7 +295,7 @@ function Readout({ locale, built }: { locale: Locale; built: Built }) {
     */
     <div
       aria-live="polite"
-      className="pointer-events-none absolute left-3 top-14 z-10 max-w-[15rem] rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px] sheet:top-3"
+      className="pointer-events-none absolute left-3 top-14 z-10 max-w-readout rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-veil sheet:top-3"
     >
       {/*
         Without this line the figures read as the specifications of a real

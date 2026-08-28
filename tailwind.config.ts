@@ -41,18 +41,32 @@ const config: Config = {
       height: {
         // The minimum pointer target, from the tokens.
         control: 'var(--control-target)',
+        // On a phone the drawing keeps over half the screen.
+        viewport: 'var(--viewport-h)',
       },
       minHeight: {
         control: 'var(--control-target)',
+        masthead: 'var(--masthead-h)',
       },
       minWidth: {
         // The same-scale elevation shelf pans below this rather than shrinking.
         shelf: 'var(--shelf-min)',
+        // The source table pans below this rather than reflowing.
+        table: 'var(--table-min)',
+      },
+      maxWidth: {
+        readout: 'var(--readout-max)',
+        caption: 'var(--caption-max)',
+      },
+      backdropBlur: {
+        veil: 'var(--veil-blur)',
       },
       spacing: {
         // 4px grid. Tailwind's default scale is already on it; this is the
         // rail width the surveyor's-sheet layout needs.
         rail: '320px',
+        // Clearance above the masthead band, for overlays floated over it.
+        'masthead-clear': 'var(--masthead-clear)',
       },
       borderRadius: {
         DEFAULT: '2px',

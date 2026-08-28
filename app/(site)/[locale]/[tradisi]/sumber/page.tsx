@@ -118,15 +118,22 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
               .map((s, i) => (
                 <li
                   key={s.dim}
-                  className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-hairline py-2.5"
+                  className="flex items-baseline gap-x-3 border-t border-hairline py-2.5"
                 >
+                  {/*
+                    The rank is a column of its own, so the wrapped probe label
+                    aligns under the dimension by layout rather than by a
+                    padding that has to re-derive the column's width.
+                  */}
                   <span className="num w-10 shrink-0 text-meta text-muted">{i + 1}</span>
-                  <span className="font-mono text-meta">{s.dim}</span>
-                  <span className="num ml-auto whitespace-nowrap text-body">
-                    {s.worst.toFixed(2)} m
-                  </span>
-                  <span className="w-full pl-[3.25rem] text-meta text-muted sheet:w-auto sheet:pl-0">
-                    {t0.probeLabel(s.worstProbe)[locale]}
+                  <span className="flex flex-1 flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="font-mono text-meta">{s.dim}</span>
+                    <span className="num ml-auto whitespace-nowrap text-body">
+                      {s.worst.toFixed(2)} m
+                    </span>
+                    <span className="w-full text-meta text-muted sheet:w-auto">
+                      {t0.probeLabel(s.worstProbe)[locale]}
+                    </span>
                   </span>
                 </li>
               ))}
@@ -162,7 +169,7 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
             {pick(COPY.sources.tableHeading, locale)}
           </h2>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[38rem] border-collapse text-left">
+            <table className="w-full min-w-table border-collapse text-left">
               <thead>
                 <tr className="border-b border-hairline">
                   <Th>{pick(COPY.sources.dimension, locale)}</Th>
@@ -221,16 +228,21 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           </p>
           <ul className="mt-4 flex flex-col">
             {results.map((r) => (
-              <li key={r.key} className="border-b border-hairline py-3">
-                <div className="flex items-baseline gap-3">
-                  <CheckChip status={r.status} locale={locale} />
+              /*
+                The chip is a column, so the detail line aligns under the title
+                whatever the verdict word's width is — the old padding was a
+                guess at the widest chip and drifted per locale.
+              */
+              <li key={r.key} className="flex items-baseline gap-3 border-b border-hairline py-3">
+                <CheckChip status={r.status} locale={locale} />
+                <div>
                   <span className="text-body leading-snug">
                     {locale === 'id' ? r.titleId : r.titleEn}
                   </span>
+                  <p className="mt-1 text-body text-muted">
+                    {locale === 'id' ? r.detail : r.detailEn}
+                  </p>
                 </div>
-                <p className="mt-1 pl-[3.6rem] text-body text-muted">
-                  {locale === 'id' ? r.detail : r.detailEn}
-                </p>
               </li>
             ))}
           </ul>
@@ -245,7 +257,7 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           </p>
           <p className="mt-3 max-w-prose text-body">{counter.why[locale]}</p>
 
-          <div className="mt-5 grid gap-px overflow-hidden rounded border border-hairline bg-[color:var(--hairline)] sheet:grid-cols-2">
+          <div className="mt-5 grid gap-px overflow-hidden rounded border border-hairline bg-hairline sheet:grid-cols-2">
             <CounterCase
               title={pick(COPY.checks.counterSound, locale)}
               result={counter.sound}

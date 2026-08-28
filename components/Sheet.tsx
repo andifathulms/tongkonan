@@ -84,7 +84,7 @@ export function Sheet({
         className={[
           'sheet:h-auto sheet:min-h-0 sheet:flex-1',
           isViewport
-            ? 'sticky top-0 order-1 h-[55dvh] shrink-0 sheet:static sheet:order-none'
+            ? 'sticky top-0 order-1 h-viewport shrink-0 sheet:static sheet:order-none'
             : 'min-h-0',
         ].join(' ')}
       >
@@ -116,7 +116,7 @@ function Masthead({
   tradition: Tradition
 }) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex min-h-[var(--masthead-h)] flex-col justify-center border-t border-hairline bg-veil px-3 py-2 backdrop-blur-[2px] sheet:hidden">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex min-h-masthead flex-col justify-center border-t border-hairline bg-veil px-3 py-2 backdrop-blur-veil sheet:hidden">
       <div className="flex items-center justify-between gap-3">
         {/*
           The house, not the app: on a band this narrow one of them has to go,

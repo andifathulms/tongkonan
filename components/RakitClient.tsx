@@ -155,19 +155,17 @@ export function RakitClient({ locale, tradisi }: { locale: Locale; tradisi: Trad
       rail={
         <>
           <RailSection title={pick(COPY.assembly.heading, locale)}>
-            <div className="mb-3 flex gap-px">
-              <button
-                type="button"
-                onClick={() => (t >= 1 ? replay() : setPlaying(!playing))}
-                className="flex-1 rounded bg-bolu px-2 py-2 text-body text-kapur transition-opacity duration-state hover:opacity-90"
-              >
-                {t >= 1
-                  ? pick(COPY.assembly.replay, locale)
-                  : playing
-                    ? pick(COPY.assembly.pause, locale)
-                    : pick(COPY.assembly.play, locale)}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => (t >= 1 ? replay() : setPlaying(!playing))}
+              className="mb-3 w-full rounded bg-bolu px-2 py-2 text-body text-kapur transition-opacity duration-state hover:opacity-90"
+            >
+              {t >= 1
+                ? pick(COPY.assembly.replay, locale)
+                : playing
+                  ? pick(COPY.assembly.pause, locale)
+                  : pick(COPY.assembly.play, locale)}
+            </button>
             <label className="sr-only" htmlFor="urutan">
               {pick(COPY.assembly.heading, locale)}
             </label>
@@ -315,10 +313,14 @@ function StageCaption({ info, locale }: { info: StageView | null; locale: Locale
   if (!info) return null
   return (
     // Clear of the masthead band under 860px, by the height that band reserves.
-    // Same collision the scale bar had, and missed here at the time.
-    <div className="pointer-events-none absolute bottom-[calc(var(--masthead-h)+0.75rem)] left-1/2 z-10 w-[min(30rem,calc(100%-6rem))] -translate-x-1/2 rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-[2px] sheet:bottom-3">
-      <p className="micro">{info.title}</p>
-      <p className="mt-1 text-body">{info.gloss[locale]}</p>
+    // Same collision the scale bar had, and missed here at the time. The outer
+    // div carries the margins and the inner one the cap, so the caption is
+    // centred and never wider than the viewport leaves room for.
+    <div className="pointer-events-none absolute inset-x-12 bottom-masthead-clear z-10 flex justify-center sheet:bottom-3">
+      <div className="w-full max-w-caption rounded border border-hairline bg-veil px-3 py-2.5 backdrop-blur-veil">
+        <p className="micro">{info.title}</p>
+        <p className="mt-1 text-body">{info.gloss[locale]}</p>
+      </div>
     </div>
   )
 }
