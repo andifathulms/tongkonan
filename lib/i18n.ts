@@ -144,6 +144,13 @@ export const COPY = {
       'Satu skala untuk semua rumah, digambar dari bagian-bagian model itu sendiri.',
       'One scale for every house, drawn from the model’s own parts.',
     ),
+    /* Alt text for a house's share card. The card carries no text of its
+       own — the unfurled link already shows title and description — so the
+       alt says what the picture is. */
+    ogAlt: t(
+      'Siluet tampak {house}, digambar dari bagian-bagian model.',
+      'The elevation silhouette of {house}, drawn from the model’s parts.',
+    ),
     elevationCaption: t(
       'Tampak, digambar dari bagian-bagian model pada aturan bakunya.',
       'The elevation, drawn from the model’s parts at its default rules.',
@@ -514,8 +521,20 @@ const OG_LOCALE: Record<Locale, string> = { id: 'id_ID', en: 'en_US' }
  * `urlFor` is a function of the locale because the alternates are the same
  * page in the other language, whatever kind of page it is.
  */
-function head(locale: Locale, title: string, description: string, urlFor: (l: Locale) => string) {
+function head(
+  locale: Locale,
+  title: string,
+  description: string,
+  urlFor: (l: Locale) => string,
+  /**
+   * The share card: a file under public/og/, drawn by the generator and held
+   * by test/og.test.ts against what the generator would draw today. Relative
+   * to metadataBase, so the base path is applied once, there.
+   */
+  image: { file: string; alt: string },
+) {
   const url = urlFor(locale)
+  const images = [{ url: image.file, width: 1200, height: 630, alt: image.alt }]
   return {
     title,
     description,
@@ -531,12 +550,22 @@ function head(locale: Locale, title: string, description: string, urlFor: (l: Lo
       siteName: pick(COPY.appName, locale),
       locale: OG_LOCALE[locale],
       alternateLocale: LOCALES.filter((l) => l !== locale).map((l) => OG_LOCALE[l]),
+      images,
     },
     twitter: {
-      card: 'summary' as const,
+      card: 'summary_large_image' as const,
       title,
       description,
+      images,
     },
+  }
+}
+
+/** A house's card and its alt, from the slug the card file is named by. */
+function houseImage(locale: Locale, slug: string, house: string) {
+  return {
+    file: `og/${slug}.png`,
+    alt: pick(COPY.landing.ogAlt, locale).replace('{house}', house),
   }
 }
 
@@ -550,6 +579,7 @@ export function routeMetadata(
     pageTitle(route, locale, tradition.house),
     pageDescription(route, locale, tradition.house),
     (l) => pageUrl(route, l, tradition.slug),
+    houseImage(locale, tradition.slug, tradition.house),
   )
 }
 
@@ -560,6 +590,9 @@ export function landingMetadata(locale: Locale, houses: string) {
     pick(COPY.appName, locale),
     `${pick(COPY.tagline, locale)} ${houses}.`,
     (l) => landingUrl(l),
+    /* The collection's card is the shelf, and its caption already says
+       exactly what the picture is. */
+    { file: 'og/semua.png', alt: pick(COPY.landing.shelfCaption, locale) },
   )
 }
 
@@ -573,5 +606,6 @@ export function houseMetadata(
     `${tradition.house} — ${pick(COPY.appName, locale)}`,
     `${tradition.house}, ${tradition.place}. ${pick(COPY.tagline, locale)}`,
     (l) => houseUrl(l, tradition.slug),
+    houseImage(locale, tradition.slug, tradition.house),
   )
 }
