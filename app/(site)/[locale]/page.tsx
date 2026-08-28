@@ -14,7 +14,9 @@ import {
   houseHref,
   isLocale,
   landingMetadata,
+  latLabel,
   pick,
+  plateNo,
 } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { TRADITIONS } from '@/lib/tradition/registry'
@@ -169,11 +171,6 @@ export default function Landing({ params }: { params: { locale: string } }) {
   )
 }
 
-/** The plate number as it is printed: T for tradisi, two digits. */
-export function plateNo(n: number): string {
-  return `T.${String(n).padStart(2, '0')}`
-}
-
 function HouseCard({
   locale,
   tradition,
@@ -232,14 +229,6 @@ function HouseCard({
       </Link>
     </li>
   )
-}
-
-/** A latitude, said the way the locale says it: 3,0° LS in id, 3.0° S in en. */
-function latLabel(lat: number, locale: Locale): string {
-  const n = Math.abs(lat).toFixed(1)
-  const figure = locale === 'id' ? n.replace('.', ',') : n
-  const hemi = lat < 0 ? (locale === 'id' ? 'LS' : 'S') : locale === 'id' ? 'LU' : 'N'
-  return `${figure}° ${hemi}`
 }
 
 /**

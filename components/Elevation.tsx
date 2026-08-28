@@ -138,12 +138,21 @@ export function ElevationShelf({
  * One house on its own sheet, with the scale bar that makes it a drawing
  * rather than a picture.
  */
-export function ElevationSheet({ s, caption }: { s: Silhouette; caption: string }) {
+export function ElevationSheet({
+  s,
+  caption,
+  frameless = false,
+}: {
+  s: Silhouette
+  caption: string
+  /** true when the caller draws its own sheet frame around this drawing */
+  frameless?: boolean
+}) {
   const W = s.max[0] - s.min[0] + PAD * 2
   const baseY = s.max[1] + PAD
   const H = baseY + BELOW
   return (
-    <div className="rounded border border-hairline px-4 pt-5">
+    <div className={frameless ? 'px-4 pt-5' : 'rounded border border-hairline px-4 pt-5'}>
       <svg viewBox={`0 0 ${f(W)} ${f(H)}`} className="w-full" aria-hidden="true">
         <line
           x1={0}

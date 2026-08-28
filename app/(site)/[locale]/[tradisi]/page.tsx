@@ -15,9 +15,11 @@ import {
   houseMetadata,
   href,
   isLocale,
+  latLabel,
   pick,
+  plateNo,
 } from '@/lib/i18n'
-import { isTraditionKey, tradition } from '@/lib/tradition/registry'
+import { TRADITION_KEYS, isTraditionKey, tradition } from '@/lib/tradition/registry'
 
 export function generateMetadata({
   params,
@@ -54,9 +56,10 @@ export default function House({ params }: { params: { locale: string; tradisi: s
   const t = tradition(params.tradisi)
   const b = t.build(t.defaultQuery)
   const s = silhouette(b.house, b.scene.ridgeAxis ?? 0)
+  const plate = TRADITION_KEYS.indexOf(t.key) + 1
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col px-6 py-10">
+    <main className="mx-auto flex min-h-dvh max-w-3xl flex-col px-6 py-10">
       <header className="flex items-baseline justify-between gap-3">
         <nav className="micro flex min-w-0 items-baseline gap-2 text-bolu">
           <Link href={`${homeHref(locale)}/`} className="shrink-0 underline underline-offset-4">
@@ -78,28 +81,47 @@ export default function House({ params }: { params: { locale: string; tradisi: s
       </header>
 
       <h1 className="mt-8 text-display text-bolu">{t.house[locale]}</h1>
-      <p className="micro mt-2">
+      <p className="micro mt-3">
         {t.people[locale]} · {t.place[locale]}
       </p>
-      <p className="mt-4 text-body text-bolu">{t.about[locale]}</p>
-      <p className="mt-3 text-body text-muted">{t.caution[locale]}</p>
-
-      <div className="mt-6">
-        <ElevationSheet s={s} caption={pick(COPY.landing.elevationCaption, locale)} />
-      </div>
 
       {/*
-        The generator's own figures for the default house. Mono, right-aligned,
-        with their units — outputs of the same run the drawing above traces.
+        The house's sheet, framed the way a working drawing is framed: a
+        title-block band of stamps, the elevation, and the generator's own
+        readouts as the sheet's foot. Everything inside the frame is computed
+        from the same build — the drawing cannot disagree with the figures.
       */}
-      <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
-        {b.readout.map((r) => (
-          <div key={r.label.en} className="flex items-baseline justify-between gap-4">
-            <dt className="micro">{r.label[locale]}</dt>
-            <dd className="num text-meta text-bolu">{r.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <figure className="mt-6 rounded border border-muted bg-sheet">
+        <div className="grid grid-cols-2 divide-x divide-hairline border-b border-hairline sm:grid-cols-4">
+          <p className="micro px-4 py-2 text-bolu">
+            {pick(COPY.landing.plate, locale)} {plateNo(plate)}
+          </p>
+          <p className="micro truncate px-4 py-2">{t.people[locale]}</p>
+          <p className="micro truncate border-t border-hairline px-4 py-2 sm:border-t-0">
+            {t.site.name} · {latLabel(t.site.latitude, locale)}
+          </p>
+          <p className="micro truncate border-t border-hairline px-4 py-2 sm:border-t-0">
+            {pick(COPY.computed, locale)}
+          </p>
+        </div>
+        <ElevationSheet s={s} caption={pick(COPY.landing.elevationCaption, locale)} frameless />
+        {/*
+          The generator's own figures for the default house. Mono,
+          right-aligned, with their units — outputs of the same run the
+          drawing above traces.
+        */}
+        <dl className="grid grid-cols-1 gap-x-8 gap-y-1 border-t border-hairline px-4 py-3 sm:grid-cols-2">
+          {b.readout.map((r) => (
+            <div key={r.label.en} className="flex items-baseline justify-between gap-4">
+              <dt className="micro">{r.label[locale]}</dt>
+              <dd className="num text-meta text-bolu">{r.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </figure>
+
+      <p className="mt-6 max-w-2xl text-body text-bolu">{t.about[locale]}</p>
+      <p className="mt-3 max-w-2xl text-body text-muted">{t.caution[locale]}</p>
 
       <hr className="rule my-8" />
 
@@ -128,7 +150,7 @@ export default function House({ params }: { params: { locale: string; tradisi: s
             <li key={r} className="h-full">
               <Link
                 href={`${href(locale, t.slug, r)}/`}
-                className="press flex h-full flex-col gap-1 rounded border border-hairline px-4 py-4 transition-colors duration-state hover:border-muted hover:bg-wash"
+                className="press flex h-full flex-col gap-1 rounded border border-hairline bg-sheet px-4 py-4 transition-colors duration-state hover:border-muted hover:bg-wash"
               >
                 <span className="text-lead text-bolu">{pick(COPY.nav[r], locale)}</span>
                 <span className="text-body text-muted">{pick(COPY.navGloss[r], locale)}</span>

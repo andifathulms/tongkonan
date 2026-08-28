@@ -464,6 +464,24 @@ export function pick(dict: Dict, locale: Locale): string {
 }
 
 /**
+ * The catalogue plate number as it is printed: T for tradisi, two digits,
+ * numbered in registry order — the order the houses joined, which is the
+ * order the project learned what generalises. The landing cards, the map
+ * markers and each house's own sheet all print the same number.
+ */
+export function plateNo(n: number): string {
+  return `T.${String(n).padStart(2, '0')}`
+}
+
+/** A latitude, said the way the locale says it: 3,0° LS in id, 3.0° S in en. */
+export function latLabel(lat: number, locale: Locale): string {
+  const n = Math.abs(lat).toFixed(1)
+  const figure = locale === 'id' ? n.replace('.', ',') : n
+  const hemi = lat < 0 ? (locale === 'id' ? 'LS' : 'S') : locale === 'id' ? 'LU' : 'N'
+  return `${figure}° ${hemi}`
+}
+
+/**
  * The document title for a route.
  *
  * Every route shipped as "Tongkonan", so a reader with four tabs open, or one
