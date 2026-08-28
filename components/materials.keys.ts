@@ -113,6 +113,15 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * does.
    */
   arfak: ['kulit'],
+  /**
+   * Nothing of its own, and it is the third entry here to be empty.
+   *
+   * A lumbung is stone, timber, board, bamboo and grass thatch — every one of
+   * them a substance another building here already uses, off the same
+   * generator. What makes this granary distinctive is a shape and a purpose
+   * rather than a material, and the empty list says so.
+   */
+  sasak: [],
 }
 
 /**
@@ -138,6 +147,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   palembang: 'tembesu',
   bugis: 'kayu',
   arfak: 'kayu',
+  sasak: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

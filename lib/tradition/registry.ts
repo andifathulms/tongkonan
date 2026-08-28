@@ -1,5 +1,8 @@
 /**
- * The eleven houses, as one list the app can walk.
+ * The twelve buildings, as one list the app can walk.
+ *
+ * Eleven of them are houses and the twelfth is a granary, which is why this
+ * comment no longer says "houses".
  *
  * Every entry seals its own rule type inside itself. `build` takes a query
  * string and hands back parts, a scene model, a timeline, verdicts and
@@ -27,7 +30,7 @@ import type { Split } from '@/lib/core/provenance'
 import type { AnyHouse, AnyPart, Dim, ProvenanceClass, Source } from '@/lib/core/types'
 import type { Sensitivity } from '@/lib/core/sensitivity'
 import type { Site } from '@/lib/solar/position'
-import { ANGGI, BAWOMATALUO, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, UBUD, WAE_REBO, WAINGAPU, YOGYAKARTA } from '@/lib/solar/position'
+import { ANGGI, BAWOMATALUO, MATARAM, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, UBUD, WAE_REBO, WAINGAPU, YOGYAKARTA } from '@/lib/solar/position'
 
 import * as toraja from './toraja/facade'
 import * as minang from './minang/facade'
@@ -40,8 +43,9 @@ import * as sumba from './sumba/facade'
 import * as palembang from './palembang/facade'
 import * as bugis from './bugis/facade'
 import * as arfak from './arfak/facade'
+import * as sasak from './sasak/facade'
 
-export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak'] as const
+export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak'] as const
 export type TraditionKey = (typeof TRADITION_KEYS)[number]
 
 export function isTraditionKey(value: string): value is TraditionKey {
@@ -170,6 +174,7 @@ export const TRADITIONS: readonly Tradition[] = [
   palembang.tradition(PALEMBANG),
   bugis.tradition(PARE_PARE),
   arfak.tradition(ANGGI),
+  sasak.tradition(MATARAM),
 ]
 
 export function tradition(key: TraditionKey): Tradition {

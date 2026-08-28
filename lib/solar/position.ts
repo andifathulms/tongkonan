@@ -162,6 +162,15 @@ export const ANGGI: Site = {
   tzName: 'WIT',
 }
 
+/** Mataram, on Lombok. */
+export const MATARAM: Site = {
+  name: 'Mataram',
+  latitude: -8.58,
+  longitude: 116.32,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,
