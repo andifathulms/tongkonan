@@ -26,7 +26,7 @@ import {
 } from '@/lib/core/invariants'
 import type { CheckResult } from '@/lib/core/invariants'
 import type { House, Layout } from './types'
-import { hipRun } from './hip'
+import { hipRun } from '@/lib/core/hip'
 import { tileBands } from './roof'
 import { wallRing } from './frame'
 import { DIMS, PACK, SENTHONG_NAMES, wujudInfo, roofTiers } from './rules'

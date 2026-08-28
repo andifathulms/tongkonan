@@ -19,7 +19,7 @@ import { partBuilders } from '@/lib/core/parts'
 import type { Joint, JawaKinds, Layout, Part, RoofLevel, Rules, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS, SENTHONG_NAMES, tumpangInset, wujudInfo } from './rules'
-import { hipRun } from './hip'
+import { hipRun } from '@/lib/core/hip'
 
 const builders = partBuilders<JawaKinds>()
 const box = builders.box

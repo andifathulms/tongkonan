@@ -42,6 +42,63 @@ const TOL = 1e-4
 
 /* ── AABB helpers ─────────────────────────────────────────────────────── */
 
+/**
+ * Every point a part actually occupies: mesh vertices, or a box's eight true
+ * corners.
+ *
+ * Not the corners of the axis-aligned bounding box — for a leaning member
+ * those are eight points the timber does not reach, and a check testing them
+ * fails members that are perfectly placed. The temptation is then to loosen
+ * the tolerance until they pass, which is how a check stops being evidence.
+ *
+ * Here rather than tradition-side because it is the same rotation
+ * `rotatedHalfExtents` already applies, and a second copy of an Euler matrix
+ * is a second thing to get wrong.
+ */
+export function partPoints<K extends Kinds>(part: Part<K>): readonly Vec3[] {
+  if (part.kind === 'mesh') {
+    const out: Vec3[] = []
+    for (let i = 0; i < part.positions.length; i += 3) {
+      out.push([part.positions[i] ?? 0, part.positions[i + 1] ?? 0, part.positions[i + 2] ?? 0])
+    }
+    return out
+  }
+  const [cx, cy, cz] = part.center
+  const h: Vec3 = [part.size[0] / 2, part.size[1] / 2, part.size[2] / 2]
+  const [rx, ry, rz] = part.rotation ?? [0, 0, 0]
+  const cosx = Math.cos(rx)
+  const sinx = Math.sin(rx)
+  const cosy = Math.cos(ry)
+  const siny = Math.sin(ry)
+  const cosz = Math.cos(rz)
+  const sinz = Math.sin(rz)
+  // XYZ-order Euler, the same matrix `rotatedHalfExtents` takes the modulus of.
+  const m = [
+    cosy * cosz,
+    -cosy * sinz,
+    siny,
+    sinx * siny * cosz + cosx * sinz,
+    -sinx * siny * sinz + cosx * cosz,
+    -sinx * cosy,
+    -cosx * siny * cosz + sinx * sinz,
+    cosx * siny * sinz + sinx * cosz,
+    cosx * cosy,
+  ]
+  const out: Vec3[] = []
+  for (const ax of [-h[0], h[0]]) {
+    for (const ay of [-h[1], h[1]]) {
+      for (const az of [-h[2], h[2]]) {
+        out.push([
+          cx + (m[0] ?? 0) * ax + (m[1] ?? 0) * ay + (m[2] ?? 0) * az,
+          cy + (m[3] ?? 0) * ax + (m[4] ?? 0) * ay + (m[5] ?? 0) * az,
+          cz + (m[6] ?? 0) * ax + (m[7] ?? 0) * ay + (m[8] ?? 0) * az,
+        ])
+      }
+    }
+  }
+  return out
+}
+
 export function partBounds<K extends Kinds>(part: Part<K>): Bounds {
   if (part.kind === 'box') {
     const h = rotatedHalfExtents(part.size, part.rotation)

@@ -14,7 +14,7 @@ import {
   wujudInfo,
 } from '@/lib/tradition/jawa/rules'
 import { rulesEqual, rulesFromQuery, rulesToQuery } from '@/lib/tradition/jawa/address'
-import { hipLevelAt, hipRun, steppedHip } from '@/lib/tradition/jawa/hip'
+import { hipLevelAt, hipRun, steppedHip } from '@/lib/core/hip'
 import { STAGE_ORDER } from '@/lib/tradition/jawa/types'
 import type { Rules } from '@/lib/tradition/jawa/types'
 
@@ -221,7 +221,7 @@ describe('provenance', () => {
   })
 
   it('declares the numbers that size and place what the reader can see', () => {
-    const sources = ['lib/tradition/jawa/frame.ts', 'lib/tradition/jawa/roof.ts', 'lib/tradition/jawa/hip.ts'].map(
+    const sources = ['lib/tradition/jawa/frame.ts', 'lib/tradition/jawa/roof.ts'].map(
       (f) => [f, readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')] as const,
     )
     const offenders: string[] = []

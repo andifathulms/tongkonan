@@ -142,23 +142,11 @@ export type House = CoreHouse<JawaKinds>
 /* ── Layout ───────────────────────────────────────────────────────────── */
 
 /**
- * One level of the roof, in plan and in height.
- *
- * A hipped roof is a stack of rectangles: the eave is the largest, each tier
- * above it is smaller, and the topmost has no width at all across the short
- * axis, which is what makes it a ridge. The surface is the skin over that
- * stack. Neither of the other two houses has anything of this shape — both
- * sweep a section along a ridge that runs the whole length of the building,
- * and a hip is exactly the roof that cannot be made that way.
+ * A hipped roof is a stack of rectangles, and that stack now lives in the core
+ * — a second house hips, so `steppedHip` moved. The type comes back with it.
  */
-export interface RoofLevel {
-  readonly key: string
-  /** half-extent across X, front to rear. Zero at the ridge. */
-  readonly halfX: number
-  /** half-extent along Z, the ridge axis */
-  readonly halfZ: number
-  readonly y: number
-}
+import type { RoofLevel } from '@/lib/core/hip'
+export type { RoofLevel }
 
 export interface Layout {
   readonly rules: Rules

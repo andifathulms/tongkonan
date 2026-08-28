@@ -22,7 +22,7 @@ import type { CourseBand } from '@/lib/core/courses'
 import type { BoxPart, Joint, Layout, Part, RoofLevel, Vec3 } from './types'
 import type { DimKey } from './rules'
 import { DIMS } from './rules'
-import { hipLevelAt, hipRun, steppedHip } from './hip'
+import { hipLevelAt, hipRun, steppedHip } from '@/lib/core/hip'
 import { meshPart } from './frame'
 
 /* ── The frame ────────────────────────────────────────────────────────── */

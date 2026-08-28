@@ -1,29 +1,41 @@
 /**
  * A stepped hipped roof, as a stack of rectangles.
  *
- * The other two houses both sweep a transverse section along a ridge that runs
- * the whole length of the building. That is not a general way to make a roof;
- * it is a way to make *their* roof. A hip has a ridge shorter than its
- * building and four planes falling away to a closed rectangular eave, and no
- * amount of sweeping produces one.
+ * A hip has a ridge shorter than its building and four planes falling away to
+ * a closed rectangular eave. Sweeping a section along a ridge cannot produce
+ * one, which is why this is a second roof primitive standing beside
+ * `sweepSurface` rather than a generalisation of it.
  *
- * So this is a second roof primitive standing beside `sweepSurface` rather
- * than a generalisation of it — which is itself the answer to a question the
- * code had been holding open. `minang/roof.ts` asks whether a third house
- * turning the sweep means the axis belongs in `SweepOptions`. The third house
- * declined the ballot: it does not sweep at all.
- *
- * It lives here rather than in the core for the usual reason. One house hips.
- * When a second one does, this moves.
+ * It was written tradition-side and said, in as many words, that it would move
+ * here when a second house hipped. A second house hips: an open pavilion whose
+ * roof is a single band — one eave rectangle and one ridge — which is the
+ * degenerate case of the same stack and came through needing nothing. That is
+ * better evidence than a second elaborate case would have been, because a
+ * primitive that only works at the complexity it was written for is not a
+ * primitive.
  *
  * Levels run outermost first and ridge last. The ridge is simply the level
  * whose half-extent across the short axis is zero, which is what turns the two
  * end faces of the top band from trapezoids into triangles.
  */
 
-import { computeNormals, emptyMesh, lerp } from '@/lib/core/geometry'
-import type { MeshData } from '@/lib/core/geometry'
-import type { RoofLevel } from './types'
+import { computeNormals, emptyMesh, lerp } from './geometry'
+import type { MeshData } from './geometry'
+
+/**
+ * One level of the roof, in plan and in height.
+ *
+ * The eave is the largest, each tier above it is smaller, and the topmost has
+ * no width at all across the short axis, which is what makes it a ridge.
+ */
+export interface RoofLevel {
+  readonly key: string
+  /** half-extent across X. Zero at the ridge. */
+  readonly halfX: number
+  /** half-extent along Z, the ridge axis */
+  readonly halfZ: number
+  readonly y: number
+}
 
 /** Below this a triangle is a seam rather than a surface, and is not emitted. */
 const DEGENERATE = 1e-9
@@ -183,6 +195,35 @@ function pushed(a: RoofLevel, b: RoofLevel, at: RoofLevel, push: number): RoofLe
     halfZ: at.halfZ + (push * dy) / outZ,
     y: at.y + push * ((riseX + riseZ) / 2),
   }
+}
+
+/**
+ * Where the *surface* is at a fraction up the slope, pushed out by `push`.
+ *
+ * `hipLevelAt` gives the frame line; this gives the outside of what is laid
+ * over it, which is a different thing whenever the roof has any pitch at all —
+ * an offset along the normal buys less height on a steep roof than on a
+ * shallow one. Anything that has to sit *on* the covering needs this rather
+ * than a height computed beside it. A ridge cap positioned by its own
+ * arithmetic tracked a shallow roof correctly and floated clear of a steep
+ * one, which is this codebase's most persistent fault appearing yet again:
+ * two places describing one shape.
+ */
+export function hipSurfaceAt(levels: readonly RoofLevel[], f: number, push: number): RoofLevel {
+  const at = hipLevelAt(levels, f)
+  if (push === 0 || levels.length < 2) return at
+  const total = hipRun(levels)
+  let walked = 0
+  const want = Math.max(0, Math.min(1, f)) * total
+  for (let i = 1; i < levels.length; i++) {
+    const a = levels[i - 1]
+    const b = levels[i]
+    if (!a || !b) continue
+    const run = bandRun(a, b)
+    if (want <= walked + run || i === levels.length - 1) return pushed(a, b, at, push)
+    walked += run
+  }
+  return at
 }
 
 export interface HipOptions {
