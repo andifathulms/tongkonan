@@ -167,7 +167,7 @@ function HouseCard({
     <li className="h-full">
       <Link
         href={`${houseHref(locale, tradition.slug)}/`}
-        className="flex h-full flex-col gap-2 rounded border border-hairline px-4 py-4 transition-colors duration-state hover:bg-wash"
+        className="press flex h-full flex-col gap-2 rounded border border-hairline px-4 py-4 transition-colors duration-state hover:border-muted hover:bg-wash"
       >
         <ElevationMark s={s} frame={frame} />
         <span className="micro">

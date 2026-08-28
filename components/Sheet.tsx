@@ -196,7 +196,7 @@ function TitleBlock({
                   href={href(locale, tradition.slug, r)}
                   aria-current={active ? 'page' : undefined}
                   className={[
-                    'block rounded px-2 py-1.5 transition-colors duration-state',
+                    'press block rounded px-2 py-1.5 transition-colors duration-state',
                     active ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
                   ].join(' ')}
                 >

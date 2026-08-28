@@ -158,7 +158,7 @@ export function RakitClient({ locale, tradisi }: { locale: Locale; tradisi: Trad
             <button
               type="button"
               onClick={() => (t >= 1 ? replay() : setPlaying(!playing))}
-              className="mb-3 w-full rounded bg-bolu px-2 py-2 text-body text-kapur transition-opacity duration-state hover:opacity-90"
+              className="press mb-3 w-full rounded bg-bolu px-2 py-2 text-body text-kapur transition-opacity duration-state hover:opacity-90"
             >
               {t >= 1
                 ? pick(COPY.assembly.replay, locale)
@@ -214,7 +214,7 @@ export function RakitClient({ locale, tradisi }: { locale: Locale; tradisi: Trad
                       }}
                       aria-current={active ? 'step' : undefined}
                       className={[
-                        'w-full rounded px-2 py-1.5 text-left transition-colors duration-state',
+                        'press w-full rounded px-2 py-1.5 text-left transition-colors duration-state',
                         active
                           ? 'bg-bolu text-kapur'
                           : 'hover:bg-wash',
@@ -231,6 +231,25 @@ export function RakitClient({ locale, tradisi }: { locale: Locale; tradisi: Trad
                         </span>
                         <span className="num text-meta opacity-70">{span.partIds.length}</span>
                       </span>
+                      {/*
+                        How far through this stage the sequence stands, drawn
+                        only on the row that is running. It follows the same
+                        clock the viewport follows, so the rail and the model
+                        agree about where the crew is.
+                      */}
+                      {active ? (
+                        <span
+                          className="mt-1.5 block h-0.5 rounded-none bg-kapur"
+                          style={{
+                            width: `${Math.round(
+                              (Math.min(1, Math.max(0, (t - span.start) / (span.end - span.start))) *
+                                1000) /
+                                10,
+                            )}%`,
+                          }}
+                          aria-hidden
+                        />
+                      ) : null}
                     </button>
                   </li>
                 )

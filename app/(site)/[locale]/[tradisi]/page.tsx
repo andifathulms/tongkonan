@@ -128,7 +128,7 @@ export default function House({ params }: { params: { locale: string; tradisi: s
             <li key={r} className="h-full">
               <Link
                 href={`${href(locale, t.slug, r)}/`}
-                className="flex h-full flex-col gap-1 rounded border border-hairline px-4 py-4 transition-colors duration-state hover:bg-wash"
+                className="press flex h-full flex-col gap-1 rounded border border-hairline px-4 py-4 transition-colors duration-state hover:border-muted hover:bg-wash"
               >
                 <span className="text-lead text-bolu">{pick(COPY.nav[r], locale)}</span>
                 <span className="text-body text-muted">{pick(COPY.navGloss[r], locale)}</span>
