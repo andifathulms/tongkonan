@@ -59,9 +59,26 @@ export default function Landing({ params }: { params: { locale: string } }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-5xl flex-col px-6 py-10">
-      <header className="flex items-baseline justify-between gap-3">
+    <main className="mx-auto flex min-h-dvh max-w-5xl flex-col px-6 pb-10">
+      {/*
+        The title bar, kept while the page scrolls: the wordmark, the three
+        section anchors, and the way into the other language. It floats on
+        the veil token, the same surface every panel over the model uses, so
+        "a bar over content" means one thing across the site.
+      */}
+      <header className="sticky top-0 z-20 -mx-6 flex min-h-control items-center justify-between gap-3 border-b border-hairline bg-veil px-6 py-2 backdrop-blur-veil">
         <p className="micro text-bolu">{pick(COPY.appName, locale)}</p>
+        <nav className="micro hidden items-center gap-5 sm:flex">
+          <a href="#cerita" className="transition-colors duration-state hover:text-bolu">
+            {pick(COPY.landing.storyHeading, locale)}
+          </a>
+          <a href="#tapak" className="transition-colors duration-state hover:text-bolu">
+            {pick(COPY.landing.sitesHeading, locale)}
+          </a>
+          <a href="#rumah" className="transition-colors duration-state hover:text-bolu">
+            {pick(COPY.landing.housesHeading, locale)}
+          </a>
+        </nav>
         <LocaleSwitch
           locale={locale}
           targets={
@@ -80,8 +97,8 @@ export default function Landing({ params }: { params: { locale: string } }) {
         title bar. The drawing under it is the claim made good — the same
         parts the invariants run over, projected and traced.
       */}
-      <h1 className="mt-10 max-w-2xl text-display text-bolu">{pick(COPY.tagline, locale)}</h1>
-      <p className="mt-4 max-w-2xl text-body text-muted">{pick(COPY.landing.lede, locale)}</p>
+      <h1 className="mt-12 max-w-3xl text-display text-bolu">{pick(COPY.tagline, locale)}</h1>
+      <p className="mt-5 max-w-2xl text-lead text-muted">{pick(COPY.landing.lede, locale)}</p>
 
       <div className="mt-8">
         <ElevationShelf
@@ -97,11 +114,16 @@ export default function Landing({ params }: { params: { locale: string } }) {
 
       <hr className="rule my-10" />
 
-      <section className="max-w-2xl">
+      {/*
+        The story runs in two columns above the sheet breakpoint: four beats
+        read as a spread, not a scroll, and each paragraph keeps its own
+        column so no beat is split mid-sentence.
+      */}
+      <section id="cerita" className="scroll-mt-16">
         <h2 className="micro mb-4">{pick(COPY.landing.storyHeading, locale)}</h2>
-        <div className="flex flex-col gap-4">
+        <div className="gap-10 sheet:columns-2">
           {COPY.landing.story.map((p, i) => (
-            <p key={i} className="text-body text-bolu">
+            <p key={i} className="reveal mb-4 break-inside-avoid text-body text-bolu">
               {pick(p, locale)}
             </p>
           ))}
@@ -110,7 +132,7 @@ export default function Landing({ params }: { params: { locale: string } }) {
 
       <hr className="rule my-10" />
 
-      <section className="max-w-2xl">
+      <section id="tapak" className="reveal max-w-3xl scroll-mt-16">
         <h2 className="micro mb-4">{pick(COPY.landing.sitesHeading, locale)}</h2>
         <SiteMap locale={locale} />
         <p className="mt-3 text-body text-muted">{pick(COPY.landing.sitesNote, locale)}</p>
@@ -118,7 +140,7 @@ export default function Landing({ params }: { params: { locale: string } }) {
 
       <hr className="rule my-10" />
 
-      <section>
+      <section id="rumah" className="scroll-mt-16">
         <h2 className="micro mb-4">{pick(COPY.landing.housesHeading, locale)}</h2>
         {/*
           The legend for the card bars, drawn once above the index rather than
@@ -127,12 +149,13 @@ export default function Landing({ params }: { params: { locale: string } }) {
         <div className="mb-4">
           <SplitLegend locale={locale} />
         </div>
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sheet:grid-cols-4">
-          {built.map(({ t, b, s }) => (
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sheet:grid-cols-3">
+          {built.map(({ t, b, s }, i) => (
             <HouseCard
               key={t.key}
               locale={locale}
               tradition={t}
+              plate={i + 1}
               s={s}
               frame={frame}
               parts={b.house.parts.length}
@@ -146,9 +169,15 @@ export default function Landing({ params }: { params: { locale: string } }) {
   )
 }
 
+/** The plate number as it is printed: T for tradisi, two digits. */
+export function plateNo(n: number): string {
+  return `T.${String(n).padStart(2, '0')}`
+}
+
 function HouseCard({
   locale,
   tradition,
+  plate,
   s,
   frame,
   parts,
@@ -156,6 +185,7 @@ function HouseCard({
 }: {
   locale: Locale
   tradition: Tradition
+  plate: number
   s: Silhouette
   frame: { w: number; h: number }
   parts: number
@@ -164,29 +194,40 @@ function HouseCard({
   const split = tradition.split
   const share = split.total === 0 ? 0 : Math.round((split.interpolated / split.total) * 100)
   return (
-    <li className="h-full">
+    <li className="reveal h-full">
       <Link
         href={`${houseHref(locale, tradition.slug)}/`}
-        className="press flex h-full flex-col gap-2 rounded border border-hairline px-4 py-4 transition-colors duration-state hover:border-muted hover:bg-wash"
+        className="press flex h-full flex-col rounded border border-hairline bg-sheet transition-colors duration-state hover:border-muted hover:bg-wash"
       >
-        <ElevationMark s={s} frame={frame} />
-        <span className="micro">
-          {tradition.people[locale]} · {tradition.place[locale]}
+        {/* The plate header: catalogue number left, whose house right. */}
+        <span className="flex items-baseline justify-between gap-2 border-b border-hairline px-4 py-2">
+          <span className="micro text-bolu">
+            {pick(COPY.landing.plate, locale)} {plateNo(plate)}
+          </span>
+          <span className="micro truncate">{tradition.people[locale]}</span>
         </span>
-        <span className="text-title text-bolu">{tradition.house[locale]}</span>
-        <span className="font-mono text-meta text-muted">
-          {parts} {pick(COPY.landing.parts, locale)} · {joints}{' '}
-          {pick(COPY.landing.joints, locale)}
+        <span className="block px-4 pt-4">
+          <ElevationMark s={s} frame={frame} />
         </span>
-        {/* Each house's own bar. Never a merged one — see the note below the index. */}
-        <span className="mt-auto block">
+        <span className="flex flex-col gap-1 px-4 pb-4 pt-2">
+          <span className="text-title text-bolu">{tradition.house[locale]}</span>
+          <span className="micro">{tradition.place[locale]}</span>
+          <span className="mt-1 font-mono text-meta text-muted">
+            {parts} {pick(COPY.landing.parts, locale)} · {joints}{' '}
+            {pick(COPY.landing.joints, locale)}
+          </span>
+        </span>
+        {/* The plate foot: each house's own bar, never a merged one. */}
+        <span className="mt-auto flex flex-col gap-2 border-t border-hairline px-4 py-3">
           <SplitBar split={split} />
-        </span>
-        <span className="font-mono text-meta text-muted">
-          {pick(COPY.landing.interpolatedShare, locale).replace('{pct}', String(share))}
-        </span>
-        <span className="text-body text-bolu underline underline-offset-4">
-          {pick(COPY.landing.enter, locale)} <span aria-hidden>→</span>
+          <span className="flex items-baseline justify-between gap-2">
+            <span className="font-mono text-meta text-muted">
+              {pick(COPY.landing.interpolatedShare, locale).replace('{pct}', String(share))}
+            </span>
+            <span className="text-body text-bolu underline underline-offset-4">
+              {pick(COPY.landing.enter, locale)} <span aria-hidden>→</span>
+            </span>
+          </span>
         </span>
       </Link>
     </li>

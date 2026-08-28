@@ -169,6 +169,13 @@ export const COPY = {
       '{pct}% of dimensions the author’s own',
     ),
     enter: t('Masuk', 'Enter'),
+    /*
+     * The catalogue plate label on each index card: T for tradisi, numbered
+     * in the order the houses joined the registry — which is the order the
+     * project learned what generalises, so the number is history, not
+     * decoration. The map's markers carry the same numbers.
+     */
+    plate: t('Lembar', 'Plate'),
     doorsHeading: t('Cara membaca rumah ini', 'Ways to read this house'),
   },
   modelLabel: t(

@@ -153,6 +153,13 @@ body {
   height: 100%;
 }
 
+/* Anchor moves glide unless the reader has asked motion to stop. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /*
  * The browser's own line breaking, asked to try harder: headings balance
  * their lines and prose avoids leaving one word alone on the last one.
