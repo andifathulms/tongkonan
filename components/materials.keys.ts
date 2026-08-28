@@ -29,7 +29,15 @@ import type { TraditionKey } from '@/lib/tradition/registry'
  * asked for a key nothing declared — which in the static export does not throw,
  * it silently falls back, so the tower would have been drawn in timber.
  */
-export const SHARED_MATERIALS: readonly string[] = ['kayu', 'papan', 'bambu', 'ijuk', 'alang', 'batu']
+export const SHARED_MATERIALS: readonly string[] = [
+  'kayu',
+  'papan',
+  'bambu',
+  'ijuk',
+  'alang',
+  'genteng',
+  'batu',
+]
 
 /**
  * What each tradition owns, because the generator genuinely differs.
@@ -46,10 +54,10 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   /** pucuak rabuang and kaluak paku, and woven bamboo in the end walls */
   minang: ['ukiran', 'anyaman'],
   /**
-   * lung-lungan and wajikan; fired clay rather than thatch; and teak named
-   * rather than called timber, because on a joglo it is named.
+   * lung-lungan and wajikan, and teak named rather than called timber because
+   * on a joglo it is named. The fired clay is shared — see above.
    */
-  jawa: ['ukiran', 'genteng', 'jati'],
+  jawa: ['ukiran', 'jati'],
   /**
    * Nothing. The first house here that owns no material of its own.
    *
@@ -76,6 +84,15 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * missing was a carving; here nothing is missing at all.
    */
   sumba: [],
+  /**
+   * Two named timbers and a turned lattice.
+   *
+   * `unglen` and `tembesu` are named rather than called timber for the same
+   * reason the joglo's `jati` and the betang's `ulin` are: on this house the
+   * species is a choice the builder made and stated. `kisi` is the turned bar
+   * of the front screen, which reads as neither board nor post.
+   */
+  palembang: ['unglen', 'tembesu', 'kisi'],
 }
 
 /**
@@ -98,6 +115,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   nias: 'kayu',
   dayak: 'ulin',
   sumba: 'kayu',
+  palembang: 'tembesu',
 }
 
 /** Every key a tradition is entitled to use. */

@@ -10,6 +10,7 @@ import { BaliControls } from './bali'
 import { NiasControls } from './nias'
 import { DayakControls } from './dayak'
 import { SumbaControls } from './sumba'
+import { PalembangControls } from './palembang'
 
 /**
  * The rule controls, chosen by tradition.
@@ -56,5 +57,7 @@ export function RuleControlsFor({
       return <DayakControls {...props} />
     case 'sumba':
       return <SumbaControls {...props} />
+    case 'palembang':
+      return <PalembangControls {...props} />
   }
 }

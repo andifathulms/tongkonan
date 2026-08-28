@@ -131,6 +131,15 @@ export const WAINGAPU: Site = {
   tzName: 'WITA',
 }
 
+/** Palembang, on the Musi in South Sumatra. */
+export const PALEMBANG: Site = {
+  name: 'Palembang',
+  latitude: -2.98,
+  longitude: 104.76,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,

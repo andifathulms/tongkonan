@@ -858,6 +858,13 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'palembang') {
+    // Two timbers that differ on purpose: unglen dark and dense in the posts,
+    // tembesu warmer and straighter in the frame and boards.
+    set.unglen = timber(808, 0, 0.3, 0.8)
+    set.tembesu = timber(809, 0.5, 0.7, 0.78)
+    set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
+    set.kisi = timber(810, 0.7, 0.9, 0.6)
   } else if (tradition === 'sumba') {
     set.kayu = timber(707, 0.2, 0.35, 0.82)
     set.alang = new THREE.MeshStandardMaterial({
