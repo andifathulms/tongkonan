@@ -234,6 +234,14 @@ function HouseCard({
   )
 }
 
+/** A latitude, said the way the locale says it: 3,0° LS in id, 3.0° S in en. */
+function latLabel(lat: number, locale: Locale): string {
+  const n = Math.abs(lat).toFixed(1)
+  const figure = locale === 'id' ? n.replace('.', ',') : n
+  const hemi = lat < 0 ? (locale === 'id' ? 'LS' : 'S') : locale === 'id' ? 'LU' : 'N'
+  return `${figure}° ${hemi}`
+}
+
 /**
  * The sites, plotted. A graticule and the equator, not a coastline: inventing
  * a plausible outline of the archipelago by hand would be an interpolated
@@ -241,8 +249,11 @@ function HouseCard({
  * refuses everywhere else. The coordinates are the same ones the solar
  * arithmetic runs on, read from each tradition's registry entry.
  *
- * aria-hidden because everything it shows — which houses, where — is written
- * out in the index below it.
+ * The markers carry the plate numbers and nothing else, and the names live
+ * in the legend list below — full labels collided the moment there were
+ * eleven sites three of which share a stretch of Sulawesi, and a map that
+ * scales by number is a map a twentieth house cannot crowd. The svg is
+ * aria-hidden; the legend is the real, linked content.
  */
 function SiteMap({ locale }: { locale: Locale }) {
   // Degrees of the frame, and viewBox units per degree.
@@ -258,51 +269,61 @@ function SiteMap({ locale }: { locale: Locale }) {
   const meridians = [100, 110, 120, 130, 140]
 
   return (
-    <svg
-      viewBox={`0 0 ${w} ${h}`}
-      className="w-full rounded border border-hairline"
-      aria-hidden="true"
-    >
-      {meridians.map((lon) => (
-        <g key={lon}>
-          <line x1={x(lon)} y1={0} x2={x(lon)} y2={h} stroke="var(--hairline)" />
-          <text x={x(lon) + 4} y={h - 6} className="micro" fill="var(--muted)">
-            {lon}°
-          </text>
-        </g>
-      ))}
-      {/* The equator, named: two of these sites sit close enough to it for a zero-shadow day. */}
-      <line x1={0} y1={y(0)} x2={w} y2={y(0)} stroke="var(--muted)" />
-      <text x={w - 8} y={y(0) - 6} textAnchor="end" className="micro" fill="var(--muted)">
-        {pick(COPY.landing.equator, locale)} 0°
-      </text>
-      {TRADITIONS.map((t) => (
-        <g key={t.key}>
-          <rect
-            x={x(t.site.longitude) - 3}
-            y={y(t.site.latitude) - 3}
-            width={6}
-            height={6}
-            fill="var(--bolu)"
-          />
-          <text
-            x={x(t.site.longitude) + 9}
-            y={y(t.site.latitude) + 4}
-            className="micro"
-            fill="var(--bolu)"
-          >
-            {t.house[locale]}
-          </text>
-          <text
-            x={x(t.site.longitude) + 9}
-            y={y(t.site.latitude) + 17}
-            className="micro"
-            fill="var(--muted)"
-          >
-            {t.site.name} {Math.abs(t.site.latitude).toFixed(1)}°{t.site.latitude < 0 ? 'S' : 'N'}
-          </text>
-        </g>
-      ))}
-    </svg>
+    <>
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        className="w-full rounded border border-hairline bg-sheet"
+        aria-hidden="true"
+      >
+        {meridians.map((lon) => (
+          <g key={lon}>
+            <line x1={x(lon)} y1={0} x2={x(lon)} y2={h} stroke="var(--hairline)" />
+            <text x={x(lon) + 4} y={h - 6} className="micro" fill="var(--muted)">
+              {lon}°
+            </text>
+          </g>
+        ))}
+        {/* The equator, named: several of these sites sit close enough to it for a zero-shadow day. */}
+        <line x1={0} y1={y(0)} x2={w} y2={y(0)} stroke="var(--muted)" />
+        <text x={w - 8} y={y(0) - 6} textAnchor="end" className="micro" fill="var(--muted)">
+          {pick(COPY.landing.equator, locale)} 0°
+        </text>
+        {TRADITIONS.map((t, i) => (
+          <g key={t.key}>
+            <rect
+              x={x(t.site.longitude) - 3}
+              y={y(t.site.latitude) - 3}
+              width={6}
+              height={6}
+              fill="var(--bolu)"
+            />
+            <text
+              x={x(t.site.longitude) + 8}
+              y={y(t.site.latitude) + 4}
+              className="micro"
+              fill="var(--bolu)"
+            >
+              {plateNo(i + 1)}
+            </text>
+          </g>
+        ))}
+      </svg>
+      <ol className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
+        {TRADITIONS.map((t, i) => (
+          <li key={t.key}>
+            <Link
+              href={`${houseHref(locale, t.slug)}/`}
+              className="flex items-baseline gap-3 rounded py-1 transition-colors duration-state hover:bg-wash"
+            >
+              <span className="micro shrink-0 text-bolu">{plateNo(i + 1)}</span>
+              <span className="min-w-0 truncate text-body text-bolu">{t.house[locale]}</span>
+              <span className="ml-auto shrink-0 font-mono text-meta text-muted">
+                {t.site.name} · {latLabel(t.site.latitude, locale)}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </>
   )
 }
