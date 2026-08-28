@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { LocaleSwitch } from '@/components/LocaleSwitch'
+import { SplitBar, SplitLegend } from '@/components/split'
 import {
   COPY,
   DEFAULT_LOCALE,
   LOCALES,
-  LOCALE_NAMES,
   homeHref,
   houseHref,
   isLocale,
@@ -43,7 +44,15 @@ export default function Landing({ params }: { params: { locale: string } }) {
     <main className="mx-auto flex min-h-dvh max-w-2xl flex-col px-6 py-10">
       <header className="flex items-baseline justify-between gap-3">
         <p className="micro text-bolu">{pick(COPY.appName, locale)}</p>
-        <LocaleSwitch locale={locale} />
+        <LocaleSwitch
+          locale={locale}
+          targets={
+            Object.fromEntries(LOCALES.map((l) => [l, `${homeHref(l)}/`])) as Record<
+              typeof locale,
+              string
+            >
+          }
+        />
       </header>
 
       {/*
@@ -84,20 +93,9 @@ export default function Landing({ params }: { params: { locale: string } }) {
           The legend for the card bars, drawn once above the index rather than
           once per card: no colour may carry a meaning only the code knows.
         */}
-        <dl className="mb-4 flex flex-wrap gap-x-5 gap-y-1">
-          {(
-            [
-              ['measured', 'var(--bolu)'],
-              ['canon', 'var(--riri)'],
-              ['interpolated', 'var(--rara)'],
-            ] as const
-          ).map(([key, colour]) => (
-            <div key={key} className="flex items-center gap-2">
-              <dt className="h-2 w-2 rounded-none" style={{ background: colour }} aria-hidden />
-              <dd className="micro">{pick(COPY.provenance[key], locale)}</dd>
-            </div>
-          ))}
-        </dl>
+        <div className="mb-4">
+          <SplitLegend locale={locale} />
+        </div>
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {built.map(({ t, b }) => (
             <HouseCard
@@ -127,8 +125,7 @@ function HouseCard({
   joints: number
 }) {
   const split = tradition.split
-  const pct = (n: number) => (split.total === 0 ? 0 : (n / split.total) * 100)
-  const share = Math.round(pct(split.interpolated))
+  const share = split.total === 0 ? 0 : Math.round((split.interpolated / split.total) * 100)
   return (
     <li className="h-full">
       <Link
@@ -144,10 +141,8 @@ function HouseCard({
           {pick(COPY.landing.joints, locale)}
         </span>
         {/* Each house's own bar. Never a merged one — see the note below the index. */}
-        <span className="mt-auto flex h-1 w-full overflow-hidden rounded" aria-hidden>
-          <span style={{ width: `${pct(split.measured)}%`, background: 'var(--bolu)' }} />
-          <span style={{ width: `${pct(split.canon)}%`, background: 'var(--riri)' }} />
-          <span style={{ width: `${pct(split.interpolated)}%`, background: 'var(--rara)' }} />
+        <span className="mt-auto block">
+          <SplitBar split={split} />
         </span>
         <span className="font-mono text-meta text-muted">
           {pick(COPY.landing.interpolatedShare, locale).replace('{pct}', String(share))}
@@ -233,32 +228,3 @@ function SiteMap({ locale }: { locale: Locale }) {
   )
 }
 
-/**
- * The language switch, landing-local: the same face as the one in the rail,
- * but its links go to the landing page in the other language rather than to a
- * route of a house this page is not inside.
- */
-function LocaleSwitch({ locale }: { locale: Locale }) {
-  return (
-    <div className="flex items-stretch overflow-hidden rounded border border-hairline">
-      {LOCALES.map((l, i) => (
-        <Link
-          key={l}
-          href={`${homeHref(l)}/`}
-          hrefLang={l}
-          lang={l}
-          aria-label={`${LOCALE_NAMES[l]} — ${pick(COPY.openIn, l)}`}
-          title={pick(COPY.openIn, l)}
-          aria-current={l === locale ? 'true' : undefined}
-          className={[
-            'micro flex min-h-control items-center px-2 transition-colors duration-state',
-            i > 0 ? 'border-l border-hairline' : '',
-            l === locale ? 'bg-bolu text-kapur' : 'text-bolu hover:bg-wash',
-          ].join(' ')}
-        >
-          {l.toUpperCase()}
-        </Link>
-      ))}
-    </div>
-  )
-}

@@ -132,6 +132,7 @@ export const COPY = {
       '{pct}% of dimensions the author’s own',
     ),
     enter: t('Masuk', 'Enter'),
+    doorsHeading: t('Cara membaca rumah ini', 'Ways to read this house'),
   },
   modelLabel: t(
     'Model tongkonan, dihitung dari aturannya',
