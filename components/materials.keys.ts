@@ -93,6 +93,16 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * of the front screen, which reads as neither board nor post.
    */
   palembang: ['unglen', 'tembesu', 'kisi'],
+  /**
+   * Nipa-palm thatch: the fourth plant and the fourth generator.
+   *
+   * Ijuk is black palm fibre, alang-alang is grass, rumbia is sago leaf, nipah
+   * is the frond of a mangrove palm folded over a lath. Four roofs, four
+   * plants, four ways of catching light — and giving any two of them one
+   * generator because both are "thatch" is the split-by-name fault waiting to
+   * happen for the fifth time.
+   */
+  bugis: ['nipah'],
 }
 
 /**
@@ -116,6 +126,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   dayak: 'ulin',
   sumba: 'kayu',
   palembang: 'tembesu',
+  bugis: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

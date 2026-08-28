@@ -750,6 +750,47 @@ function sirapCanvas(): HTMLCanvasElement {
   return el
 }
 
+/**
+ * Nipah: mangrove-palm frond, folded over a lath and stitched.
+ *
+ * The fourth thatch here and the fourth generator, because it is the fourth
+ * plant. A nipah panel is made before it goes up — leaflets folded over a
+ * batten and sewn — so what reads is a regular seam every few centimetres and
+ * a hard horizontal line where one panel laps the next, which is nothing like
+ * loose ijuk or combed alang-alang.
+ */
+function nipahCanvas(): HTMLCanvasElement {
+  const S = 512
+  const { ctx, el } = canvas(S)
+  const r = rng(20317)
+  const base = mix(mix(RIRI, BOLU, 0.46), KAPUR, 0.14)
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, S, S)
+  const rows = 9
+  const h = S / rows
+  for (let j = 0; j < rows; j++) {
+    // The leaflets: near-vertical strokes, regular because they were folded
+    // over a lath rather than thrown on.
+    for (let i = 0; i < 120; i++) {
+      const x = (i / 120) * S + (r() - 0.5) * 2
+      ctx.strokeStyle = mix(base, r() > 0.5 ? KAPUR : BOLU, 0.04 + r() * 0.16)
+      ctx.lineWidth = 0.8 + r() * 0.8
+      ctx.beginPath()
+      ctx.moveTo(x, j * h + 1)
+      ctx.lineTo(x + (r() - 0.5) * 2, j * h + h - 1)
+      ctx.stroke()
+    }
+    // The stitched lath, and the shadow the panel above casts on this one.
+    ctx.strokeStyle = mix(base, BOLU, 0.42)
+    ctx.lineWidth = 1.8
+    ctx.beginPath()
+    ctx.moveTo(0, j * h + 0.9)
+    ctx.lineTo(S, j * h + 0.9)
+    ctx.stroke()
+  }
+  return el
+}
+
 const clampByte = (v: number) => Math.min(255, Math.max(0, v))
 
 /* ── The material sets ────────────────────────────────────────────────── */
@@ -858,6 +899,14 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'bugis') {
+    set.kayu = timber(909, 0.25, 0.6, 0.8)
+    set.nipah = new THREE.MeshStandardMaterial({
+      map: tex(nipahCanvas()),
+      roughness: 0.94,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
   } else if (tradition === 'palembang') {
     // Two timbers that differ on purpose: unglen dark and dense in the posts,
     // tembesu warmer and straighter in the frame and boards.

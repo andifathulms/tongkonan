@@ -140,6 +140,15 @@ export const PALEMBANG: Site = {
   tzName: 'WIB',
 }
 
+/** Pare-Pare, on the west coast of South Sulawesi. */
+export const PARE_PARE: Site = {
+  name: 'Pare-Pare',
+  latitude: -4.0,
+  longitude: 119.63,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 export const WAE_REBO: Site = {
   name: 'Wae Rebo',
   latitude: -8.72,

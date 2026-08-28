@@ -11,6 +11,7 @@ import { NiasControls } from './nias'
 import { DayakControls } from './dayak'
 import { SumbaControls } from './sumba'
 import { PalembangControls } from './palembang'
+import { BugisControls } from './bugis'
 
 /**
  * The rule controls, chosen by tradition.
@@ -59,5 +60,7 @@ export function RuleControlsFor({
       return <SumbaControls {...props} />
     case 'palembang':
       return <PalembangControls {...props} />
+    case 'bugis':
+      return <BugisControls {...props} />
   }
 }
