@@ -6,7 +6,7 @@ import { Viewport } from './viewport/Viewport'
 import { ProvenanceStrip } from './Provenance'
 import { useReaderState } from './useReaderState'
 import { flag, readFlag, unless } from '@/lib/reader'
-import { Choice } from './Controls'
+import { Choice, Toggle } from './Controls'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { tradition } from '@/lib/tradition/registry'
@@ -36,9 +36,15 @@ export function BacaClient({ locale, tradisi }: { locale: Locale; tradisi: Tradi
   const t0 = useMemo(() => tradition(tradisi), [tradisi])
   /* The one thing a reader chooses here: façade, or cut open. */
   const [vantage, setVantage] = useReaderState(
-    { section: false },
-    (p) => ({ section: readFlag(p.get('potongan'), false) }),
-    (v) => [['potongan', unless(v.section, false, flag)]],
+    { section: false, site: true },
+    (p) => ({
+      section: readFlag(p.get('potongan'), false),
+      site: readFlag(p.get('tapak'), true),
+    }),
+    (v) => [
+      ['potongan', unless(v.section, false, flag)],
+      ['tapak', unless(v.site, true, flag)],
+    ],
   )
   const section = vantage.section
   const setSection = (v: boolean) => setVantage({ section: v })
@@ -109,6 +115,24 @@ export function BacaClient({ locale, tradisi }: { locale: Locale; tradisi: Tradi
           {built.scene.site.length > 0 && (
             <RailSection title={pick(COPY.site.heading, locale)}>
               <p className="mb-3 text-body text-muted">{pick(COPY.site.intro, locale)}</p>
+              {/*
+                The switch belongs beside the legend rather than only on the
+                route that generates. This is the façade reading, and a façade
+                is read off the building — a granary standing in front of the
+                one being described is a granary in the way.
+              */}
+              <div className="mb-3">
+                <Toggle
+                  checked={vantage.site}
+                  onChange={(v) => setVantage({ site: v })}
+                  label={pick(COPY.controls.site, locale)}
+                  hint={
+                    locale === 'id'
+                      ? 'Matikan dan yang tersisa hanya bangunannya.'
+                      : 'Turn it off and the building is all that is left.'
+                  }
+                />
+              </div>
               <dl className="flex flex-col gap-3">
                 {built.scene.site.map((mark) => (
                   <div key={mark.key}>
@@ -141,6 +165,7 @@ export function BacaClient({ locale, tradisi }: { locale: Locale; tradisi: Tradi
         sun={sun}
         view={section ? 'potongan' : 'tampak'}
         figure
+        site={vantage.site}
         rain={false}
         section={section}
         reveal={null}

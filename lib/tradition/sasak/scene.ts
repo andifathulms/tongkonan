@@ -73,38 +73,52 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
  */
 function site(layout: Layout): readonly SiteMark[] {
   const spacing = DIMS.neighbourSpacing.value
-  const plan = DIMS.neighbourPlan.value
-  const half = plan / 2
-  void layout
-  /* The neighbours as massing: a raised block under a hood. */
-  const floorY = DIMS.neighbourFloorY.value
-  const bodyH = DIMS.neighbourBodyHeight.value
-  const hood = DIMS.neighbourHoodHeight.value
-  const post = DIMS.neighbourPostWidth.value
-  const eave = DIMS.neighbourHoodEave.value
+
+  /*
+   * The neighbours are this building, at this building's own size.
+   *
+   * They were five invented numbers — a floor height, a body, a hood, a post
+   * and an overhang — and being invented separately they came out half again
+   * too big, so the granary the page is about stood between two larger ones.
+   * A neighbouring lumbung is a lumbung: its plan, its floor, its store and
+   * its hood are read off the layout being drawn, and the only figure left is
+   * how far apart they stand.
+   *
+   * What is still massing is the hood: a cone where the subject has nine
+   * stepped bands following a curve. The size is the subject's, the shape is
+   * shorthand, and the rat guards — the whole point of this building — are on
+   * the one in the middle only.
+   */
+  const eaveLevel = layout.roof[0]
+  const ridgeLevel = layout.roof[layout.roof.length - 1]
+  const hoodHalf = eaveLevel?.halfX ?? layout.halfX
+  const eaveY = eaveLevel?.y ?? layout.floorY
+  const hoodRise = (ridgeLevel?.y ?? eaveY) - eaveY
+  const post = layout.postSection
+  const store = layout.storeHalfX * 2
   const volumes: SiteVolume[] = []
   for (const sz of [-1, 1] as const) {
     const cz = sz * spacing
     for (const ex of [-1, 1] as const) {
       for (const ez of [-1, 1] as const) {
         volumes.push({
-          kind: 'cylinder',
-          at: [(ex * (plan - post)) / 2, 0, cz + (ez * (plan - post)) / 2],
-          size: [post, floorY, post],
+          kind: 'box',
+          at: [ex * (layout.halfX - post / 2), 0, cz + ez * (layout.halfZ - post / 2)],
+          size: [post, layout.floorY, post],
           material: 'kayu',
         })
       }
     }
     volumes.push({
       kind: 'box',
-      at: [0, floorY, cz],
-      size: [plan, bodyH, plan],
+      at: [0, layout.floorY, cz],
+      size: [store, layout.storeHeight, store],
       material: 'kayu',
     })
     volumes.push({
       kind: 'cone',
-      at: [0, floorY + bodyH, cz],
-      size: [plan + eave * 2, hood, plan + eave * 2],
+      at: [0, eaveY, cz],
+      size: [hoodHalf * 2, hoodRise, hoodHalf * 2],
       material: 'atap',
     })
   }
@@ -118,10 +132,14 @@ function site(layout: Layout): readonly SiteMark[] {
         'Jejak dua lumbung lain di pekarangan yang sama. Bahwa bangunan paling dirawat di pekarangan bukan tempat orang tidur hanyalah terbaca bila yang lain ikut terlihat; rumah tinggalnya sendiri tidak dimodelkan.',
       glossEn:
         'The footprints of two more lumbung in the same yard. That the most carefully made building in the compound is not the one people sleep in only reads when the others are in view; the dwellings themselves are not modelled.',
-      lines: [
-        groundRect(-half, -spacing - half, half, -spacing + half),
-        groundRect(-half, spacing - half, half, spacing + half),
-      ],
+      lines: [-1, 1].map((sz) =>
+        groundRect(
+          -hoodHalf,
+          sz * spacing - hoodHalf,
+          hoodHalf,
+          sz * spacing + hoodHalf,
+        ),
+      ),
       closed: true,
       volumes,
       provenance: 'canon',

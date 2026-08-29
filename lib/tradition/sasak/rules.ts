@@ -134,13 +134,7 @@ export const DIMS = {
 
   /* The site: the row, because a lumbung is never the only one. */
   granaryRow: dim(1, 'count', 'canon', 'depdikbud-ntb', 'Lumbung berdiri berjajar di pekarangan bersama lumbung lain dan rumah-rumah tinggal. Bangunan yang paling dirawat di pekarangan itu bukan tempat orang tidur, dan itu hanya terbaca bila yang lain ikut terlihat.', 'Lumbung stand in a row in the compound alongside other granaries and the dwellings. The most carefully made building in the yard is not the one people sleep in, and that only reads when the others are in view.'),
-  neighbourSpacing: dim(6, 'm', 'interpolated', 'none', 'Jarak antar lumbung sepanjang jajarannya.', 'Spacing between lumbung along their row.'),
-  neighbourFloorY: dim(1.5, 'm', 'interpolated', 'none', 'Tinggi lantai lumbung tetangga. Hanya massanya yang digambar — sebuah lumbung adalah bangunan yang berhak atas modelnya sendiri, dan yang ada di sini balok dengan tudung di atasnya.', 'Height of a neighbouring lumbung’s floor. Only its massing is drawn — a lumbung is a building entitled to its own model, and what stands here is a block with a hood over it.'),
-  neighbourBodyHeight: dim(1.2, 'm', 'interpolated', 'none', 'Tinggi badan lumbung tetangga di atas lantainya, pada massa yang digambar.', 'Height of a neighbouring lumbung’s body above its floor, on the massing drawn here.'),
-  neighbourPostWidth: dim(0.22, 'm', 'interpolated', 'none', 'Garis tengah tiang lumbung tetangga.', 'Diameter of a neighbouring lumbung’s post.'),
-  neighbourHoodEave: dim(0.9, 'm', 'interpolated', 'none', 'Tritisan tudung di luar badannya.', 'Overhang of the hood beyond the body.'),
-  neighbourHoodHeight: dim(2, 'm', 'interpolated', 'none', 'Tinggi tudung di atas massa itu.', 'Height of the hood over that massing.'),
-  neighbourPlan: dim(3.2, 'm', 'interpolated', 'none', 'Sisi denah lumbung tetangga. Hanya jejaknya yang digambar.', 'Plan side of a neighbouring lumbung. Only the footprint is drawn.'),
+  neighbourSpacing: dim(6, 'm', 'interpolated', 'none', 'Jarak antar lumbung sepanjang jajarannya. Satu-satunya angka yang tersisa untuk tetangga: sisanya adalah lumbung ini sendiri, dibaca dari layout yang sedang digambar, karena lumbung tetangga adalah lumbung.', 'Spacing between lumbung along their row. The only figure left for the neighbours: everything else is this granary itself, read off the layout being drawn, because a neighbouring lumbung is a lumbung.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

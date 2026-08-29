@@ -16,6 +16,7 @@
 import { groundRect, groundRing } from '@/lib/core/scene'
 import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
+import { resolveLayout } from './frame'
 import { domeProfile } from './roof'
 import type { House, Layout } from './types'
 
@@ -86,10 +87,20 @@ function site(layout: Layout): readonly SiteMark[] {
    * least dishonest kind of massing in the collection.
    */
   const fh = DIMS.fenceHeightSite.value
-  const nh = DIMS.neighbourHeightSite.value
   const ft = DIMS.fenceThickness.value
-  const ebei = DIMS.ebeiRadius.value
-  const wamai = DIMS.wamaiRadius.value
+  /*
+   * The ebei and the wamai at the size this pack builds them.
+   *
+   * They are entries in the building rule — a reader can put either one on
+   * screen in full by changing it — so inventing a radius for their massing
+   * was inventing a number the model already knew. Read off the same
+   * `resolveLayout` that would build them, with this house's own layers of
+   * thatch, so the three in the compound are three of the same thing.
+   */
+  const ebeiLayout = resolveLayout({ ...layout.rules, bangunan: 'ebei' })
+  const wamaiLayout = resolveLayout({ ...layout.rules, bangunan: 'wamai' })
+  const ebei = ebeiLayout.radius
+  const wamai = wamaiLayout.radius
   const volumes: SiteVolume[] = [
     { kind: 'box', at: [-half, 0, 0], size: [ft, fh, half * 2], material: 'kayu' },
     { kind: 'box', at: [half, 0, 0], size: [ft, fh, half * 2], material: 'kayu' },
@@ -98,13 +109,13 @@ function site(layout: Layout): readonly SiteMark[] {
     {
       kind: 'cone',
       at: [offset, 0, -offset],
-      size: [ebei * 2, nh, ebei * 2],
+      size: [ebei * 2, ebeiLayout.apexY, ebei * 2],
       material: 'atap',
     },
     {
       kind: 'cone',
       at: [-offset, 0, offset],
-      size: [wamai * 2, nh - ebei + wamai, wamai * 2],
+      size: [wamai * 2, wamaiLayout.apexY, wamai * 2],
       material: 'atap',
     },
   ]
