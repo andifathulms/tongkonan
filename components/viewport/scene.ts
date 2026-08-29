@@ -597,6 +597,28 @@ export class HouseScene {
     this.needsRender = true
   }
 
+  /**
+   * Where each site mark's caption belongs on screen, in percent of the
+   * viewport, or nothing when it is behind the camera.
+   *
+   * The names are drawn in the interface's own type over the canvas rather
+   * than inside the model. A caption laid on the ground would be the first
+   * lettering in the scene, and the register here is a physical model under
+   * real light — a model with words written on the earth is a diagram.
+   */
+  siteLabels(): readonly { key: string; left: number; top: number }[] {
+    const out: { key: string; left: number; top: number }[] = []
+    const v = new THREE.Vector3()
+    for (const [key, anchor] of this.site.anchors()) {
+      v.copy(anchor).project(this.camera)
+      // Behind the camera, or far enough outside the frame that a caption
+      // would sit against the edge pointing at nothing.
+      if (v.z > 1 || Math.abs(v.x) > 1.1 || Math.abs(v.y) > 1.1) continue
+      out.push({ key, left: (v.x * 0.5 + 0.5) * 100, top: (-v.y * 0.5 + 0.5) * 100 })
+    }
+    return out
+  }
+
   /** Metres per pixel at the target, for the scale bar. */
   metresPerPixel(height: number): number {
     const fov = (this.camera.fov * Math.PI) / 180
@@ -832,7 +854,9 @@ class ZoneRig {
 class SiteRig {
   readonly group = new THREE.Group()
   private lines: THREE.LineSegments | null = null
-  private fills: THREE.Mesh[] = []
+  private meshes: THREE.Mesh[] = []
+  /** where each mark's caption is anchored, in world metres */
+  private anchorsByKey = new Map<string, THREE.Vector3>()
 
   /** Set out the grid for a particular building, and draw what is around it. */
   configure(model: SceneModel): void {
@@ -883,68 +907,6 @@ class SiteRig {
       push(n, reach)
     }
 
-    /*
-     * The north point, at the north edge of the grid.
-     *
-     * North is −X for every building here, because the axis convention is the
-     * model's and not the camera's: what varies between traditions is which
-     * end of the house faces which way, never which way north is. Drawn as an
-     * arrow and an N, in line segments — a letter from a font would be the
-     * first typography inside the model, and the model is not a diagram.
-     */
-    const mark = ground.clone().lerp(ink, 0.75)
-    const seg = (x1: number, z1: number, x2: number, z2: number, colour: THREE.Color) => {
-      positions.push(x1, y, z1, x2, y, z2)
-      for (let i = 0; i < 2; i++) colours.push(colour.r, colour.g, colour.b)
-    }
-    const tip = -half - 1.5
-    seg(tip, 0, tip + 2.4, 0, mark)
-    seg(tip, 0, tip + 0.9, -0.55, mark)
-    seg(tip, 0, tip + 0.9, 0.55, mark)
-    // N, one metre tall, read from the south — the side a viewer is on.
-    const nx = tip + 3.4
-    seg(nx + 1, -0.45, nx, -0.45, mark)
-    seg(nx, -0.45, nx + 1, 0.45, mark)
-    seg(nx + 1, 0.45, nx, 0.45, mark)
-
-    /*
-     * And what the tradition says is on the ground.
-     *
-     * These come off the scene model, so the renderer still cannot name a
-     * single one of them — it is handed polylines in metres and draws them.
-     * A closed figure gets a tone as well as an outline, because an outline
-     * alone in a field of setting-out lines is another setting-out line: the
-     * first version of this drew the yard, the barns and the river as hairlines
-     * among the grid and every one of them vanished into it. An open edge gets
-     * ticks on one side, the way a drawing shows which side of a line is the
-     * bank.
-     *
-     * Still flat, all of it: nothing here can hide any part of the house, which
-     * is the condition the whole idea was accepted under.
-     */
-    for (const site of model.site) {
-      for (const line of site.lines) {
-        for (let i = 1; i < line.length; i++) {
-          const a = line[i - 1]
-          const b = line[i]
-          if (a && b) seg(a[0], a[1], b[0], b[1], mark)
-        }
-        const first = line[0]
-        const last = line[line.length - 1]
-        if (!first || !last) continue
-        if (site.closed) {
-          // A closed figure that was written open still closes: the drawing
-          // says "an outline", so the outline is drawn whatever the list did.
-          if (first[0] !== last[0] || first[1] !== last[1]) {
-            seg(last[0], last[1], first[0], first[1], mark)
-          }
-          this.fill(line, ground.clone().lerp(ink, 0.09))
-        } else {
-          this.ticks(line, mark, seg)
-        }
-      }
-    }
-
     const geometry = new THREE.BufferGeometry()
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colours, 3))
@@ -953,6 +915,132 @@ class SiteRig {
       new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 1 }),
     )
     this.group.add(this.lines)
+
+    /*
+     * The north point, at the north edge of the grid.
+     *
+     * North is −X for every building here, because the axis convention is the
+     * model's and not the camera's: what varies between traditions is which
+     * end of the house faces which way, never which way north is. Drawn as an
+     * arrow and an N in ribbons, like everything else on the ground — a letter
+     * from a font would be the first typography inside the model, and the
+     * model is not a diagram.
+     */
+    const tip = -half - 1.5
+    const nx = tip + 3.4
+    this.ribbon(
+      [
+        [
+          [tip, 0],
+          [tip + 2.4, 0],
+        ],
+        [
+          [tip, 0],
+          [tip + 0.9, -0.55],
+        ],
+        [
+          [tip, 0],
+          [tip + 0.9, 0.55],
+        ],
+        [
+          [nx + 1, -0.45],
+          [nx, -0.45],
+          [nx + 1, 0.45],
+          [nx, 0.45],
+        ],
+      ],
+      0.1,
+      ground.clone().lerp(ink, 0.7),
+      0.012,
+    )
+
+    /*
+     * And what the tradition says is on the ground.
+     *
+     * The first version drew these as hairlines and they could not be found:
+     * a metre grid of hairlines with three more hairlines in it is a grid. A
+     * mark has to hold its own against the house, so an outline is a ribbon
+     * with a width in metres rather than a line with a width in pixels, and a
+     * closed figure carries a tone as well.
+     *
+     * Still flat, all of it, and still only outlines and tones: nothing here
+     * can hide any part of the house, and nothing in it is a plant, a hill,
+     * water or a sky.
+     */
+    const edge = ground.clone().lerp(ink, 0.62)
+    const tone = ground.clone().lerp(ink, 0.16)
+    for (const site of model.site) {
+      const closed = site.lines.map((line) => {
+        const first = line[0]
+        const last = line[line.length - 1]
+        if (!site.closed || !first || !last) return line
+        // A closed figure that was written open still closes: the drawing says
+        // "an outline", so the outline is drawn whatever the list did.
+        return first[0] === last[0] && first[1] === last[1] ? line : [...line, first]
+      })
+      if (site.closed) for (const line of closed) this.fill(line, tone)
+      this.ribbon(closed, 0.16, edge, 0.014)
+      if (!site.closed) this.ribbon(this.tickMarks(closed), 0.12, edge, 0.014)
+      this.anchorsByKey.set(site.key, anchorOf(closed))
+    }
+  }
+
+  /** Where each mark's caption belongs, keyed the way the scene model keys it. */
+  anchors(): ReadonlyMap<string, THREE.Vector3> {
+    return this.anchorsByKey
+  }
+
+  /**
+   * A polyline drawn as a flat ribbon of a stated width in metres.
+   *
+   * WebGL will not widen a line — `linewidth` is ignored on every platform
+   * that matters — so a mark that has to be seen from across a village is
+   * geometry rather than a stroke. Two triangles per segment, lying on the
+   * ground, mitred at nothing: the corners are left square because a site plan
+   * is chalk on earth and not a vector drawing.
+   */
+  private ribbon(
+    lines: readonly (readonly (readonly [number, number])[])[],
+    width: number,
+    colour: THREE.Color,
+    y: number,
+  ): void {
+    const points: number[] = []
+    const half = width / 2
+    for (const line of lines) {
+      for (let i = 1; i < line.length; i++) {
+        const a = line[i - 1]
+        const b = line[i]
+        if (!a || !b) continue
+        const dx = b[0] - a[0]
+        const dz = b[1] - a[1]
+        const run = Math.hypot(dx, dz)
+        if (run < 1e-9) continue
+        // Run the ends past the joint by half a width, so a corner closes.
+        const ex = (dx / run) * half
+        const ez = (dz / run) * half
+        const ax = a[0] - ex
+        const az = a[1] - ez
+        const bx = b[0] + ex
+        const bz = b[1] + ez
+        const nx = (-dz / run) * half
+        const nz = (dx / run) * half
+        points.push(
+          ax + nx, y, az + nz, bx + nx, y, bz + nz, bx - nx, y, bz - nz,
+          ax + nx, y, az + nz, bx - nx, y, bz - nz, ax - nx, y, az - nz,
+        )
+      }
+    }
+    if (points.length === 0) return
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3))
+    geometry.computeVertexNormals()
+    const mesh = new THREE.Mesh(
+      geometry,
+      new THREE.MeshBasicMaterial({ color: colour, transparent: true, side: THREE.DoubleSide }),
+    )
+    this.meshes.push(mesh)
+    this.group.add(mesh)
   }
 
   /**
@@ -987,44 +1075,49 @@ class SiteRig {
     // A millimetre apart, in the order they were declared: a compound wall and
     // the shrine inside it are two figures on one plane, and two coplanar
     // meshes flicker against each other.
-    mesh.position.y = 0.004 + this.fills.length * 0.001
+    mesh.position.y = 0.004 + this.meshes.length * 0.001
     mesh.receiveShadow = true
-    this.fills.push(mesh)
+    this.meshes.push(mesh)
     this.group.add(mesh)
   }
 
-  /** Short ticks on one side of an open edge, so a bank reads as a bank. */
-  private ticks(
-    line: readonly (readonly [number, number])[],
-    colour: THREE.Color,
-    seg: (x1: number, z1: number, x2: number, z2: number, colour: THREE.Color) => void,
-  ): void {
+  /** Ticks on the far side of an open edge, so a bank reads as a bank. */
+  private tickMarks(
+    lines: readonly (readonly (readonly [number, number])[])[],
+  ): readonly (readonly [number, number])[][] {
     const spacing = 2
-    const length = 0.7
-    for (let i = 1; i < line.length; i++) {
-      const a = line[i - 1]
-      const b = line[i]
-      if (!a || !b) continue
-      const dx = b[0] - a[0]
-      const dz = b[1] - a[1]
-      const run = Math.hypot(dx, dz)
-      if (run < 1e-6) continue
-      // The normal points away from the house, which is the side the water or
-      // the street is on.
-      const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
-      let nx = -dz / run
-      let nz = dx / run
-      if (nx * mid[0] + nz * mid[1] < 0) {
-        nx = -nx
-        nz = -nz
-      }
-      for (let d = spacing / 2; d < run; d += spacing) {
-        const t = d / run
-        const x = a[0] + dx * t
-        const z = a[1] + dz * t
-        seg(x, z, x + nx * length, z + nz * length, colour)
+    const length = 0.8
+    const out: [number, number][][] = []
+    for (const line of lines) {
+      for (let i = 1; i < line.length; i++) {
+        const a = line[i - 1]
+        const b = line[i]
+        if (!a || !b) continue
+        const dx = b[0] - a[0]
+        const dz = b[1] - a[1]
+        const run = Math.hypot(dx, dz)
+        if (run < 1e-6) continue
+        const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+        // The normal points away from the house, which is the side the water
+        // or the street is on.
+        let nx = -dz / run
+        let nz = dx / run
+        if (nx * mid[0] + nz * mid[1] < 0) {
+          nx = -nx
+          nz = -nz
+        }
+        for (let d = spacing / 2; d < run; d += spacing) {
+          const t = d / run
+          const x = a[0] + dx * t
+          const z = a[1] + dz * t
+          out.push([
+            [x, z],
+            [x + nx * length, z + nz * length],
+          ])
+        }
       }
     }
+    return out
   }
 
   /**
@@ -1033,24 +1126,45 @@ class SiteRig {
    * here rather than glowing through it.
    */
   setDaylight(day: number): void {
+    const opacity = 0.15 + 0.85 * day
     const material = this.lines?.material
-    if (material instanceof THREE.LineBasicMaterial) material.opacity = 0.15 + 0.85 * day
+    if (material instanceof THREE.LineBasicMaterial) material.opacity = opacity
+    for (const mesh of this.meshes) {
+      const m = mesh.material
+      if (m instanceof THREE.MeshBasicMaterial) m.opacity = opacity
+    }
     this.group.visible = day > 0.02
   }
 
   dispose(): void {
-    for (const mesh of this.fills) {
+    for (const mesh of this.meshes) {
       this.group.remove(mesh)
       mesh.geometry.dispose()
       ;(mesh.material as THREE.Material).dispose()
     }
-    this.fills = []
+    this.meshes = []
+    this.anchorsByKey.clear()
     if (!this.lines) return
     this.group.remove(this.lines)
     this.lines.geometry.dispose()
     ;(this.lines.material as THREE.Material).dispose()
     this.lines = null
   }
+}
+
+/** The mean of a figure's vertices: where its caption sits. */
+function anchorOf(lines: readonly (readonly (readonly [number, number])[])[]): THREE.Vector3 {
+  let x = 0
+  let z = 0
+  let n = 0
+  for (const line of lines) {
+    for (const p of line) {
+      x += p[0]
+      z += p[1]
+      n += 1
+    }
+  }
+  return new THREE.Vector3(n ? x / n : 0, 0, n ? z / n : 0)
 }
 
 /* ── Pieces ───────────────────────────────────────────────────────────── */

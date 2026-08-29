@@ -55,6 +55,15 @@ export function Viewport({
   const hostRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<HouseScene | null>(null)
   const [scaleBar, setScaleBar] = useState<{ metres: number; pixels: number } | null>(null)
+  /*
+   * Where the site marks are on screen, so their names can be written beside
+   * them. Without this the yard, the river bank and the rice barns are three
+   * shapes on the ground that a reader has no way to identify — which is what
+   * happened: the first version drew them and the answer was "where is it?".
+   */
+  const [siteLabels, setSiteLabels] = useState<
+    readonly { key: string; left: number; top: number }[]
+  >([])
   // The hint retires itself the moment the reader does the thing it names.
   const [touched, setTouched] = useState(false)
   // It is also the canvas's description, so the keys are available to someone
@@ -138,6 +147,22 @@ export function Viewport({
         // a drag would push a state update on every frame.
         setScaleBar((prev) =>
           prev && prev.metres === next.metres && prev.pixels === next.pixels ? prev : next,
+        )
+        // Rounded to the nearest tenth of a percent before comparing, so a
+        // drag updates React only when a caption would actually move.
+        const labels = scene.siteLabels().map((l) => ({
+          key: l.key,
+          left: Math.round(l.left * 10) / 10,
+          top: Math.round(l.top * 10) / 10,
+        }))
+        setSiteLabels((prev) =>
+          prev.length === labels.length &&
+          prev.every((p, i) => {
+            const n = labels[i]
+            return n && p.key === n.key && p.left === n.left && p.top === n.top
+          })
+            ? prev
+            : labels,
         )
       }
       raf = requestAnimationFrame(frame)
@@ -301,6 +326,25 @@ export function Viewport({
       />
       {caption}
       {children}
+      {/*
+        The names of what is on the ground, in the interface's type over the
+        canvas. They are captions on a drawing, not lettering in the model, and
+        they carry the provenance of the arrangement the way every other figure
+        on this site does.
+      */}
+      {siteLabels.map((label) => {
+        const mark = built.scene.site.find((m) => m.key === label.key)
+        if (!mark) return null
+        return (
+          <p
+            key={label.key}
+            className="micro pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 select-none whitespace-nowrap text-on-model"
+            style={{ left: `${label.left}%`, top: `${label.top}%` }}
+          >
+            {locale === 'id' ? mark.nameId : mark.nameEn}
+          </p>
+        )
+      })}
       {scaleBar ? <ScaleBar {...scaleBar} /> : null}
       {/*
         Rotation is drag-only and deliberately never idles, so nothing about a
@@ -333,10 +377,10 @@ function ScaleBar({ metres, pixels }: { metres: number; pixels: number }) {
     // exists under 860px, so above it the bar sits back on the bottom edge.
     <div className="pointer-events-none absolute bottom-masthead-clear left-3 select-none sheet:bottom-3">
       <div
-        className="h-2 border-b border-l border-r border-bolu"
+        className="h-2 border-b border-l border-r border-on-model"
         style={{ width: `${pixels}px` }}
       />
-      <div className="micro mt-1 text-bolu">
+      <div className="micro mt-1 text-on-model">
         {metres} m
       </div>
     </div>

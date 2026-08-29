@@ -25,6 +25,7 @@ const config: Config = {
         riri: 'var(--riri)', // turmeric, as a fill
         'riri-ink': 'var(--riri-ink)', // turmeric dropped in value, for strokes and labels
         'on-riri': 'var(--on-riri)', // ink over a turmeric fill, dark in both registers
+        'on-model': 'var(--on-model)', // ink over the daylight model, dark in both registers
         kapur: 'var(--kapur)', // slaked lime
         film: 'var(--film)', // drafting film
         sheet: 'var(--sheet)', // a sheet lying on the film: cards, the rail

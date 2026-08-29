@@ -34,6 +34,18 @@
    */
   --on-riri: #17150f;
 
+  /*
+   * Ink written over the model itself: the scale bar, and the names of what is
+   * on the ground around the house.
+   *
+   * The renderer keeps its own light and its own ground and does not read
+   * these tokens, so the model is a daylight object in both registers — which
+   * means text laid over it must be dark in both too. A token that followed
+   * --bolu would go pale at night and sit light-on-light over a sunlit floor.
+   * 9.9:1 on the ground plane, both ways.
+   */
+  --on-model: #17150f;
+
   /* Interface neutrals */
   --film: #d8d7cd; /* drafting film — the page */
   /*
