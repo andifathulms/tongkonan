@@ -167,12 +167,12 @@ export const DIMS = {
   /* The site: the rangkiang, which are the other half of the orientation rule. */
   rangkiangOpposite: dim(1, 'count', 'canon', 'navis-1984', 'Rangkiang berdiri di seberang halaman menghadap rumah gadang. Kendala hadap rumah ini bersifat hubungan, bukan mata angin — dan inilah benda yang dihadapinya, jadi tanpa rangkiang aturan itu tidak menyebut apa pun.', 'The rangkiang stand across the halaman facing the rumah gadang. This house’s orientation constraint is relational rather than compass-bound — and these are what it is relative to, so without them the rule says nothing.'),
   halamanDepth: dim(10, 'm', 'interpolated', 'none', 'Lebar halaman antara rumah dan rangkiang.', 'Width of the halaman between the house and the rangkiang.'),
-  rangkiangPlan: dim(3, 'm', 'interpolated', 'none', 'Sisi denah satu rangkiang. Hanya jejaknya yang digambar: rangkiang tidak dimodelkan, dan itu sudah dinyatakan sebagai kekurangan.', 'Plan side of one rangkiang. Only the footprint is drawn: the rangkiang are not modelled, and that is already stated as an absence.'),
+  rangkiangPlan: dim(2.6, 'm', 'interpolated', 'none', 'Sisi denah satu rangkiang. Hanya jejaknya yang digambar: rangkiang tidak dimodelkan, dan itu sudah dinyatakan sebagai kekurangan.', 'Plan side of one rangkiang. Only the footprint is drawn: the rangkiang are not modelled, and that is already stated as an absence.'),
   rangkiangFloorY: dim(1.9, 'm', 'interpolated', 'none', 'Tinggi lantai rangkiang di atas tanah. Hanya massanya yang digambar; setiap ukuran di sini penetapan penulis.', 'Height of the rangkiang floor above the ground. Only its massing is drawn; every figure here is the author’s.'),
-  rangkiangBodyHeight: dim(1.8, 'm', 'interpolated', 'none', 'Tinggi badan rangkiang.', 'Height of the rangkiang body.'),
-  rangkiangRoofRise: dim(3.2, 'm', 'interpolated', 'none', 'Tinggi atap rangkiang di atas badannya. Atap rangkiang bergonjong seperti rumah gadang; massa ini pelana lurus dan tidak menyatakan gonjong.', 'Rise of the rangkiang roof above its body. A rangkiang’s roof carries gonjong like the house; this massing is a straight gable and states none.'),
+  rangkiangBodyHeight: dim(1.6, 'm', 'interpolated', 'none', 'Tinggi badan rangkiang.', 'Height of the rangkiang body.'),
+  rangkiangRoofRise: dim(3.4, 'm', 'interpolated', 'none', 'Tinggi atap rangkiang di atas badannya. Atap rangkiang bergonjong seperti rumah gadang; massa ini pelana lurus dan tidak menyatakan gonjong.', 'Rise of the rangkiang roof above its body. A rangkiang’s roof carries gonjong like the house; this massing is a straight gable and states none.'),
   rangkiangPostWidth: dim(0.26, 'm', 'interpolated', 'none', 'Sisi tiang rangkiang.', 'Side of a rangkiang post.'),
-  rangkiangEave: dim(0.5, 'm', 'interpolated', 'none', 'Tritisan atap rangkiang di luar badannya, pada massa yang digambar di sini.', 'Overhang of the rangkiang roof beyond its body, on the massing drawn here.'),
+  rangkiangEave: dim(1, 'm', 'interpolated', 'none', 'Tritisan atap rangkiang di luar badannya, pada massa yang digambar di sini.', 'Overhang of the rangkiang roof beyond its body, on the massing drawn here.'),
   rangkiangSpacing: dim(5, 'm', 'interpolated', 'none', 'Jarak antar rangkiang sepanjang halaman.', 'Spacing between rangkiang along the halaman.'),
 } as const
 

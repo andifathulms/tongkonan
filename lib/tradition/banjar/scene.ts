@@ -86,7 +86,7 @@ function site(layout: Layout): readonly SiteMark[] {
    * water is up.
    */
   const width = DIMS.riverWidth.value
-  const drop = DIMS.bankDrop.value
+  const sheet = DIMS.waterSheet.value
   const spacing = DIMS.titianPostSpacing.value
   const postW = DIMS.titianPostWidth.value
   const deck = DIMS.titianDeckThickness.value
@@ -94,8 +94,8 @@ function site(layout: Layout): readonly SiteMark[] {
   const volumes: SiteVolume[] = [
     {
       kind: 'box',
-      at: [bank - width / 2, -drop, 0],
-      size: [width, drop, reach * 2],
+      at: [bank - width / 2, 0, 0],
+      size: [width, sheet, width],
       material: 'air',
     },
     {
@@ -111,8 +111,8 @@ function site(layout: Layout): readonly SiteMark[] {
     for (const sz of [-1, 1] as const) {
       volumes.push({
         kind: 'cylinder',
-        at: [x, -drop, sz * (half - postW / 2)],
-        size: [postW, drop + deckY, postW],
+        at: [x, 0, sz * (half - postW / 2)],
+        size: [postW, deckY, postW],
         material: 'kayu',
       })
     }

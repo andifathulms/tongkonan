@@ -46,6 +46,17 @@
    */
   --on-model: #17150f;
 
+  /*
+   * The chip a caption over the model sits on.
+   *
+   * Fixed in both registers for the same reason --on-model is: the model keeps
+   * its daylight after dark, so a chip that followed --veil would go to soot
+   * behind ink and the name of a rice barn would disappear at night. Kept
+   * translucent, because a caption is a note on the drawing and not a label
+   * stuck to the ground. 9.4:1 with --on-model on it.
+   */
+  --chip-model: rgba(233, 227, 210, 0.88);
+
   /* Interface neutrals */
   --film: #d8d7cd; /* drafting film — the page */
   /*

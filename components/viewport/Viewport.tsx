@@ -338,7 +338,10 @@ export function Viewport({
         return (
           <p
             key={label.key}
-            className="micro pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 select-none whitespace-nowrap text-on-model"
+            // A chip, because a caption may land on a dark roof or a bright
+            // yard in the same second: over the model, legibility cannot be a
+            // property of what happens to be underneath.
+            className="micro pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 select-none whitespace-nowrap rounded bg-chip-model px-1.5 py-0.5 text-on-model"
             style={{ left: `${label.left}%`, top: `${label.top}%` }}
           >
             {locale === 'id' ? mark.nameId : mark.nameEn}

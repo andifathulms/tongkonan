@@ -82,12 +82,12 @@ function site(layout: Layout): readonly SiteMark[] {
    * is no ripple, no reflection written by hand and no sound.
    */
   const width = DIMS.riverWidth.value
-  const drop = DIMS.bankDrop.value
+  const sheet = DIMS.waterSheet.value
   const volumes: SiteVolume[] = [
     {
       kind: 'box',
-      at: [bank - width / 2, -drop, 0],
-      size: [width, drop, reach * 2],
+      at: [bank - width / 2, 0, 0],
+      size: [width, sheet, width],
       material: 'air',
     },
   ]

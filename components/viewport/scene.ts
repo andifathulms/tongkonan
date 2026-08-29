@@ -1269,16 +1269,24 @@ function siteMaterial(key: SiteVolume['material']): THREE.MeshStandardMaterial {
   if (found) return found
   const made = ((): THREE.MeshStandardMaterial => {
     switch (key) {
+      /*
+       * Kept in the same value range as the house's own materials. The first
+       * set was two stops lighter and the barns read as furniture standing
+       * beside a building — a toy next to a model, which is worse than a
+       * hairline, because a hairline at least knows it is a drawing.
+       */
       case 'batu':
-        return new THREE.MeshStandardMaterial({ color: 0x9a958a, roughness: 0.95, metalness: 0 })
+        return new THREE.MeshStandardMaterial({ color: 0x8c887e, roughness: 0.96, metalness: 0 })
       case 'kayu':
-        return new THREE.MeshStandardMaterial({ color: 0x6b5a43, roughness: 0.85, metalness: 0 })
+        return new THREE.MeshStandardMaterial({ color: 0x4a3f31, roughness: 0.88, metalness: 0 })
       case 'atap':
-        return new THREE.MeshStandardMaterial({ color: 0x4a4033, roughness: 0.95, metalness: 0 })
+        return new THREE.MeshStandardMaterial({ color: 0x2f2a22, roughness: 0.95, metalness: 0 })
       case 'air':
-        return new THREE.MeshStandardMaterial({ color: 0x6f7f7c, roughness: 0.28, metalness: 0 })
+        // The one surface with any sheen, and only a little: a model's water
+        // is poured, not flowing. Nothing moves on it and nothing is in it.
+        return new THREE.MeshStandardMaterial({ color: 0x5c6b70, roughness: 0.25, metalness: 0 })
       case 'tanah':
-        return new THREE.MeshStandardMaterial({ color: 0xb3a892, roughness: 1, metalness: 0 })
+        return new THREE.MeshStandardMaterial({ color: 0xb0a48e, roughness: 1, metalness: 0 })
     }
   })()
   siteMaterials.set(key, made)
