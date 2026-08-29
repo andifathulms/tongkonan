@@ -20,6 +20,18 @@ const GAP = 3
 const BELOW = 0.4
 /** the scale bar's length, metres — the drawing convention, not a dimension */
 const BAR = 5
+/**
+ * The ground line's weight, in metres of the drawing.
+ *
+ * It was a non-scaling stroke, which is the right choice for a hairline and
+ * the wrong one here: this line also carries `pathLength={1}` and a dashed
+ * wipe, and a non-scaling stroke measures its dashes in device pixels rather
+ * than in the path's own length. So the finished line sat at one pixel on and
+ * one pixel off — a dotted rule that read as a broken one, with the houses'
+ * own bright feet standing on it at intervals. Weight in metres and the dash
+ * means what the wipe says it means.
+ */
+const RULE_W = 0.1
 
 const f = (n: number) => (Math.round(n * 100) / 100).toString()
 
@@ -107,7 +119,7 @@ export function ElevationShelf({
                   x2={f(W)}
                   y2={f(baseY)}
                   stroke="var(--muted)"
-                  vectorEffect="non-scaling-stroke"
+                  strokeWidth={RULE_W}
                   pathLength={1}
                   className="rule-draw"
                 />
@@ -202,7 +214,7 @@ export function ElevationSheet({
           x2={f(W)}
           y2={f(baseY)}
           stroke="var(--muted)"
-          vectorEffect="non-scaling-stroke"
+          strokeWidth={RULE_W}
           pathLength={1}
           className="rule-draw"
         />
