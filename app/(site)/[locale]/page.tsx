@@ -135,10 +135,18 @@ export default function Landing({ params }: { params: { locale: string } }) {
 
       <hr className="rule my-10" />
 
-      <section id="tapak" className="reveal max-w-3xl scroll-mt-16">
+      {/*
+        The map takes the width of the window and the reading takes the width
+        of a column. The archipelago is four thousand kilometres of ocean with
+        islands in it: in a prose measure Sumatra is a smudge and three of the
+        sites share a marker. The legend and the note stay where prose belongs.
+      */}
+      <section id="tapak" className="reveal scroll-mt-16">
         <h2 className="micro mb-4">{pick(COPY.landing.sitesHeading, locale)}</h2>
         <SiteMap locale={locale} />
-        <p className="mt-3 text-body text-muted">{pick(COPY.landing.sitesNote, locale)}</p>
+        <p className="mt-3 max-w-3xl text-body text-muted">
+          {pick(COPY.landing.sitesNote, locale)}
+        </p>
       </section>
 
       <hr className="rule my-10" />
@@ -282,80 +290,89 @@ function SiteMap({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <svg
-        viewBox={`0 0 ${w} ${h}`}
-        className="w-full rounded border border-hairline bg-sheet"
-        aria-hidden="true"
-      >
-        {/*
-          The land first, everything else over it. One path for the whole
-          archipelago: the rings are separate loops in one `d`, so the browser
-          fills them as one shape and the sea between two islands is the page,
-          not a colour.
-        */}
-        <path
-          d={COASTLINE.map(
-            (ring) =>
-              'M' +
-              ring.map(([lon, lat]) => `${g(x(lon))} ${g(y(lat))}`).join('L') +
-              'Z',
-          ).join('')}
-          fill="var(--wash)"
-          stroke="var(--hairline)"
-          vectorEffect="non-scaling-stroke"
-          fillRule="evenodd"
-        />
-        {meridians.map((lon) => (
-          <g key={lon}>
-            <line x1={x(lon)} y1={0} x2={x(lon)} y2={h} stroke="var(--hairline)" />
-            <text x={x(lon) + 4} y={h - 6} className="micro" fill="var(--muted)">
-              {lon}°
-            </text>
-          </g>
-        ))}
-        {/* The equator, named: several of these sites sit close enough to it for a zero-shadow day. */}
-        <line x1={0} y1={y(0)} x2={w} y2={y(0)} stroke="var(--muted)" />
-        <text x={w - 8} y={y(0) - 6} textAnchor="end" className="micro" fill="var(--muted)">
-          {pick(COPY.landing.equator, locale)} 0°
-        </text>
-        {/*
-          Markers, with their numbers stepped down when they would collide.
-          Bali and Lombok are a degree apart and their plates were written over
-          each other; the legend below is the real content, but a number that
-          cannot be read is worse than no number. Each label drops a line for
-          every earlier site within a degree and a half of it, which is
-          deterministic and needs no measuring of text.
-        */}
-        {TRADITIONS.map((t, i) => {
-          const crowd = TRADITIONS.slice(0, i).filter(
-            (o) =>
-              Math.hypot(
-                o.site.longitude - t.site.longitude,
-                o.site.latitude - t.site.latitude,
-              ) < 1.5,
-          ).length
-          return (
-            <g key={t.key}>
-              <rect
-                x={x(t.site.longitude) - 3}
-                y={y(t.site.latitude) - 3}
-                width={6}
-                height={6}
-                fill="var(--bolu)"
-              />
-              <text
-                x={x(t.site.longitude) + 8}
-                y={y(t.site.latitude) + 4 + crowd * 11}
-                className="micro"
-                fill="var(--bolu)"
-              >
-                {plateNo(i + 1)}
+      <div className="bleed px-6">
+        <svg
+          viewBox={`0 0 ${w} ${h}`}
+          className="w-full rounded border border-hairline bg-sheet"
+          aria-hidden="true"
+          >
+          {/*
+            The land first, everything else over it. One path for the whole
+            archipelago: the rings are separate loops in one `d`, so the browser
+            fills them as one shape and the sea between two islands is the page,
+            not a colour.
+          */}
+          <path
+            d={COASTLINE.map(
+              (ring) =>
+                'M' +
+                ring.map(([lon, lat]) => `${g(x(lon))} ${g(y(lat))}`).join('L') +
+                'Z',
+            ).join('')}
+            fill="var(--wash)"
+            stroke="var(--hairline)"
+            vectorEffect="non-scaling-stroke"
+            fillRule="evenodd"
+          />
+          {meridians.map((lon) => (
+            <g key={lon}>
+              <line x1={x(lon)} y1={0} x2={x(lon)} y2={h} stroke="var(--hairline)" />
+              <text x={x(lon) + 4} y={h - 6} className="micro" fill="var(--muted)">
+                {lon}°
               </text>
             </g>
-          )
-        })}
-      </svg>
-      <ol className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
+          ))}
+          {/* The equator, named: several of these sites sit close enough to it for a zero-shadow day. */}
+          <line x1={0} y1={y(0)} x2={w} y2={y(0)} stroke="var(--muted)" />
+          <text x={w - 8} y={y(0) - 6} textAnchor="end" className="micro" fill="var(--muted)">
+            {pick(COPY.landing.equator, locale)} 0°
+          </text>
+          {/*
+            Markers, with their numbers stepped down when they would collide.
+            Bali and Lombok are a degree apart and their plates were written over
+            each other; the legend below is the real content, but a number that
+            cannot be read is worse than no number. Each label drops a line for
+            every earlier site within a degree and a half of it, which is
+            deterministic and needs no measuring of text.
+          */}
+          {TRADITIONS.map((t, i) => {
+            const crowd = TRADITIONS.slice(0, i).filter(
+              (o) =>
+                Math.hypot(
+                  o.site.longitude - t.site.longitude,
+                  o.site.latitude - t.site.latitude,
+                ) < 1.5,
+            ).length
+            return (
+              <g key={t.key}>
+                <rect
+                  x={x(t.site.longitude) - 3}
+                  y={y(t.site.latitude) - 3}
+                  width={6}
+                  height={6}
+                  fill="var(--bolu)"
+                />
+                {/*
+                  A plate near the east edge is written back toward the middle:
+                  Wamena is three degrees from the frame and its number ran off
+                  the map, which is the sort of thing that only shows up when a
+                  house is added at the far end of the archipelago.
+                */}
+                <text
+                  x={x(t.site.longitude) + (t.site.longitude > LON_MAX - 6 ? -8 : 8)}
+                  y={y(t.site.latitude) + 4 + crowd * 11}
+                  textAnchor={t.site.longitude > LON_MAX - 6 ? 'end' : 'start'}
+                  className="micro"
+                  fill="var(--bolu)"
+                >
+                  {plateNo(i + 1)}
+                </text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+      <ol className="mt-3 grid max-w-3xl grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
         {TRADITIONS.map((t, i) => (
           <li key={t.key}>
             <Link

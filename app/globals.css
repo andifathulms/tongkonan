@@ -259,6 +259,22 @@ body {
  * for, and the defaults below apply only when nothing overrides them.
  */
 @layer components {
+  /*
+   * A panel that steps out of the page's column to the full viewport.
+   *
+   * For one thing only: the site map, which is a drawing of an archipelago
+   * four thousand kilometres wide and was being shown in a column set for
+   * prose. Written here rather than as bracketed viewport arithmetic in a
+   * component, because that is where every measurement in this interface
+   * lives. Nothing else uses it — a page of full-bleed panels has no column
+   * left to break out of.
+   */
+  .bleed {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
   /* A single-sided rule gets radius 0; everything else gets 2px. */
   .rule {
     border: 0;
