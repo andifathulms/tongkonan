@@ -832,20 +832,19 @@ class ZoneRig {
 class SiteRig {
   readonly group = new THREE.Group()
   private lines: THREE.LineSegments | null = null
+  private fills: THREE.Mesh[] = []
 
-  /** Set out the grid for a particular building. */
+  /** Set out the grid for a particular building, and draw what is around it. */
   configure(model: SceneModel): void {
     this.dispose()
 
     /*
-     * The grid reaches half again past the longest side, rounded up to five
-     * metres, and never less than fifteen either way. A grid smaller than the
-     * building would read as a plinth; one the same size every time would
-     * swamp a honai and be lost under a betang.
+     * The grid reaches half again past the longest side, and far enough out to
+     * hold whatever the tradition put on the ground, rounded up to five
+     * metres. A grid smaller than the building would read as a plinth; one
+     * that stopped short of the rice barns would draw them off the sheet.
      */
     const longest = Math.max(model.footprint.x, model.footprint.z)
-    // Far enough out to hold whatever the tradition put on the ground: a grid
-    // that stopped short of the rice barns would draw them off the sheet.
     const reachOut = model.site.flatMap((mark) =>
       mark.lines.flatMap((line) => line.map(([x, z]) => Math.hypot(x, z))),
     )
@@ -856,29 +855,32 @@ class SiteRig {
     const colours: number[] = []
     const ground = new THREE.Color(GROUND)
     const ink = new THREE.Color(BOLU)
-    const fine = ground.clone().lerp(ink, 0.22)
-    const five = ground.clone().lerp(ink, 0.42)
 
-    /** A vertex's colour: the line's own, fading into the ground at the edge. */
-    const push = (x: number, z: number, base: THREE.Color) => {
+    /*
+     * Five metres, not one.
+     *
+     * At a metre the grid was a hundred lines under the house and everything
+     * drawn on it — the yard, the river, the barns — disappeared into the
+     * hatching. Setting-out lines are supposed to be the quietest thing on the
+     * ground: what the reader is meant to see is the place.
+     */
+    const rule = ground.clone().lerp(ink, 0.20)
+    const step = 5
+    const push = (x: number, z: number) => {
       positions.push(x, y, z)
-      // Radial, not per-axis, so the grid dissolves into a disc rather than a
-      // square with soft sides.
       const t = clamp01(Math.hypot(x, z) / half)
-      const c = base.clone().lerp(ground, t * t)
+      const c = rule.clone().lerp(ground, t * t)
       colours.push(c.r, c.g, c.b)
     }
-
-    for (let n = -half; n <= half; n += 1) {
-      const base = n % 5 === 0 ? five : fine
+    for (let n = -half; n <= half; n += step) {
       // A line only runs as far as the disc it is fading into, so the corners
       // of the square are never drawn.
       const reach = Math.sqrt(Math.max(0, half * half - n * n))
       if (reach < 0.5) continue
-      push(-reach, n, base)
-      push(reach, n, base)
-      push(n, -reach, base)
-      push(n, reach, base)
+      push(-reach, n)
+      push(reach, n)
+      push(n, -reach)
+      push(n, reach)
     }
 
     /*
@@ -890,49 +892,55 @@ class SiteRig {
      * arrow and an N, in line segments — a letter from a font would be the
      * first typography inside the model, and the model is not a diagram.
      */
-    const tip = -half - 1.5
-    const arrow = five.clone().lerp(ink, 0.5)
-    const seg = (x1: number, z1: number, x2: number, z2: number) => {
+    const mark = ground.clone().lerp(ink, 0.75)
+    const seg = (x1: number, z1: number, x2: number, z2: number, colour: THREE.Color) => {
       positions.push(x1, y, z1, x2, y, z2)
-      for (let i = 0; i < 2; i++) colours.push(arrow.r, arrow.g, arrow.b)
+      for (let i = 0; i < 2; i++) colours.push(colour.r, colour.g, colour.b)
     }
-    seg(tip, 0, tip + 2.4, 0)
-    seg(tip, 0, tip + 0.9, -0.55)
-    seg(tip, 0, tip + 0.9, 0.55)
+    const tip = -half - 1.5
+    seg(tip, 0, tip + 2.4, 0, mark)
+    seg(tip, 0, tip + 0.9, -0.55, mark)
+    seg(tip, 0, tip + 0.9, 0.55, mark)
     // N, one metre tall, read from the south — the side a viewer is on.
     const nx = tip + 3.4
-    seg(nx + 1, -0.45, nx, -0.45)
-    seg(nx, -0.45, nx + 1, 0.45)
-    seg(nx + 1, 0.45, nx, 0.45)
+    seg(nx + 1, -0.45, nx, -0.45, mark)
+    seg(nx, -0.45, nx + 1, 0.45, mark)
+    seg(nx + 1, 0.45, nx, 0.45, mark)
 
     /*
-     * And what the tradition says is on the ground: the yard the barns stand
-     * across, the street, the river bank, the compound wall.
+     * And what the tradition says is on the ground.
      *
      * These come off the scene model, so the renderer still cannot name a
      * single one of them — it is handed polylines in metres and draws them.
-     * They are set a shade stronger than the grid, because the grid is
-     * setting-out and these are the place. Still flat: nothing here can hide
-     * any part of the house, which is the condition the whole idea was
-     * accepted under.
+     * A closed figure gets a tone as well as an outline, because an outline
+     * alone in a field of setting-out lines is another setting-out line: the
+     * first version of this drew the yard, the barns and the river as hairlines
+     * among the grid and every one of them vanished into it. An open edge gets
+     * ticks on one side, the way a drawing shows which side of a line is the
+     * bank.
+     *
+     * Still flat, all of it: nothing here can hide any part of the house, which
+     * is the condition the whole idea was accepted under.
      */
-    const place = five.clone().lerp(ink, 0.45)
-    for (const mark of model.site) {
-      for (const line of mark.lines) {
+    for (const site of model.site) {
+      for (const line of site.lines) {
         for (let i = 1; i < line.length; i++) {
           const a = line[i - 1]
           const b = line[i]
-          if (!a || !b) continue
-          positions.push(a[0], y, a[1], b[0], y, b[1])
-          for (let k = 0; k < 2; k++) colours.push(place.r, place.g, place.b)
+          if (a && b) seg(a[0], a[1], b[0], b[1], mark)
         }
-        // A closed figure that was written open still closes: the drawing
-        // says "an outline", so the outline is drawn whatever the list did.
         const first = line[0]
         const last = line[line.length - 1]
-        if (mark.closed && first && last && (first[0] !== last[0] || first[1] !== last[1])) {
-          positions.push(last[0], y, last[1], first[0], y, first[1])
-          for (let k = 0; k < 2; k++) colours.push(place.r, place.g, place.b)
+        if (!first || !last) continue
+        if (site.closed) {
+          // A closed figure that was written open still closes: the drawing
+          // says "an outline", so the outline is drawn whatever the list did.
+          if (first[0] !== last[0] || first[1] !== last[1]) {
+            seg(last[0], last[1], first[0], first[1], mark)
+          }
+          this.fill(line, ground.clone().lerp(ink, 0.09))
+        } else {
+          this.ticks(line, mark, seg)
         }
       }
     }
@@ -948,6 +956,78 @@ class SiteRig {
   }
 
   /**
+   * A tone inside a closed figure — a yard, a footprint, a compound.
+   *
+   * Lit and shadow-receiving rather than painted on, so the house's own shadow
+   * crosses it. A flat unlit patch would sit on top of the shadow and read as
+   * a sticker rather than as ground.
+   */
+  private fill(line: readonly (readonly [number, number])[], colour: THREE.Color): void {
+    /*
+     * The shape is built with its Z negated, because the mesh is laid down by
+     * turning it a quarter about X the same way the ground plane is, and that
+     * turn sends the shape's +Y to the world's −Z. Negating here rather than
+     * turning the other way keeps the face pointing up: a plane turned the
+     * other way is lit from underneath and renders as nothing.
+     */
+    const shape = new THREE.Shape()
+    const first = line[0]
+    if (!first) return
+    shape.moveTo(first[0], -first[1])
+    for (let i = 1; i < line.length; i++) {
+      const p = line[i]
+      if (p) shape.lineTo(p[0], -p[1])
+    }
+    shape.closePath()
+    const mesh = new THREE.Mesh(
+      new THREE.ShapeGeometry(shape),
+      new THREE.MeshStandardMaterial({ color: colour, roughness: 1, metalness: 0 }),
+    )
+    mesh.rotation.x = -Math.PI / 2
+    // A millimetre apart, in the order they were declared: a compound wall and
+    // the shrine inside it are two figures on one plane, and two coplanar
+    // meshes flicker against each other.
+    mesh.position.y = 0.004 + this.fills.length * 0.001
+    mesh.receiveShadow = true
+    this.fills.push(mesh)
+    this.group.add(mesh)
+  }
+
+  /** Short ticks on one side of an open edge, so a bank reads as a bank. */
+  private ticks(
+    line: readonly (readonly [number, number])[],
+    colour: THREE.Color,
+    seg: (x1: number, z1: number, x2: number, z2: number, colour: THREE.Color) => void,
+  ): void {
+    const spacing = 2
+    const length = 0.7
+    for (let i = 1; i < line.length; i++) {
+      const a = line[i - 1]
+      const b = line[i]
+      if (!a || !b) continue
+      const dx = b[0] - a[0]
+      const dz = b[1] - a[1]
+      const run = Math.hypot(dx, dz)
+      if (run < 1e-6) continue
+      // The normal points away from the house, which is the side the water or
+      // the street is on.
+      const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+      let nx = -dz / run
+      let nz = dx / run
+      if (nx * mid[0] + nz * mid[1] < 0) {
+        nx = -nx
+        nz = -nz
+      }
+      for (let d = spacing / 2; d < run; d += spacing) {
+        const t = d / run
+        const x = a[0] + dx * t
+        const z = a[1] + dz * t
+        seg(x, z, x + nx * length, z + nz * length, colour)
+      }
+    }
+  }
+
+  /**
    * Setting-out lines are chalk and string, not paint: they are legible in
    * daylight and gone at night, so they follow the sun like everything else
    * here rather than glowing through it.
@@ -959,6 +1039,12 @@ class SiteRig {
   }
 
   dispose(): void {
+    for (const mesh of this.fills) {
+      this.group.remove(mesh)
+      mesh.geometry.dispose()
+      ;(mesh.material as THREE.Material).dispose()
+    }
+    this.fills = []
     if (!this.lines) return
     this.group.remove(this.lines)
     this.lines.geometry.dispose()
