@@ -393,15 +393,28 @@ export function Field({
 export function Stepper({
   min,
   max,
+  step = 1,
   value,
   onChange,
 }: {
   min: number
   max: number
+  /**
+   * How far apart the offered numbers are.
+   *
+   * One everywhere until a house counted households in pairs — a Karo hearth
+   * is shared by two, so four, six and eight are the numbers that exist and
+   * five is not a smaller version of six. The stepper offers what the rule
+   * allows rather than every integer between its ends.
+   */
+  step?: number
   value: number
   onChange: (v: number) => void
 }) {
-  const options = Array.from({ length: max - min + 1 }, (_, i) => min + i)
+  const options = Array.from(
+    { length: Math.floor((max - min) / step) + 1 },
+    (_, i) => min + i * step,
+  )
   return (
     // No fieldset here: the Field around this one is the group, and its
     // visible label is the legend.

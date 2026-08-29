@@ -184,6 +184,15 @@ export const WAMENA: Site = {
   tzName: 'WIT',
 }
 
+/** Kabanjahe, in the Karo highlands — the northernmost site in the collection. */
+export const KABANJAHE: Site = {
+  name: 'Kabanjahe',
+  latitude: 3.19,
+  longitude: 98.52,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /** Tomohon, in the North Sulawesi highlands — the second site north of the equator. */
 export const TOMOHON: Site = {
   name: 'Tomohon',
