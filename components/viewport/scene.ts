@@ -1007,7 +1007,20 @@ class SiteRig {
         // "an outline", so the outline is drawn whatever the list did.
         return first[0] === last[0] && first[1] === last[1] ? line : [...line, first]
       })
-      if (site.closed) for (const line of closed) this.fill(line, tone)
+      /*
+       * A tone goes on the things standing on the ground, not on the ground
+       * you are standing on.
+       *
+       * Toning an enclosure — a walled yard, a compound, a clearing — repaints
+       * the floor the house is on, and with a wall around it the whole figure
+       * reads as a raised tray with buildings set into it. So a closed figure
+       * is toned only when it does not contain the house: a barn's footprint
+       * is a thing on the ground and takes a tone, a pekarangan is the ground
+       * and is read from its wall.
+       */
+      if (site.closed) {
+        for (const line of closed) if (!containsOrigin(line)) this.fill(line, tone)
+      }
       this.ribbon(closed, 0.16, edge, 0.014)
       if (!site.closed) this.ribbon(this.tickMarks(closed), 0.12, edge, 0.014)
       for (const volume of site.volumes) this.solid(volume)
@@ -1305,7 +1318,7 @@ function siteMaterial(key: SiteVolume['material']): THREE.MeshStandardMaterial {
        * hairline, because a hairline at least knows it is a drawing.
        */
       case 'batu':
-        return new THREE.MeshStandardMaterial({ color: 0x8c887e, roughness: 0.96, metalness: 0 })
+        return new THREE.MeshStandardMaterial({ color: 0x807c72, roughness: 0.96, metalness: 0 })
       case 'kayu':
         return new THREE.MeshStandardMaterial({ color: 0x4a3f31, roughness: 0.88, metalness: 0 })
       case 'atap':
@@ -1320,6 +1333,20 @@ function siteMaterial(key: SiteVolume['material']): THREE.MeshStandardMaterial {
   })()
   siteMaterials.set(key, made)
   return made
+}
+
+/** Whether a closed figure has the house inside it, by even–odd crossing. */
+function containsOrigin(line: readonly (readonly [number, number])[]): boolean {
+  let inside = false
+  for (let i = 0, j = line.length - 1; i < line.length; j = i++) {
+    const a = line[i]
+    const b = line[j]
+    if (!a || !b) continue
+    if (a[1] > 0 !== b[1] > 0 && 0 < ((b[0] - a[0]) * (0 - a[1])) / (b[1] - a[1]) + a[0]) {
+      inside = !inside
+    }
+  }
+  return inside
 }
 
 /** The mean of a figure's vertices: where its caption sits. */
