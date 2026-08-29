@@ -184,6 +184,15 @@ export const WAMENA: Site = {
   tzName: 'WIT',
 }
 
+/** Kanekes, in the hills of southern Banten. */
+export const KANEKES: Site = {
+  name: 'Kanekes',
+  latitude: -6.55,
+  longitude: 106.25,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /** Kabanjahe, in the Karo highlands — the northernmost site in the collection. */
 export const KABANJAHE: Site = {
   name: 'Kabanjahe',

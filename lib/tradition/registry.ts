@@ -30,7 +30,7 @@ import type { Split } from '@/lib/core/provenance'
 import type { AnyHouse, AnyPart, Dim, ProvenanceClass, Source } from '@/lib/core/types'
 import type { Sensitivity } from '@/lib/core/sensitivity'
 import type { Site } from '@/lib/solar/position'
-import { AMBON, ANGGI, JAYAPURA, KABANJAHE, TOMOHON, BANJARMASIN, BAWOMATALUO, MATARAM, WAMENA, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, UBUD, WAE_REBO, WAINGAPU, YOGYAKARTA } from '@/lib/solar/position'
+import { AMBON, ANGGI, JAYAPURA, KABANJAHE, KANEKES, TOMOHON, BANJARMASIN, BAWOMATALUO, MATARAM, WAMENA, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, UBUD, WAE_REBO, WAINGAPU, YOGYAKARTA } from '@/lib/solar/position'
 
 import * as toraja from './toraja/facade'
 import * as minang from './minang/facade'
@@ -50,8 +50,9 @@ import * as maluku from './maluku/facade'
 import * as tobati from './tobati/facade'
 import * as minahasa from './minahasa/facade'
 import * as karo from './karo/facade'
+import * as sunda from './sunda/facade'
 
-export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak', 'dani', 'banjar', 'maluku', 'tobati', 'minahasa', 'karo'] as const
+export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak', 'dani', 'banjar', 'maluku', 'tobati', 'minahasa', 'karo', 'sunda'] as const
 export type TraditionKey = (typeof TRADITION_KEYS)[number]
 
 export function isTraditionKey(value: string): value is TraditionKey {
@@ -187,6 +188,7 @@ export const TRADITIONS: readonly Tradition[] = [
   tobati.tradition(JAYAPURA),
   minahasa.tradition(TOMOHON),
   karo.tradition(KABANJAHE),
+  sunda.tradition(KANEKES),
 ]
 
 export function tradition(key: TraditionKey): Tradition {

@@ -154,6 +154,15 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   minahasa: [],
   /** nothing of its own: timber, board, bamboo, ijuk and pad stones */
   karo: [],
+  /**
+   * Earth, and it is the only pack that owns it.
+   *
+   * `tanah` is the hillside this house may not cut, and it is in the model as
+   * a part for that reason. No other building here has ground in its part
+   * list, so no other building needs a material for it — which is exactly when
+   * a key belongs to one tradition rather than to the shared list.
+   */
+  sunda: ['tanah'],
 }
 
 /**
@@ -186,6 +195,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   tobati: 'kayu',
   minahasa: 'kayu',
   karo: 'kayu',
+  sunda: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

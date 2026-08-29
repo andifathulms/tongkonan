@@ -20,6 +20,7 @@ import { MalukuControls } from './maluku'
 import { TobatiControls } from './tobati'
 import { MinahasaControls } from './minahasa'
 import { KaroControls } from './karo'
+import { SundaControls } from './sunda'
 
 /**
  * The rule controls, chosen by tradition.
@@ -86,5 +87,7 @@ export function RuleControlsFor({
       return <MinahasaControls {...props} />
     case 'karo':
       return <KaroControls {...props} />
+    case 'sunda':
+      return <SundaControls {...props} />
   }
 }
