@@ -27,6 +27,18 @@ describe('the shelf', () => {
     for (const row of shelf.rows) expect(row.width).toBeLessThanOrEqual(shelf.width)
   })
 
+  /**
+   * And in one height. Rows sized to their own tallest house put the ground
+   * lines at uneven intervals down the page, which reads as rows drawn at
+   * different scales — the one thing this drawing may not suggest.
+   */
+  it('draws every row in one height, which is the tallest house on the shelf', () => {
+    const items = houses()
+    const shelf = packShelf(items, { gap: GAP, pad: PAD })
+    expect(shelf.height).toBeCloseTo(Math.max(...items.map((i) => i.height)), 9)
+    for (const row of shelf.rows) expect(row.height).toBeLessThanOrEqual(shelf.height)
+  })
+
   it('keeps every house, once, in registry order', () => {
     const items = houses()
     const shelf = packShelf(items, { gap: GAP, pad: PAD })

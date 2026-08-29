@@ -35,6 +35,18 @@ export interface Shelf<T> {
   readonly rows: readonly ShelfRow<T>[]
   /** the viewBox width every row is drawn in — one scale for the whole sheet */
   readonly width: number
+  /**
+   * The height every row is drawn in, which is the tallest house on the shelf.
+   *
+   * Rows were sized to their own contents at first, and the ground lines came
+   * out at uneven intervals down the page — a fifteen-metre gap under the row
+   * with the uma in it and a five-metre one under the row of small buildings.
+   * It read as a mistake, and worse, it read as the rows being at different
+   * scales, which is the one thing this drawing must never suggest. One height
+   * for every row is a grid: the air above a row of small buildings is the
+   * measure of how much smaller they are.
+   */
+  readonly height: number
 }
 
 /**
@@ -79,6 +91,7 @@ export function packShelf<T extends { readonly width: number; readonly height: n
   // One width for every row, so one scale for every house. This is the line
   // that carries the claim.
   const width = Math.max(...packed.map((r) => r.width)) + opts.pad
+  const height = Math.max(...packed.map((r) => r.height))
 
-  return { rows: packed, width }
+  return { rows: packed, width, height }
 }

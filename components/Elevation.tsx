@@ -94,7 +94,9 @@ export function ElevationShelf({
     <div className="overflow-x-auto rounded border border-hairline">
       <div className="min-w-shelf px-4 pt-5">
         {shelf.rows.map((row, r) => {
-          const baseY = row.height + PAD
+          // Every row in the shelf's height, not its own: see the note on
+          // `Shelf.height`. Uneven ground lines read as uneven scales.
+          const baseY = shelf.height + PAD
           const H = baseY + BELOW
           return (
             <div key={r} className={r > 0 ? 'mt-2' : undefined}>
