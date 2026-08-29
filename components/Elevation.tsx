@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Silhouette } from '@/lib/core/silhouette'
+import { packShelf } from '@/lib/draw/shelf'
 
 /*
  * Elevation drawings, from computed silhouettes.
@@ -14,7 +15,7 @@ import type { Silhouette } from '@/lib/core/silhouette'
 /** metres of sheet margin around the drawn houses */
 const PAD = 1
 /** metres between houses standing on the shared ground line */
-const GAP = 2.5
+const GAP = 3
 /** metres of sheet below the ground line */
 const BELOW = 0.4
 /** the scale bar's length, metres — the drawing convention, not a dimension */
@@ -56,13 +57,24 @@ function ScaleBar({ viewW }: { viewW: number }) {
 }
 
 /**
- * Every house on one ground line, at one scale.
+ * Every house at one scale, on as many ground lines as it takes.
  *
- * One svg rather than one per house, because the same-scale claim is the
- * point and separate viewBoxes could quietly break it. The svg is decoration
- * over the index below — aria-hidden — but the labels are real links.
- * A new house in the registry widens the sheet and appears; nothing here
- * counts to four.
+ * It was one ground line while the collection fitted on one. At fourteen it
+ * does not: the houses come to two hundred and eighteen metres, and a strip
+ * that wide in a page-width container draws a honai thirty pixels tall with
+ * its name written across its neighbour's roof. So the shelf wraps, and the
+ * packing is in `lib/draw/shelf.ts` with a test on it, because the thing that
+ * must survive wrapping is the claim the shelf makes.
+ *
+ * That claim is one scale, and it survives by every row being drawn in the
+ * *same* viewBox width — so a row holding one house is drawn at the scale of a
+ * row holding six, and the scale bar at the foot is a fraction of that same
+ * width. Rows sized to their own contents would have been the natural way to
+ * write this and would have quietly made the small houses large.
+ *
+ * A new house in the registry is packed by the same arithmetic; if it is the
+ * one that overruns the last row, a third row appears and nothing here
+ * changes. Nothing counts to fourteen.
  */
 export function ElevationShelf({
   items,
@@ -71,60 +83,88 @@ export function ElevationShelf({
   items: readonly { key: string; href: string; label: string; s: Silhouette }[]
   caption: string
 }) {
-  const widths = items.map((i) => i.s.max[0] - i.s.min[0])
-  const maxH = Math.max(...items.map((i) => i.s.max[1]))
-  const W = widths.reduce((a, b) => a + b, 0) + GAP * (items.length - 1) + PAD * 2
-  const baseY = maxH + PAD
-  const H = baseY + BELOW
-  let cursor = PAD
-  const placed = items.map((item, i) => {
-    const ox = cursor
-    cursor += widths[i]! + GAP
-    return { ...item, ox, centre: ox + widths[i]! / 2 }
-  })
+  const shelf = packShelf(
+    items.map((i) => ({ ...i, width: i.s.max[0] - i.s.min[0], height: i.s.max[1] })),
+    { gap: GAP, pad: PAD },
+  )
+  const W = shelf.width
+  let raised = 0
 
   return (
     <div className="overflow-x-auto rounded border border-hairline">
       <div className="min-w-shelf px-4 pt-5">
-        <svg viewBox={`0 0 ${f(W)} ${f(H)}`} className="w-full" aria-hidden="true">
-          <line
-            x1={0}
-            y1={f(baseY)}
-            x2={f(W)}
-            y2={f(baseY)}
-            stroke="var(--muted)"
-            vectorEffect="non-scaling-stroke"
-            pathLength={1}
-            className="rule-draw"
-          />
-          {/*
-            The houses rise in shelf order once the ground line has drawn,
-            one state-timing apart — the landing's echo of the frame-raising,
-            run once on arrival. Reduced motion gets the finished drawing.
-          */}
-          {placed.map((p, i) => (
-            <path
-              key={p.key}
-              d={pathOf(p.s, p.ox, baseY)}
-              fill="var(--bolu)"
-              fillRule="evenodd"
-              className="house-raise"
-              style={{ animationDelay: `calc(var(--t-layout) + ${i} * var(--t-state))` }}
-            />
-          ))}
-        </svg>
-        <div className="relative h-control">
-          {placed.map((p) => (
-            <Link
-              key={p.key}
-              href={p.href}
-              className="micro absolute top-1 -translate-x-1/2 whitespace-nowrap text-bolu underline-offset-4 hover:underline"
-              style={{ left: `${(p.centre / W) * 100}%` }}
-            >
-              {p.label}
-            </Link>
-          ))}
-        </div>
+        {shelf.rows.map((row, r) => {
+          const baseY = row.height + PAD
+          const H = baseY + BELOW
+          return (
+            <div key={r} className={r > 0 ? 'mt-2' : undefined}>
+              <svg viewBox={`0 0 ${f(W)} ${f(H)}`} className="w-full" aria-hidden="true">
+                <line
+                  x1={0}
+                  y1={f(baseY)}
+                  x2={f(W)}
+                  y2={f(baseY)}
+                  stroke="var(--muted)"
+                  vectorEffect="non-scaling-stroke"
+                  pathLength={1}
+                  className="rule-draw"
+                />
+                {/*
+                  The houses rise in shelf order once the ground line has drawn,
+                  one state-timing apart — the landing's echo of the
+                  frame-raising, run once on arrival. The delay counts across
+                  rows rather than restarting, because it is one sequence read
+                  left to right and then down. Reduced motion gets the finished
+                  drawing.
+                */}
+                {row.items.map((p) => {
+                  const delay = raised++
+                  return (
+                    <path
+                      key={p.key}
+                      d={pathOf(p.s, p.ox, baseY)}
+                      fill="var(--bolu)"
+                      fillRule="evenodd"
+                      className="house-raise"
+                      style={{
+                        animationDelay: `calc(var(--t-layout) + ${delay} * var(--t-state))`,
+                      }}
+                    />
+                  )
+                })}
+              </svg>
+              {/*
+                Each name sits over its own house and is allowed the width of
+                its own slot — the house plus the gap either side of it. They
+                were nowrap and centred on a point, which at fourteen houses
+                meant "rumah bubungan tinggi" written straight through
+                "lumbung" and "honai". A name that wraps onto two lines is
+                legible; two names sharing one line are not.
+              */}
+              {/*
+                Two lines of the micro step on the 4px scale: the tall names
+                need the second line and the strip has to reserve it, because
+                the labels are positioned and would otherwise hang over the
+                next row's ground line.
+              */}
+              <div className="relative h-10">
+                {row.items.map((p) => (
+                  <Link
+                    key={p.key}
+                    href={p.href}
+                    className="micro absolute top-1 -translate-x-1/2 text-center leading-tight text-bolu underline-offset-4 hover:underline"
+                    style={{
+                      left: `${(p.centre / W) * 100}%`,
+                      width: `${((p.width + GAP) / W) * 100}%`,
+                    }}
+                  >
+                    {p.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )
+        })}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-2 border-t border-hairline py-3">
           <ScaleBar viewW={W} />
           <p className="micro ml-auto text-muted">{caption}</p>
