@@ -133,6 +133,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     zoneLines: [0, layout.floorY, layout.eaveY, topY],
     zones: zones(layout, topY),
     site: site(layout),
+    approachAt: [-layout.eaveHalfX - DIMS.riverSetback.value * 0.55, 0, 0],
     figureAt: [-layout.eaveHalfX - 1.6, 0, layout.hejot.z],
   }
 }

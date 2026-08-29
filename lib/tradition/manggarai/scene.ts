@@ -141,6 +141,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     zoneLines: [0, ...layout.levels.map((l) => l.y), topY],
     zones: zones(layout, topY),
     site: site(layout),
+    approachAt: [DIMS.plazaRadius.value * 0.55, 0, 0],
     figureAt: [reach + 1.8, 0, 0],
   }
 }

@@ -32,7 +32,7 @@ import { solarPosition } from '@/lib/solar/position'
  * Mid-morning by default: raking enough to read the form, and a short drag of
  * the time control to noon shows the shadow all but disappear.
  */
-const VIEWS: readonly ViewKey[] = ['perspektif', 'tampak', 'kolong']
+const VIEWS: readonly ViewKey[] = ['perspektif', 'halaman', 'tampak', 'kolong']
 
 const BANGUN_DEFAULTS = {
   view: 'perspektif' as ViewKey,

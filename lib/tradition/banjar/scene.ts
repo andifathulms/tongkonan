@@ -165,6 +165,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     zoneLines: [0, layout.segments[0]?.floorY ?? 0, core?.eaveY ?? topY, topY],
     zones: zones(layout, topY),
     site: site(layout),
+    approachAt: [-layout.depth / 2 - DIMS.riverSetback.value * 0.5, 0, 0],
     figureAt: [-layout.depth / 2 - 1.6, 0, 0],
   }
 }

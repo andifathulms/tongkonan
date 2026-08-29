@@ -97,6 +97,34 @@ describe('the site figures', () => {
       }
     })
 
+    /**
+     * And the vantage the setting made necessary: standing in the yard, is the
+     * house actually in view?
+     *
+     * This is the fault the setting introduced. Barns stand where barns stand,
+     * so the default three-quarter view now has them in front of the building;
+     * the answer is a place to stand rather than a moved barn, and the place
+     * has to be one where nothing is in the way. Anything below a metre is not
+     * in the way — a paving slab, a plinth, the water — so only things a
+     * person could not see over count.
+     */
+    it(`${tradition.key}: can be looked at from where it is met`, () => {
+      const [ax, , az] = built.scene.approachAt
+      const halfX = built.scene.footprint.x / 2
+      const halfZ = built.scene.footprint.z / 2
+      // Outside the building, and not so far off that the house is a speck.
+      expect(Math.abs(ax) > halfX || Math.abs(az) > halfZ).toBe(true)
+      expect(Math.hypot(ax, az)).toBeLessThan(45)
+
+      for (const mark of marks) {
+        for (const v of mark.volumes) {
+          if (v.size[1] < 1) continue
+          const blocking = crosses([ax, az], [0, 0], v)
+          expect(`${mark.key}: ${blocking ? 'in the way' : 'clear'}`).toBe(`${mark.key}: clear`)
+        }
+      }
+    })
+
     /** Names in both languages, since the legend prints one of them. */
     it(`${tradition.key}: names every mark in both languages`, () => {
       for (const mark of marks) {
@@ -108,3 +136,41 @@ describe('the site figures', () => {
     })
   }
 })
+
+/**
+ * Does the line from the vantage to the house pass through this solid, in plan?
+ *
+ * A slab test on the plan rectangle: the solids in a setting are boxes, cones
+ * and cylinders standing upright, so what matters is whether the segment from
+ * where a person stands to the middle of the house enters that rectangle.
+ * Written out because the answer has to be a fact rather than an impression —
+ * "it looked fine when I tried it" is how a barn ends up in front of a house.
+ */
+function crosses(
+  from: readonly [number, number],
+  to: readonly [number, number],
+  v: {
+    readonly at: readonly [number, number, number]
+    readonly size: readonly [number, number, number]
+  },
+): boolean {
+  const dx = to[0] - from[0]
+  const dz = to[1] - from[1]
+  let lo = 0
+  let hi = 1
+  const spans: readonly (readonly [number, number, number, number])[] = [
+    [from[0], dx, v.at[0] - v.size[0] / 2, v.at[0] + v.size[0] / 2],
+    [from[1], dz, v.at[2] - v.size[2] / 2, v.at[2] + v.size[2] / 2],
+  ]
+  for (const [o, d, min, max] of spans) {
+    if (Math.abs(d) < 1e-9) {
+      if (o < min || o > max) return false
+      continue
+    }
+    const t1 = (min - o) / d
+    const t2 = (max - o) / d
+    lo = Math.max(lo, Math.min(t1, t2))
+    hi = Math.min(hi, Math.max(t1, t2))
+  }
+  return hi > lo
+}

@@ -202,6 +202,7 @@ export function ViewSwitch({
 }) {
   const views: { key: ViewKey; label: string }[] = [
     { key: 'perspektif', label: pick(COPY.views.perspektif, locale) },
+    { key: 'halaman', label: pick(COPY.views.halaman, locale) },
     { key: 'tampak', label: pick(COPY.views.tampak, locale) },
     { key: 'kolong', label: pick(COPY.views.kolong, locale) },
   ]

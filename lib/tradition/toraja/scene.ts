@@ -159,6 +159,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     zoneLines: [0, layout.floorFrameY, layout.deckY, layout.plateY, topY],
     zones: zones(layout, topY),
     site: site(layout),
+    approachAt: [layout.frontProwX - DIMS.halamanDepth.value * 0.45, 0, 0],
     figureAt: [layout.bodyLength * 0.28, 0, layout.eaveHalfWidth + 1.4],
   }
 }

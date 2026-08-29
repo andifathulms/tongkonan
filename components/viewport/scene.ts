@@ -26,7 +26,7 @@ import type { TraditionKey } from '@/lib/tradition/registry'
 import type { Timeline } from '@/lib/core/assembly'
 import { progressAt } from '@/lib/core/assembly'
 
-export type ViewKey = 'perspektif' | 'tampak' | 'kolong' | 'potongan'
+export type ViewKey = 'perspektif' | 'halaman' | 'tampak' | 'kolong' | 'potongan'
 
 export interface CameraState {
   azimuth: number
@@ -496,6 +496,35 @@ export class HouseScene {
           polar: Math.PI / 2 - 0.05,
           distance: distance * 0.86,
           target,
+        }
+      }
+      case 'halaman': {
+        /*
+         * Standing in the yard, at the height of a person, looking at the
+         * front of the house.
+         *
+         * The place is the tradition's, not the renderer's: `approachAt` is
+         * where that house is addressed from, which its orientation rule
+         * already said and which nothing in the model could show while the
+         * yard was empty. Now that the alang stand where the alang stand, the
+         * default three-quarter view has them squarely in front of the house —
+         * which is what happens if you stand behind a granary, and the answer
+         * is to stand somewhere else rather than to move the granary.
+         *
+         * Eye height is the scale figure's, so the two agree about how tall a
+         * person is; the aim is at the middle of the front rather than the
+         * centroid, so a tall roof does not pitch the whole frame skyward.
+         */
+        const at = model ? model.approachAt : ([-12, 0, 0] as const)
+        const eye = new THREE.Vector3(at[0], FIGURE_HEIGHT, at[2])
+        const aim = new THREE.Vector3(0, house ? house.bounds.max[1] * 0.42 : 3, 0)
+        const away = eye.clone().sub(aim)
+        const range = Math.max(4, away.length())
+        return {
+          azimuth: Math.atan2(away.z, away.x),
+          polar: Math.acos(Math.max(-1, Math.min(1, away.y / range))),
+          distance: range,
+          target: aim,
         }
       }
       case 'kolong':

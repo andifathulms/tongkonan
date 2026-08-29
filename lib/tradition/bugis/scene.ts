@@ -112,6 +112,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     // At the gable end, because that is where the claim is and where a
     // neighbour would stand to count it.
     site: site(layout),
+    approachAt: [0, 0, -layout.eaveHalfZ - DIMS.yardDepth.value * 0.5],
     figureAt: [0, 0, -layout.eaveHalfZ - 1.6],
   }
 }

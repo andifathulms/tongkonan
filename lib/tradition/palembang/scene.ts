@@ -130,6 +130,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     // In front of the gallery, at the street end — which is where a person
     // arrives and where the sequence starts.
     site: site(layout),
+    approachAt: [-layout.eaveHalfX - DIMS.yardDepth.value * 0.5, 0, 0],
     figureAt: [-layout.eaveHalfX - 1.5, 0, 0],
   }
 }

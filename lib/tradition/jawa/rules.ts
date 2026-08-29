@@ -158,7 +158,7 @@ export const DIMS = {
 
   /* The site: the yard the house sits inside. */
   walledYard: dim(1, 'count', 'canon', 'dakung-depdikbud', 'Omah berdiri di dalam pekarangan berpagar, dengan pendhapa di muka dan halaman di antaranya. Rumah Jawa bukan benda di tengah lapangan: ia bagian belakang sebuah pekarangan yang dimasuki dari muka.', 'The omah stands inside a walled pekarangan, with the pendhapa in front and the yard between. A Javanese house is not an object in a field: it is the back of a yard entered from the front.'),
-  pekaranganDepth: dim(16, 'm', 'interpolated', 'none', 'Kedalaman pekarangan dari pagar muka ke belakang rumah.', 'Depth of the pekarangan from the front wall to the back of the house.'),
+  pekaranganDepth: dim(24, 'm', 'interpolated', 'none', 'Kedalaman pekarangan dari pagar muka ke belakang rumah.', 'Depth of the pekarangan from the front wall to the back of the house.'),
   yardWallHeight: dim(1.5, 'm', 'interpolated', 'none', 'Tinggi tembok pekarangan, dengan pintu masuk di muka. Tembok rendah agar tidak menutupi rumah dari luar; tingginya penetapan penulis.', 'Height of the yard wall, with the entrance in the front. Low enough not to hide the house from outside; the height is the author’s.'),
   yardWallThickness: dim(0.3, 'm', 'interpolated', 'none', 'Tebal tembok itu.', 'Thickness of that wall.'),
   gateWidth: dim(3, 'm', 'interpolated', 'none', 'Lebar bukaan masuk di muka pekarangan.', 'Width of the entrance opening at the front of the yard.'),

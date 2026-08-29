@@ -169,6 +169,26 @@ export interface SceneModel {
   readonly site: readonly SiteMark[]
 
   /**
+   * Where a person arriving at this house stands, in plan.
+   *
+   * Not a camera position and not a rendering decision: it is where the front
+   * of the building is addressed *from*, which every tradition here already
+   * states in its orientation rule. A tongkonan is met from the north, across
+   * the yard the alang stand on the far side of; a rumah gadang from the
+   * halaman; a betang from the water; a mbaru niang from the middle of the
+   * village circle.
+   *
+   * The renderer uses it for a vantage that stands on the ground and looks at
+   * the front, which is where the house is meant to be read from and which the
+   * three-quarter default cannot be: the setting now stands between the two,
+   * and a barn in the way is not a bug in the barn.
+   *
+   * Y is ignored — a person stands on the ground — but the field is a Vec3 so
+   * it reads the same as `figureAt` beside it.
+   */
+  readonly approachAt: Vec3
+
+  /**
    * Where the scale figure stands: beside the house and clear of the eave, so
    * it reads as a measure of the building rather than as a person doing
    * something.

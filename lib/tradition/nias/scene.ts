@@ -149,6 +149,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     zoneLines: [0, layout.floorY, layout.eaveY, Math.max(topY, house.bounds.max[1])],
     zones: zones(layout, Math.max(topY, house.bounds.max[1])),
     site: site(layout),
+    approachAt: [-layout.eaveHalfX - DIMS.streetWidth.value * 0.6, 0, 0],
     figureAt: [layout.eaveHalfX + DIMS.plazaOffset.value / 2, 0, layout.eaveHalfZ + 1.4],
   }
 }

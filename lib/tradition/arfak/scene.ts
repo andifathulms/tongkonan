@@ -126,6 +126,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     zoneLines: [0, layout.floorY, layout.eaveY, topY],
     zones: zones(layout, topY),
     site: site(layout),
+    approachAt: [layout.eaveHalfX + DIMS.clearingRadius.value * 0.35, 0, layout.doorZ],
     figureAt: [layout.eaveHalfX + 1.4, 0, layout.doorZ],
   }
 }

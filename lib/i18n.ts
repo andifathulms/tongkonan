@@ -329,6 +329,13 @@ export const COPY = {
     /* Names the group of camera presets for a screen reader; not drawn. */
     legend: t('Tampilan', 'View'),
     perspektif: t('Perspektif', 'Perspective'),
+    /*
+     * Named for the ground it is taken from rather than for the camera. Every
+     * other view here is a way of looking at the model; this one is a place to
+     * stand, and the place is the tradition's own — where the house is
+     * addressed from, which is what its orientation rule has always said.
+     */
+    halaman: t('Dari halaman', 'From the yard'),
     tampak: t('Tampak muka', 'Elevation'),
     kolong: t('Kolong', 'Underfloor'),
   },

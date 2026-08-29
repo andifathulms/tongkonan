@@ -150,6 +150,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     ],
     zones: zones(layout, topY),
     site: site(layout),
+    approachAt: [-reachX - DIMS.compoundSide.value * 0.22, 0, 0],
     figureAt: [reachX + 1.6, 0, 0],
   }
 }
