@@ -85,6 +85,7 @@ export class HouseScene {
   private figure: THREE.Group
   private rain: RainRig
   private zones: ZoneRig
+  private site: SiteRig
   private clip = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
   private model: SceneModel | null = null
   private house: AnyHouse | null = null
@@ -188,6 +189,9 @@ export class HouseScene {
     this.zones = new ZoneRig()
     this.scene.add(this.zones.group)
 
+    this.site = new SiteRig()
+    this.scene.add(this.site.group)
+
     this.scene.add(this.houseGroup)
   }
 
@@ -215,6 +219,9 @@ export class HouseScene {
       if (part.kind === 'box') this.boxParts.add(part.id)
     }
     house.parts.forEach((part, i) => this.orderIndex.set(part.id, i))
+
+    // The ground is set out for this building before the parts go on it.
+    this.site.configure(model)
 
     // Contact plane sized to the body, not the whole scene.
     const span = Math.max(model.footprint.x, model.footprint.z) * 1.5
@@ -352,6 +359,7 @@ export class HouseScene {
     this.scene.background = sky
     this.contact.visible = alt > 0
     ;(this.contact.material as THREE.MeshBasicMaterial).opacity = 0.25 + 0.4 * day
+    this.site.setDaylight(day)
     this.needsRender = true
   }
 
@@ -600,6 +608,7 @@ export class HouseScene {
     this.materials.dispose()
     this.rain.dispose()
     this.zones.dispose()
+    this.site.dispose()
     this.renderer.dispose()
   }
 }
@@ -793,6 +802,131 @@ class ZoneRig {
         ;(child.material as THREE.Material).dispose()
       }
     }
+  }
+}
+
+
+/**
+ * The ground the house stands on, drawn rather than furnished.
+ *
+ * The question this answers is "where is this house", and the tempting answer
+ * is scenery: palms, a terrace, a hillside, a sky. That answer is refused for
+ * the same reason bloom and a HDRI are refused — 85% of the numbers in this
+ * model are the author's, and a photographic setting would state, fluently and
+ * without provenance, a great deal more that nobody measured. A plausible
+ * landscape is an interpolated drawing presented as a photograph.
+ *
+ * So the setting is a site plan: a metre grid and the north point, drawn on
+ * the earth the way a surveyor sets out a building before anything is raised.
+ * It asserts two things and both are true — that this is measured ground, and
+ * which way is north, which for every house here is −X because orientation is
+ * a constraint of the model rather than a property of the view.
+ *
+ * It cannot block the house: everything in it lies flat on the ground, below
+ * the underfloor of every building in the collection.
+ *
+ * The lines fade toward the ground's own colour with distance, so the grid
+ * dissolves rather than ending at a hard edge — a hard edge would read as a
+ * platform the house stands on, which is a claim about the site.
+ */
+class SiteRig {
+  readonly group = new THREE.Group()
+  private lines: THREE.LineSegments | null = null
+
+  /** Set out the grid for a particular building. */
+  configure(model: SceneModel): void {
+    this.dispose()
+
+    /*
+     * The grid reaches half again past the longest side, rounded up to five
+     * metres, and never less than fifteen either way. A grid smaller than the
+     * building would read as a plinth; one the same size every time would
+     * swamp a honai and be lost under a betang.
+     */
+    const longest = Math.max(model.footprint.x, model.footprint.z)
+    const half = Math.max(15, Math.ceil((longest * 0.75) / 5) * 5)
+    const y = 0.006
+
+    const positions: number[] = []
+    const colours: number[] = []
+    const ground = new THREE.Color(GROUND)
+    const ink = new THREE.Color(BOLU)
+    const fine = ground.clone().lerp(ink, 0.22)
+    const five = ground.clone().lerp(ink, 0.42)
+
+    /** A vertex's colour: the line's own, fading into the ground at the edge. */
+    const push = (x: number, z: number, base: THREE.Color) => {
+      positions.push(x, y, z)
+      // Radial, not per-axis, so the grid dissolves into a disc rather than a
+      // square with soft sides.
+      const t = clamp01(Math.hypot(x, z) / half)
+      const c = base.clone().lerp(ground, t * t)
+      colours.push(c.r, c.g, c.b)
+    }
+
+    for (let n = -half; n <= half; n += 1) {
+      const base = n % 5 === 0 ? five : fine
+      // A line only runs as far as the disc it is fading into, so the corners
+      // of the square are never drawn.
+      const reach = Math.sqrt(Math.max(0, half * half - n * n))
+      if (reach < 0.5) continue
+      push(-reach, n, base)
+      push(reach, n, base)
+      push(n, -reach, base)
+      push(n, reach, base)
+    }
+
+    /*
+     * The north point, at the north edge of the grid.
+     *
+     * North is −X for every building here, because the axis convention is the
+     * model's and not the camera's: what varies between traditions is which
+     * end of the house faces which way, never which way north is. Drawn as an
+     * arrow and an N, in line segments — a letter from a font would be the
+     * first typography inside the model, and the model is not a diagram.
+     */
+    const tip = -half - 1.5
+    const arrow = five.clone().lerp(ink, 0.5)
+    const seg = (x1: number, z1: number, x2: number, z2: number) => {
+      positions.push(x1, y, z1, x2, y, z2)
+      for (let i = 0; i < 2; i++) colours.push(arrow.r, arrow.g, arrow.b)
+    }
+    seg(tip, 0, tip + 2.4, 0)
+    seg(tip, 0, tip + 0.9, -0.55)
+    seg(tip, 0, tip + 0.9, 0.55)
+    // N, one metre tall, read from the south — the side a viewer is on.
+    const nx = tip + 3.4
+    seg(nx + 1, -0.45, nx, -0.45)
+    seg(nx, -0.45, nx + 1, 0.45)
+    seg(nx + 1, 0.45, nx, 0.45)
+
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colours, 3))
+    this.lines = new THREE.LineSegments(
+      geometry,
+      new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 1 }),
+    )
+    this.group.add(this.lines)
+  }
+
+  /**
+   * Setting-out lines are chalk and string, not paint: they are legible in
+   * daylight and gone at night, so they follow the sun like everything else
+   * here rather than glowing through it.
+   */
+  setDaylight(day: number): void {
+    const material = this.lines?.material
+    if (material instanceof THREE.LineBasicMaterial) material.opacity = 0.15 + 0.85 * day
+    this.group.visible = day > 0.02
+  }
+
+  dispose(): void {
+    if (!this.lines) return
+    this.group.remove(this.lines)
+    this.lines.geometry.dispose()
+    ;(this.lines.material as THREE.Material).dispose()
+    this.lines = null
   }
 }
 
