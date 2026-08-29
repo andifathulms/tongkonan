@@ -11,7 +11,9 @@
  * visible.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 function zones(layout: Layout, topY: number): readonly Zone[] {
@@ -50,6 +52,45 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The rangkiang, which are the other half of this house's orientation rule.
+ *
+ * The tongkonan's constraint is absolute — north — and this one's is
+ * relational: the rumah gadang faces the halaman with the rangkiang across
+ * it. A relational rule with nothing on the other side of the relation is not
+ * a rule, so with the yard empty the caution was the only place this house's
+ * orientation existed at all.
+ *
+ * Footprints only, for the same reason as the tongkonan's alang: the rangkiang
+ * are already named as an absence in the caution and a guessed granary would
+ * turn that honest absence into an invented building.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const gap = DIMS.halamanDepth.value
+  const plan = DIMS.rangkiangPlan.value
+  const spacing = DIMS.rangkiangSpacing.value
+  // The long face is the front, so the yard runs out on X.
+  const near = layout.eaveHalfDepth + gap
+  const lines = [-1, 0, 1].map((n) =>
+    groundRect(near, n * spacing - plan / 2, near + plan, n * spacing + plan / 2),
+  )
+  return [
+    {
+      key: 'rangkiang',
+      nameId: 'Rangkiang',
+      nameEn: 'Rangkiang',
+      glossId:
+        'Jejak denah tiga rangkiang di seberang halaman, menghadap muka rumah yang panjang. Kendala hadap rumah gadang bersifat hubungan: ia menghadap halaman dengan rangkiang di seberangnya, jadi tanpa rangkiang aturan itu tidak menyebut apa pun.',
+      glossEn:
+        'The footprints of three rangkiang across the halaman, facing the house’s long front. The rumah gadang’s orientation is relational: it faces the yard with the rangkiang across it, so without them the rule says nothing.',
+      lines,
+      closed: true,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   const lines = [0, layout.floorFrameY, layout.deckY]
@@ -70,6 +111,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.kolongHeight,
     zoneLines: lines,
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [layout.eaveHalfDepth + 1.4, 0, layout.bodyLength * 0.28],
   }
 }

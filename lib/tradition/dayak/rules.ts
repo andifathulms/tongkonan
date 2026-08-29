@@ -140,6 +140,10 @@ export const DIMS = {
   raisedOnPosts: dim(1, 'count', 'canon', 'depdikbud-kalteng', 'Rumah berdiri tinggi di atas tiang ulin.', 'The house stands high on ironwood posts.'),
   oneWayUp: dim(1, 'count', 'canon', 'sellato-1989', 'Naik ke rumah lewat hejot, batang bertakik, dan pada malam hari ia ditarik ke atas. Satu bangunan, satu jalan masuk, dan jalan itu bisa ditiadakan.', 'The way up is the hejot, a notched log, and at night it is pulled in. One building, one way in, and that way can be removed.'),
   ironwood: dim(1, 'count', 'canon', 'sellato-1989', 'Tiang dan sirapnya dari ulin, kayu besi. Bahan inilah alasan bangunan sepanjang ini bisa bertahan berpuluh tahun di iklim yang menghabiskan kayu lain.', 'The posts and shingles are ulin, ironwood. That material is why a building of this length lasts for decades in a climate that consumes other timber.'),
+
+  /* The site: the river, which is the road. */
+  facesTheRiver: dim(1, 'count', 'canon', 'sellato-1989', 'Rumah betang berdiri sejajar sungai dengan galerinya menghadap air, dan di Kalimantan sungai adalah jalannya. Panjang rumah ini adalah sensus; letaknya adalah sebuah tepian.', 'A rumah betang stands parallel to the river with its gallery facing the water, and in Borneo the river is the road. This house’s length is a census; its position is a bank.'),
+  riverSetback: dim(14, 'm', 'interpolated', 'none', 'Jarak dari muka rumah ke tepi air.', 'Distance from the front of the house to the water’s edge.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

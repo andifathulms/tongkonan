@@ -131,6 +131,11 @@ export const DIMS = {
   noOtherWayUp: dim(0, 'count', 'canon', 'depdikbud-ntb', 'Nol jalan lain dari tanah ke lantai simpan. Tidak ada tangga yang ditinggalkan bersandar, tidak ada penyangga miring yang menyentuh keduanya, tidak ada dinding yang turun melewati cakram, dan tepi tudung pun berhenti di atasnya. Sebuah cakram penghalang yang dilewati sebatang bambu bukan penghalang — dan begitu pula yang tertutup atapnya sendiri.', 'Zero other paths from the ground to the store floor. No ladder left leaning, no raking brace touching both, no wall reaching down past the disc — and the hood’s own edge stops above it too. A rat guard with a bamboo pole beside it is not a guard, and neither is one covered by its own roof.'),
   hoodFallsPastTheFloor: dim(1, 'count', 'canon', 'depdikbud-ntb', 'Tepi atap turun melewati lantai simpan. Bentuk ini terbaca sebagai tudung dan bukan atap justru karena tepinya berada di bawah bidang yang dilindunginya.', 'The eave falls past the floor of the store. This form reads as a hood rather than a roof precisely because its edge sits below the plane it protects.'),
   seatedOnStone: dim(1, 'count', 'canon', 'waterson-1990', 'Kaki tiang berdiri di atas batu, tidak ditanam — yang juga menutup jalan bagi rayap, bukan hanya bagi tikus.', 'The post feet stand on stones and are not buried — which closes a path to termites as well as to rats.'),
+
+  /* The site: the row, because a lumbung is never the only one. */
+  granaryRow: dim(1, 'count', 'canon', 'depdikbud-ntb', 'Lumbung berdiri berjajar di pekarangan bersama lumbung lain dan rumah-rumah tinggal. Bangunan yang paling dirawat di pekarangan itu bukan tempat orang tidur, dan itu hanya terbaca bila yang lain ikut terlihat.', 'Lumbung stand in a row in the compound alongside other granaries and the dwellings. The most carefully made building in the yard is not the one people sleep in, and that only reads when the others are in view.'),
+  neighbourSpacing: dim(6, 'm', 'interpolated', 'none', 'Jarak antar lumbung sepanjang jajarannya.', 'Spacing between lumbung along their row.'),
+  neighbourPlan: dim(3.2, 'm', 'interpolated', 'none', 'Sisi denah lumbung tetangga. Hanya jejaknya yang digambar.', 'Plan side of a neighbouring lumbung. Only the footprint is drawn.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

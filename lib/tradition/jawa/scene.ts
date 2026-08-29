@@ -23,7 +23,9 @@
  * height, and a fourth house should not be made to pretend it is either.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 function zones(layout: Layout, topY: number): readonly Zone[] {
@@ -66,6 +68,40 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The pekarangan: the yard the house is the back of.
+ *
+ * A joglo is not an object in a field. It stands at the rear of a walled
+ * yard entered from the front, with the pendhapa — when there is one — in
+ * front of it and the open ground between them doing the work the pendhapa
+ * exists for. Draw the omah alone and the pendhapa reads as a porch stuck on
+ * the front rather than as a building holding one side of a yard.
+ *
+ * The wall line is drawn and nothing is drawn on it: a gate, a wall thickness
+ * or a tree would each be a claim, and only the enclosure itself is sourced.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const halfWidth = DIMS.pekaranganWidth.value / 2
+  const depth = DIMS.pekaranganDepth.value
+  // The house faces −X, so the yard runs forward from the back of the body.
+  const rear = layout.bodyDepth / 2 + 2
+  return [
+    {
+      key: 'pekarangan',
+      nameId: 'Pekarangan',
+      nameEn: 'Pekarangan',
+      glossId:
+        'Pagar pekarangan. Omah berdiri di sisi belakangnya dan dimasuki dari muka, dengan pendhapa serta halaman di antaranya — jadi pendhapa bukan serambi yang ditempelkan, melainkan bangunan yang memegang satu sisi halaman.',
+      glossEn:
+        'The wall of the yard. The omah stands at its back and is entered from the front, with the pendhapa and the open ground between — so the pendhapa is not a porch stuck on the front but a building holding one side of a yard.',
+      lines: [groundRect(rear - depth, -halfWidth, rear, halfWidth)],
+      closed: true,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   const eave = layout.roof[0]
@@ -89,6 +125,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.floorY,
     zoneLines: [0, layout.floorY, layout.eaveY, layout.tumpangFootY, topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [halfX + 1.6, 0, halfZ * 0.4],
   }
 }

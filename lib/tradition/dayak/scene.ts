@@ -15,7 +15,7 @@
  * can hold, and the division that matters here is stated in the copy instead.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -55,6 +55,44 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The river, which is the road.
+ *
+ * A betang stands along the water with its gallery facing it, and everything
+ * about the building follows from that: the length is a census taken along the
+ * bank, the gallery is the public side, and the hejot leans down toward the
+ * landing. The house has no compass rule, so drawn on empty ground there is
+ * nothing to say which of its two long sides is the front — the bank says it.
+ *
+ * One line, no water. A rendered river would be the first thing in this model
+ * that is not a made object.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const setback = DIMS.riverSetback.value
+  const bank = -(layout.eaveHalfX + setback)
+  const reach = layout.length / 2 + setback
+  return [
+    {
+      key: 'sungai',
+      nameId: 'Tepi sungai',
+      nameEn: 'The river bank',
+      glossId:
+        'Garis air di muka galeri. Rumah betang berdiri sejajar sungai dan menghadapnya, dan di Kalimantan sungai adalah jalannya — jadi garis inilah yang menyatakan sisi mana yang muka. Airnya sendiri tidak digambar.',
+      glossEn:
+        'The water’s edge in front of the gallery. A betang stands parallel to the river and faces it, and in Borneo the river is the road — so this line is what says which side is the front. The water itself is not drawn.',
+      lines: [
+        [
+          [bank, -reach],
+          [bank, reach],
+        ],
+      ],
+      closed: false,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   return {
@@ -73,6 +111,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.floorY,
     zoneLines: [0, layout.floorY, layout.eaveY, topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [-layout.eaveHalfX - 1.6, 0, layout.hejot.z],
   }
 }

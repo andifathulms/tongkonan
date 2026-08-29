@@ -19,7 +19,7 @@
  * answer.
  */
 
-import type { Vec3 } from './types'
+import type { ProvenanceClass, Vec3 } from './types'
 
 /** One named band of occupancy, between two heights. */
 export interface Zone {
@@ -30,6 +30,39 @@ export interface Zone {
   readonly nameEn: string
   readonly glossId: string
   readonly glossEn: string
+}
+
+/**
+ * One thing on the ground that is not the building.
+ *
+ * Every house here answers to something outside itself — a yard the rice
+ * barns stand across, a village street, a river bank, a compound wall — and
+ * until now all of that lived in prose. It is a fact about the building in
+ * the same way the drip line is: the tongkonan faces its alang because that
+ * is what facing north *means* here, and a reader looking at a model standing
+ * on nothing cannot see it.
+ *
+ * What this is not: scenery. Every mark lies flat on the ground, so nothing
+ * here can hide any part of the house, and nothing in it is a plant, a hill,
+ * a texture or a sky. A plausible landscape would state, without provenance
+ * and very persuasively, a great deal that nobody measured.
+ *
+ * `provenance` is about the *arrangement* — whether a source says the barns
+ * stand opposite, or the author put them there. The distances are ordinary
+ * dimensions and live in the rule pack with everything else, so a site figure
+ * moves the interpolated bar the way any other invented number does.
+ */
+export interface SiteMark {
+  readonly key: string
+  readonly nameId: string
+  readonly nameEn: string
+  readonly glossId: string
+  readonly glossEn: string
+  /** polylines on the ground, in metres: [x, z], y is always zero */
+  readonly lines: readonly (readonly (readonly [number, number])[])[]
+  /** true when every line closes back onto its first point */
+  readonly closed: boolean
+  readonly provenance: ProvenanceClass
 }
 
 export interface SceneModel {
@@ -79,11 +112,57 @@ export interface SceneModel {
   readonly zones: readonly Zone[]
 
   /**
+   * What is on the ground around the house, and what it is.
+   *
+   * Empty is a real answer and means the sources say nothing this model is
+   * willing to draw — not that the house stands in a void.
+   */
+  readonly site: readonly SiteMark[]
+
+  /**
    * Where the scale figure stands: beside the house and clear of the eave, so
    * it reads as a measure of the building rather than as a person doing
    * something.
    */
   readonly figureAt: Vec3
+}
+
+/* ── Ground figures ───────────────────────────────────────────────────── */
+
+/**
+ * A rectangle on the ground, corners first and last the same point.
+ *
+ * Here rather than in fourteen scene files, because a yard is a rectangle in
+ * every tradition that has one and the arithmetic knows nothing about which.
+ */
+export function groundRect(
+  x0: number,
+  z0: number,
+  x1: number,
+  z1: number,
+): readonly (readonly [number, number])[] {
+  return [
+    [x0, z0],
+    [x1, z0],
+    [x1, z1],
+    [x0, z1],
+    [x0, z0],
+  ]
+}
+
+/** A circle on the ground, as a closed polyline. */
+export function groundRing(
+  cx: number,
+  cz: number,
+  radius: number,
+  segments = 48,
+): readonly (readonly [number, number])[] {
+  const points: [number, number][] = []
+  for (let i = 0; i <= segments; i++) {
+    const a = (i / segments) * Math.PI * 2
+    points.push([cx + Math.cos(a) * radius, cz + Math.sin(a) * radius])
+  }
+  return points
 }
 
 /**

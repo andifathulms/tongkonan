@@ -151,6 +151,11 @@ export const DIMS = {
   windowBand: dim(1, 'count', 'canon', 'feldman-1979', 'Muka rumah dibuka oleh satu pita jendela menerus di bawah tepi atap, bukan oleh sederet lubang terpisah.', 'The front is opened by a single continuous window band under the eave rather than by a row of separate holes.'),
   behuAreEarned: dim(1, 'count', 'canon', 'feldman-1979', 'Behu didirikan oleh si’ulu, dan tiap batu adalah catatan pesta yang pernah diadakan. Batu-batu itu berada di luar rumah dan menyatakan sesuatu tentang rumah tangganya yang tidak dinyatakan oleh bagian bangunan mana pun — satu-satunya aturan dalam projek ini yang menambahkan sesuatu di luar bangunan.', 'Behu are raised by si’ulu, and each stone records a feast that was held. They stand outside the house and state something about the household that no part of the building states — the only rule in this project that adds something outside the building.'),
   loftInRoof: dim(1, 'count', 'canon', 'depdikbud-sumut', 'Rumah si’ulu punya loteng di dalam atapnya. Atap sebesar itu terlalu berharga untuk dikosongkan.', 'A si’ulu’s house has a loft inside its roof. A roof that large is too valuable to leave empty.'),
+
+  /* The site: the street, which is what an omo is one of. */
+  streetTerrace: dim(1, 'count', 'canon', 'viaro-1980', 'Rumah-rumah Nias Selatan berdiri berderet rapat di sepanjang jalan kampung berbatu, saling bersinggungan sisi demi sisi. Omo bukan benda yang berdiri sendiri di tanah lapang: ia satu petak dari sebuah deretan, dan jalan itulah yang dihadapinya.', 'South Nias houses stand in a close terrace along a paved village street, side against side. An omo is not a free-standing object on open ground: it is one unit of a terrace, and the street is what it faces.'),
+  streetWidth: dim(9, 'm', 'interpolated', 'none', 'Lebar jalan berbatu di muka rumah.', 'Width of the paved street in front of the house.'),
+  neighbourGap: dim(0.8, 'm', 'interpolated', 'none', 'Jarak ke rumah tetangga di kiri dan kanan. Bahwa rumah berderet rapat adalah kanon; celah sekecil ini adalah penetapan penulis.', 'Distance to the neighbouring house on either side. That the houses stand in a close terrace is canon; a gap this small is the author’s.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

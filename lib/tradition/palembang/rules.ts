@@ -139,6 +139,10 @@ export const DIMS = {
   raisedOnPosts: dim(1, 'count', 'canon', 'waterson-1990', 'Rumah berdiri di atas tiang, dan tiangnya tidak sama panjang karena lantainya bertingkat.', 'The house stands on posts, and the posts are not all one length because the floor is stepped.'),
   seatedOnStone: dim(1, 'count', 'canon', 'waterson-1990', 'Kaki tiang berdiri di atas batu, tidak ditanam.', 'The post feet stand on stones; they are not buried.'),
   limasRoof: dim(4, 'count', 'canon', 'ju-saito-2012', 'Atap limas: empat bidang jatuh ke tepi atap yang menutup keliling, dan bubungannya lebih pendek daripada bangunannya. Rumah ini dinamai dari atapnya, bukan dari lantainya — meski lantainya yang mengatakan sesuatu.', 'A limas roof: four planes falling to an eave that closes all the way round, with a ridge shorter than the building. The house is named for its roof rather than for its floor — though it is the floor that says something.'),
+
+  /* The site: the yard the sequence starts in. */
+  yardDepth: dim(11, 'm', 'interpolated', 'none', 'Kedalaman halaman muka dari tangga ke pagar. Kekijing dimulai sebelum tangga: tamu berhenti di halaman, naik, lalu didudukkan pada tingkat yang menyatakan kedudukannya. Bahwa ada halaman di muka adalah lazim; ukuran dan pagarnya penetapan penulis.', 'Depth of the front yard from the stair to the fence. The kekijing begins before the stair: a guest stops in the yard, climbs, and is then seated on the step that states their standing. That there is a yard in front is ordinary; its size and its fence are the author’s.'),
+  yardWidth: dim(16, 'm', 'interpolated', 'none', 'Lebar halaman muka.', 'Width of the front yard.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

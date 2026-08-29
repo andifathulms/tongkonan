@@ -17,7 +17,8 @@
  * only because on a round house one bearing is as good as another.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRing } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
 import { coneAt } from '@/lib/core/cone'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -52,6 +53,43 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The village, which is a circle with a stone at the middle of it.
+ *
+ * This is the one house in the collection with no face, no corner and no
+ * ridge, and the reason it needs none is that the village gives it one:
+ * mbaru niang stand around a circular plaza with the compang at the centre,
+ * and every house looks in. A cone standing by itself on the ground is a
+ * building whose orientation has nowhere to come from.
+ *
+ * The plaza circle passes through the house rather than around it, because
+ * the house is *on* the circle — it is one of the ring, not the middle of it.
+ * The centre is where the compang is, which is where the model is not.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const plaza = DIMS.plazaRadius.value
+  const stone = DIMS.compangRadius.value
+  // The house sits on the ring, so the centre of the village is one plaza
+  // radius away — out on +X, which puts the compang behind the viewer's
+  // default vantage rather than under the house.
+  const cx = plaza
+  return [
+    {
+      key: 'compang',
+      nameId: 'Compang dan pelataran',
+      nameEn: 'The compang and the plaza',
+      glossId:
+        'Susunan batu upacara di pusat kampung, dan lingkaran pelataran yang dilalui rumah-rumahnya. Mbaru niang berdiri melingkar menghadap ke dalam: rumah ini tidak punya muka sampai ada lingkaran yang memberinya muka. Batunya sendiri tidak dimodelkan.',
+      glossEn:
+        'The ceremonial stone platform at the centre of the village, and the circle of the plaza the houses stand on. Mbaru niang stand in a ring facing inward: this house has no front until the circle gives it one. The stones themselves are not modelled.',
+      lines: [groundRing(cx, 0, stone), groundRing(cx, 0, plaza)],
+      closed: true,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   // Where the thatch actually meets the ground, which is a little outside the
@@ -80,6 +118,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.levels[0]?.y ?? 0,
     zoneLines: [0, ...layout.levels.map((l) => l.y), topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [reach + 1.8, 0, 0],
   }
 }

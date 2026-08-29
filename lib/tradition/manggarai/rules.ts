@@ -159,6 +159,11 @@ export const DIMS = {
   centrePostThrough: dim(1, 'count', 'canon', 'depdikbud-ntt', 'Satu tiang tengah berdiri dari tanah sampai puncak dan menembus kelima lantai. Seluruh rumah diukur dari tiang itu.', 'A single centre post stands from the ground to the apex and passes through all five floors. The whole house is set out from it.'),
   noNails: dim(1, 'ratio', 'canon', 'unesco-2012', 'Sambungan pasak dan ikat; rangka disusun tanpa paku.', 'Pegged and lashed joints; the frame goes up without nails.'),
   seatedOnStone: dim(1, 'count', 'canon', 'unesco-2012', 'Tiang berdiri di atas batu, tidak ditanam.', 'The posts stand on stones; they are not buried.'),
+
+  /* The site: the village, which is a circle with a stone at its centre. */
+  villageCircle: dim(1, 'count', 'canon', 'erb-1999', 'Mbaru niang berdiri melingkari sebuah pelataran bundar dengan compang — susunan batu upacara — di pusatnya, dan tiap rumah menghadap ke pusat itu. Rumah ini tidak punya muka sampai ada lingkaran yang menghadapkannya.', 'Mbaru niang stand around a circular plaza with the compang — a ceremonial stone platform — at its centre, and every house faces that centre. This house has no front until there is a circle to give it one.'),
+  plazaRadius: dim(14, 'm', 'interpolated', 'none', 'Jari-jari pelataran kampung, diukur dari compang.', 'Radius of the village plaza, measured from the compang.'),
+  compangRadius: dim(2.2, 'm', 'interpolated', 'none', 'Jari-jari susunan batu di pusat. Bahwa ia ada dan berada di pusat adalah kanon; ukurannya penetapan penulis.', 'Radius of the stone platform at the centre. That it exists and is central is canon; its size is the author’s.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

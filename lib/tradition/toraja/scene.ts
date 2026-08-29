@@ -12,7 +12,9 @@
  * the house it is the vocabulary of.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 /**
@@ -56,6 +58,48 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * What the tongkonan faces.
+ *
+ * The orientation rule says the house faces north, and read as a compass
+ * bearing that is only half of it: what is *to* the north is the row of
+ * alang, the rice barns, standing across the yard looking back at the house.
+ * A model of a tongkonan alone on the ground states the bearing and loses the
+ * relationship, which is the part a person standing there would see.
+ *
+ * Only the footprints are drawn. An alang is a building in its own right —
+ * six posts, its own roof, its own rank — and raising one from a guess is
+ * exactly what this project refuses. A footprint says "something stands here
+ * and the sources say what"; a modelled barn would say a great deal more.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const gap = DIMS.halamanDepth.value
+  const plan = DIMS.alangPlan.value
+  const spacing = DIMS.alangSpacing.value
+  // North is −X, and the front prow is the north end, so the yard runs out
+  // from there and the barns stand beyond it.
+  const front = layout.frontProwX
+  const near = front - gap
+  const lines = [-1, 0, 1].map((n) =>
+    groundRect(near - plan, n * spacing - plan / 2, near, n * spacing + plan / 2),
+  )
+  return [
+    {
+      key: 'alang',
+      nameId: 'Alang',
+      nameEn: 'Alang',
+      glossId:
+        'Jejak denah tiga lumbung padi, berjajar menghadap tongkonan di seberang halaman. Rumah dan lumbung saling berhadapan, dan itulah isi sebenarnya dari aturan hadap utara. Lumbungnya sendiri tidak dimodelkan.',
+      glossEn:
+        'The footprints of three rice barns, in a row facing the tongkonan across the yard. House and barns face each other, and that is what the rule about facing north actually contains. The barns themselves are not modelled.',
+      lines,
+      closed: true,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   // The prows are not symmetric, so the reach is the further of the two.
@@ -70,6 +114,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.kolongHeight,
     zoneLines: [0, layout.floorFrameY, layout.deckY, layout.plateY, topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [layout.bodyLength * 0.28, 0, layout.eaveHalfWidth + 1.4],
   }
 }

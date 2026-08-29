@@ -13,7 +13,8 @@
  * which is the reading a photograph gives and the numbers agree with.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import { thatchTop } from './roof'
 import type { House, Layout } from './types'
@@ -58,6 +59,54 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The street, and the neighbours it is a terrace of.
+ *
+ * An omo is not a free-standing object. South Nias villages are two rows of
+ * houses standing shoulder to shoulder along a paved street, and the house is
+ * one unit of that row — which is why its bracing is on the two long sides and
+ * why the behu stand out front rather than around it. Drawn alone on open
+ * ground it looks like a building that could be turned; drawn between its
+ * neighbours' party lines it is what it is.
+ *
+ * The neighbours are two lines and no more. A row of guessed houses would put
+ * fourteen invented buildings on the screen to explain one.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const gap = DIMS.neighbourGap.value
+  const street = DIMS.streetWidth.value
+  const edge = layout.eaveHalfZ + gap
+  const front = layout.eaveHalfX
+  return [
+    {
+      key: 'jalan',
+      nameId: 'Jalan kampung',
+      nameEn: 'The village street',
+      glossId:
+        'Tepi jalan berbatu di muka rumah, dan garis rumah tetangga di kiri dan kanan. Omo adalah satu petak dari deretan yang menghadap jalan itu: bukan bangunan yang berdiri sendiri, melainkan satu rumah dalam satu baris.',
+      glossEn:
+        'The edge of the paved street in front of the house, and the party lines of the neighbours on either side. An omo is one unit of a terrace facing that street: not a free-standing building but one house in a row.',
+      lines: [
+        [
+          [-front - street, -edge],
+          [-front, -edge],
+        ],
+        [
+          [-front - street, edge],
+          [-front, edge],
+        ],
+        [
+          [-front - street, -edge],
+          [-front - street, edge],
+        ],
+      ],
+      closed: false,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = thatchTop(layout)
   return {
@@ -71,6 +120,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.floorY,
     zoneLines: [0, layout.floorY, layout.eaveY, Math.max(topY, house.bounds.max[1])],
     zones: zones(layout, Math.max(topY, house.bounds.max[1])),
+    site: site(layout),
     figureAt: [layout.eaveHalfX + DIMS.plazaOffset.value / 2, 0, layout.eaveHalfZ + 1.4],
   }
 }

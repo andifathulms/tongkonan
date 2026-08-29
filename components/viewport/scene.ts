@@ -844,7 +844,12 @@ class SiteRig {
      * swamp a honai and be lost under a betang.
      */
     const longest = Math.max(model.footprint.x, model.footprint.z)
-    const half = Math.max(15, Math.ceil((longest * 0.75) / 5) * 5)
+    // Far enough out to hold whatever the tradition put on the ground: a grid
+    // that stopped short of the rice barns would draw them off the sheet.
+    const reachOut = model.site.flatMap((mark) =>
+      mark.lines.flatMap((line) => line.map(([x, z]) => Math.hypot(x, z))),
+    )
+    const half = Math.max(15, Math.ceil((Math.max(longest * 0.75, ...reachOut, 0) + 3) / 5) * 5)
     const y = 0.006
 
     const positions: number[] = []
@@ -899,6 +904,38 @@ class SiteRig {
     seg(nx + 1, -0.45, nx, -0.45)
     seg(nx, -0.45, nx + 1, 0.45)
     seg(nx + 1, 0.45, nx, 0.45)
+
+    /*
+     * And what the tradition says is on the ground: the yard the barns stand
+     * across, the street, the river bank, the compound wall.
+     *
+     * These come off the scene model, so the renderer still cannot name a
+     * single one of them — it is handed polylines in metres and draws them.
+     * They are set a shade stronger than the grid, because the grid is
+     * setting-out and these are the place. Still flat: nothing here can hide
+     * any part of the house, which is the condition the whole idea was
+     * accepted under.
+     */
+    const place = five.clone().lerp(ink, 0.45)
+    for (const mark of model.site) {
+      for (const line of mark.lines) {
+        for (let i = 1; i < line.length; i++) {
+          const a = line[i - 1]
+          const b = line[i]
+          if (!a || !b) continue
+          positions.push(a[0], y, a[1], b[0], y, b[1])
+          for (let k = 0; k < 2; k++) colours.push(place.r, place.g, place.b)
+        }
+        // A closed figure that was written open still closes: the drawing
+        // says "an outline", so the outline is drawn whatever the list did.
+        const first = line[0]
+        const last = line[line.length - 1]
+        if (mark.closed && first && last && (first[0] !== last[0] || first[1] !== last[1])) {
+          positions.push(last[0], y, last[1], first[0], y, first[1])
+          for (let k = 0; k < 2; k++) colours.push(place.r, place.g, place.b)
+        }
+      }
+    }
 
     const geometry = new THREE.BufferGeometry()
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))

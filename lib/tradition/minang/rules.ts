@@ -163,6 +163,12 @@ export const DIMS = {
   wallsLeanOut: dim(1, 'ratio', 'canon', 'schefold-2003', 'Dinding badan rumah condong ke luar, melebar ke arah balok tumpuan.', 'The body walls lean outward, widening toward the wall plate.'),
   noNails: dim(1, 'ratio', 'canon', 'schefold-2003', 'Sambungan pasak; rangka disusun tanpa paku.', 'Pegged joints; the frame goes up without nails.'),
   postsOnGrid: dim(1, 'count', 'canon', 'depdikbud-sumbar', 'Tonggak berdiri pada kisi ruang dan lanjar, simetris terhadap bidang tengah melintang.', 'The posts stand on the grid of ruang and lanjar, symmetric about the transverse mid-plane.'),
+
+  /* The site: the rangkiang, which are the other half of the orientation rule. */
+  rangkiangOpposite: dim(1, 'count', 'canon', 'navis-1984', 'Rangkiang berdiri di seberang halaman menghadap rumah gadang. Kendala hadap rumah ini bersifat hubungan, bukan mata angin — dan inilah benda yang dihadapinya, jadi tanpa rangkiang aturan itu tidak menyebut apa pun.', 'The rangkiang stand across the halaman facing the rumah gadang. This house’s orientation constraint is relational rather than compass-bound — and these are what it is relative to, so without them the rule says nothing.'),
+  halamanDepth: dim(10, 'm', 'interpolated', 'none', 'Lebar halaman antara rumah dan rangkiang.', 'Width of the halaman between the house and the rangkiang.'),
+  rangkiangPlan: dim(3, 'm', 'interpolated', 'none', 'Sisi denah satu rangkiang. Hanya jejaknya yang digambar: rangkiang tidak dimodelkan, dan itu sudah dinyatakan sebagai kekurangan.', 'Plan side of one rangkiang. Only the footprint is drawn: the rangkiang are not modelled, and that is already stated as an absence.'),
+  rangkiangSpacing: dim(5, 'm', 'interpolated', 'none', 'Jarak antar rangkiang sepanjang halaman.', 'Spacing between rangkiang along the halaman.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

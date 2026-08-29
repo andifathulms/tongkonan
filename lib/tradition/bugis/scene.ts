@@ -12,7 +12,9 @@
  * the readout's business.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 function zones(layout: Layout, topY: number): readonly Zone[] {
@@ -49,6 +51,40 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The yard the boards are counted from.
+ *
+ * The timpa laja is a statement addressed to whoever passes: a stack of
+ * boards on the gable whose number is the household's rank, readable from the
+ * road. So the distance a passer-by stands at is part of what the boards
+ * mean, and a saoraja drawn on empty ground is a claim with nobody to make it
+ * to.
+ *
+ * Interpolated, and deliberately so: that Bugis houses stand in yards off a
+ * road is ordinary, but no source here fixes this arrangement, and the mark
+ * says which of those two things it is.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const depth = DIMS.yardDepth.value
+  const half = DIMS.yardWidth.value / 2
+  const front = layout.eaveHalfZ
+  return [
+    {
+      key: 'halaman',
+      nameId: 'Halaman dan tepi jalan',
+      nameEn: 'The yard and the road',
+      glossId:
+        'Tepi jalan di muka tangga, di seberang halaman. Timpa laja dibaca dari sini — susunan papan itu ditujukan kepada orang yang lewat, jadi jarak berdirinya termasuk maknanya.',
+      glossEn:
+        'The edge of the road in front of the stair, across the yard. The timpa laja is read from here — the stack of boards is addressed to whoever passes, so how far away they stand is part of what it means.',
+      lines: [groundRect(-half, -front - depth, half, -front)],
+      closed: true,
+      provenance: 'interpolated',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   return {
@@ -62,6 +98,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     zones: zones(layout, topY),
     // At the gable end, because that is where the claim is and where a
     // neighbour would stand to count it.
+    site: site(layout),
     figureAt: [0, 0, -layout.eaveHalfZ - 1.6],
   }
 }

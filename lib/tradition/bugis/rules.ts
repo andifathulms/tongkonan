@@ -137,6 +137,10 @@ export const DIMS = {
   threeWorlds: dim(3, 'count', 'canon', 'pelras-1996', 'Rumah terbagi tiga dari bawah ke atas: awa bola untuk ternak dan kerja, ale bola untuk orang, rakkeang untuk padi. Tongkonan juga membagi tiga; yang berbeda adalah apa yang ditaruh di atas — di sini yang paling tinggi adalah yang menghidupi.', 'The house divides into three from the bottom up: awa bola for livestock and work, ale bola for people, rakkeang for rice. The tongkonan divides into three as well; what differs is what is put at the top — here the highest thing is what feeds the household.'),
   threadedPosts: dim(1, 'count', 'canon', 'rahim-2011', 'Pattolo menembus lubang yang dipahat tembus pada alliri, bukan ditakik pada sisinya. Rangkanya dirakit dengan diayak dan dipasak, dan itulah sebabnya rumah ini bisa dibongkar dan dipindahkan utuh — yang memang dilakukan.', 'The pattolo pass through mortises cut clean through the alliri rather than being notched onto them. The frame is threaded and pegged, which is why this house can be taken apart and moved whole — and it is.'),
   seatedOnStone: dim(1, 'count', 'canon', 'waterson-1990', 'Kaki tiang berdiri di atas batu, tidak ditanam.', 'The post feet stand on stones; they are not buried.'),
+
+  /* The site: the yard the boards are counted from. */
+  yardDepth: dim(10, 'm', 'interpolated', 'none', 'Jarak dari muka rumah ke tepi jalan. Timpa laja dibaca dari jarak ini: susunan papan pada tampak gable adalah pernyataan yang ditujukan kepada orang yang lewat, jadi jarak berdirinya orang itu adalah bagian dari maknanya. Angkanya penetapan penulis.', 'Distance from the front of the house to the edge of the road. The timpa laja is read from here: the stack of boards on the gable is a statement addressed to whoever passes, so how far away they stand is part of what it means. The figure is the author’s.'),
+  yardWidth: dim(14, 'm', 'interpolated', 'none', 'Lebar halaman muka.', 'Width of the front yard.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

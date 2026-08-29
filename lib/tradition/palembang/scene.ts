@@ -15,7 +15,9 @@
  * about the meaning is worse than one that visibly does not fit.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 function zones(layout: Layout, topY: number): readonly Zone[] {
@@ -54,6 +56,39 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The yard the sequence starts in.
+ *
+ * The kekijing begins outside the house. A guest stops in the yard, climbs
+ * the stair, and is seated on the step that states their standing — so the
+ * ground in front is the first term of the sequence, and a limas drawn
+ * without it starts its argument on the second step.
+ *
+ * A fence line and nothing on it. Where the sources are thin the drawing gets
+ * thinner too: this arrangement is ordinary rather than documented, which is
+ * why the mark is interpolated while the tongkonan's alang are canon.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const depth = DIMS.yardDepth.value
+  const half = DIMS.yardWidth.value / 2
+  const front = layout.eaveHalfX
+  return [
+    {
+      key: 'halaman',
+      nameId: 'Halaman muka',
+      nameEn: 'The front yard',
+      glossId:
+        'Pagar halaman di muka tangga. Urutan kekijing dimulai di sini: tamu berhenti di tanah, naik, lalu didudukkan pada tingkat yang menyatakan kedudukannya. Susunan ini lazim, bukan tercatat — karena itu ia ditandai sebagai penetapan penulis.',
+      glossEn:
+        'The fence of the yard in front of the stair. The kekijing sequence starts here: a guest stops on the ground, climbs, and is seated on the step that states their standing. The arrangement is ordinary rather than documented, which is why it is marked as the author’s.',
+      lines: [groundRect(-front - depth, -half, -front, half)],
+      closed: true,
+      provenance: 'interpolated',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   return {
@@ -67,6 +102,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     zones: zones(layout, topY),
     // In front of the gallery, at the street end — which is where a person
     // arrives and where the sequence starts.
+    site: site(layout),
     figureAt: [-layout.eaveHalfX - 1.5, 0, 0],
   }
 }

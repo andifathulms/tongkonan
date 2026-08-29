@@ -16,7 +16,8 @@
  * which is what it did for the joglo and remains the right answer.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
 import { stockLength } from './module'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -60,6 +61,44 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The compound, which is the thing this bale is one piece of.
+ *
+ * The caution says it outright: a Balinese house is a walled yard with several
+ * bale around a natah and a shrine in the kaja-kangin corner, and this model
+ * builds one pavilion. Drawing the wall and the corner does not build the
+ * missing buildings — it shows the shape of what is missing, which is the
+ * difference between an absence a reader can see and a paragraph they have to
+ * take on trust.
+ *
+ * Kaja-kangin is toward the mountain and the sunrise. In this model's axes,
+ * with the sun rising on +Z and the mountain inland, that corner is drawn on
+ * the (−X, +Z) side and the wall is square to the house, which is what an
+ * orthogonal compound does.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const half = DIMS.compoundSide.value / 2
+  const shrine = DIMS.shrinePlan.value
+  return [
+    {
+      key: 'pekarangan',
+      nameId: 'Pekarangan dan sanggah',
+      nameEn: 'The compound and the shrine',
+      glossId:
+        'Tembok pekarangan, dan jejak sanggah di sudut kaja-kangin. Rumah Bali adalah pekarangan berisi beberapa bale mengelilingi natah; yang dimodelkan di sini satu bale saja, dan garis ini memperlihatkan bentuk dari apa yang tidak ada.',
+      glossEn:
+        'The compound wall, and the footprint of the shrine in the kaja-kangin corner. A Balinese house is a walled yard of several bale around the natah; this model builds one of them, and these lines show the shape of what is not here.',
+      lines: [
+        groundRect(-half, -half, half, half),
+        groundRect(-half + 1, half - 1 - shrine, -half + 1 + shrine, half - 1),
+      ],
+      closed: true,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   const eave = layout.roof[0]
@@ -91,6 +130,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
       topY,
     ],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [reachX + 1.6, 0, 0],
   }
 }

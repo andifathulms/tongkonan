@@ -348,6 +348,15 @@ export const COPY = {
     all: t('Semua rumah', 'All houses'),
   },
 
+  site: {
+    heading: t('Tapak', 'The site'),
+    intro: t(
+      'Yang ada di tanah sekeliling rumah, dan hanya yang dikatakan sumbernya. Semuanya datar, jadi tak satu pun dapat menutupi bagian rumah — dan tak ada tanaman, bukit, air atau langit di sini: pemandangan yang meyakinkan akan menyatakan, dengan sangat fasih dan tanpa asal-usul, jauh lebih banyak daripada yang pernah diukur siapa pun.',
+      'What is on the ground around the house, and only what the sources say is. Everything is flat, so none of it can hide any part of the house — and there is no vegetation, no terrain, no water and no sky here: a convincing landscape would state, very fluently and without provenance, a great deal more than anybody has measured.',
+    ),
+    /* The names and glosses are vocabulary, so they live in each scene model. */
+  },
+
   zones: {
     heading: t('Tiga tingkat', 'The three zones'),
     /* The names and glosses are vocabulary, so they live in each scene model. */

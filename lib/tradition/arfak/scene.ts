@@ -10,7 +10,9 @@
  * clearance cannot carry that, and the zone gloss does it instead.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRing } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 function zones(layout: Layout, topY: number): readonly Zone[] {
@@ -51,6 +53,37 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The clearing.
+ *
+ * A rumah kaki seribu stands on ground cut out of a wooded slope, and the
+ * hundreds of unbraced legs are an answer to that ground. A circle of cleared
+ * earth is the least this can say and still say something: the house is not
+ * on a plain, it is in an opening.
+ *
+ * Interpolated against nothing, like every other figure in this pack, and the
+ * pack says so at the front. The forest itself is not drawn — a wall of
+ * guessed trees would be scenery, and this project does not do scenery.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const radius = Math.max(DIMS.clearingRadius.value, layout.eaveHalfX + 4)
+  return [
+    {
+      key: 'bukaan',
+      nameId: 'Lahan terbuka',
+      nameEn: 'The clearing',
+      glossId:
+        'Tepi lahan yang dibuka di lereng berhutan. Kaki-kaki yang tak berpengaku itu adalah jawaban atas tanah ini. Hutannya tidak digambar: sederet pohon terkaan adalah pemandangan, dan projek ini tidak menggambar pemandangan.',
+      glossEn:
+        'The edge of the ground cleared on a wooded slope. The unbraced legs are an answer to this ground. The forest is not drawn: a row of guessed trees is scenery, and this project does not do scenery.',
+      lines: [groundRing(0, 0, radius)],
+      closed: true,
+      provenance: 'interpolated',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   return {
@@ -62,6 +95,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.floorY,
     zoneLines: [0, layout.floorY, layout.eaveY, topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [layout.eaveHalfX + 1.4, 0, layout.doorZ],
   }
 }

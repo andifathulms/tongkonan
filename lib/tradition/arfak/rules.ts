@@ -130,6 +130,9 @@ export const DIMS = {
   manyLegs: dim(1, 'count', 'canon', 'depdikbud-papua', 'Kakinya sangat banyak dan sangat kecil. Bebannya disebar sehingga tidak ada satu batang pun yang perlu besar — rumah ini dinamai dari jumlah kakinya, bukan dari kekuatannya.', 'The legs are very many and very small. The load is spread so that no single pole needs to be large — the house is named for how many legs it has rather than for how strong they are.'),
   clanDividesInTwo: dim(2, 'count', 'canon', 'mansoben-1995', 'Rumah marga terbagi dua memanjang, sisi laki-laki dan sisi perempuan, dengan lorong di tengahnya. Rumah keluarga tidak dibagi. Yang berubah ada di dalam, dan dari luar kedua rumah itu sama.', 'A clan house divides lengthwise into a men’s side and a women’s side with a passage between. A family house is not divided. What changes is inside, and from outside the two are the same.'),
   tiedNotPegged: dim(1, 'count', 'canon', 'waterson-1990', 'Sambungannya ikat, bukan pasak dan bukan takik. Ikatan boleh bekerja sedikit tanpa patah, dan itulah seluruh gagasan bangunan ini dinyatakan pada satu sambungan.', 'The joints are lashings rather than pegs or notches. A lashing can work a little without breaking, and that is the whole idea of the building stated at one connection.'),
+
+  /* The site: the clearing. */
+  clearingRadius: dim(13, 'm', 'interpolated', 'none', 'Jari-jari lahan terbuka di sekeliling rumah, di antara rumah dan hutan. Rumah kaki seribu berdiri di tanah yang dibuka di lereng berhutan; letak persisnya dan besar bukaannya adalah penetapan penulis, seperti hampir semua angka pada pak ini.', 'Radius of the cleared ground around the house, between the house and the forest. A rumah kaki seribu stands on ground cut out of a wooded slope; the exact siting and the size of the clearing are the author’s, like nearly every figure in this pack.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

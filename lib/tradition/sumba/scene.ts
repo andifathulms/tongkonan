@@ -13,7 +13,9 @@
  * the whole building exists to hold it up.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 function zones(layout: Layout, topY: number): readonly Zone[] {
@@ -58,6 +60,43 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The square, and the graves in it.
+ *
+ * The tower keeps the marapu, and the reason a household keeps them is
+ * standing in front of the house: uma face a village square on a hilltop with
+ * the megalithic graves of the ancestors lying in it. The building is a
+ * container for the ancestors and it looks at where they are buried, which is
+ * a relationship no view of the house alone can show.
+ *
+ * Footprints, not slabs. A Sumbanese grave is a monument with its own carving
+ * and its own tonnage, and inventing one to decorate a yard would be worse
+ * than drawing a rectangle and saying what stood there.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const depth = DIMS.squareDepth.value
+  const plan = DIMS.gravePlan.value
+  const front = layout.eaveHalfX
+  return [
+    {
+      key: 'kubur',
+      nameId: 'Pelataran dan kubur batu',
+      nameEn: 'The square and the stone graves',
+      glossId:
+        'Jejak dua kubur batu megalitik di pelataran kampung, di muka rumah. Rumah yang menyimpan marapu di menaranya berdiri berhadapan dengan kubur orang-orang yang diwakilinya. Batunya sendiri tidak dimodelkan.',
+      glossEn:
+        'The footprints of two megalithic graves in the village square in front of the house. The house that keeps the marapu in its tower stands facing the graves of the people it keeps them for. The slabs themselves are not modelled.',
+      lines: [
+        groundRect(-front - depth, -plan * 1.2, -front - depth + plan, -plan * 0.2),
+        groundRect(-front - depth, plan * 0.2, -front - depth + plan, plan * 1.2),
+      ],
+      closed: true,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   return {
@@ -80,6 +119,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
       ? [0, layout.eaveY, layout.shoulderY, topY]
       : [0, layout.eaveY, topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [layout.eaveHalfX + 1.6, 0, 0],
   }
 }

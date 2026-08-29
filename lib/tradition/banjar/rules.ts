@@ -135,6 +135,11 @@ export const DIMS = {
   coreIsTallest: dim(1, 'count', 'canon', 'seman-2001', 'Yang di tengah menjulang di atas keduanya. Kalau tidak, urutannya tidak terbaca dan rumahnya tidak lagi jenis yang disebut namanya — jadi ketinggian itu bukan hiasan melainkan yang membuat nama itu benar.', 'The middle one rises above both. If it did not, the sequence would not read and the house would no longer be the type its name says — so that height is not ornament but what makes the name true.'),
   raisedOnPosts: dim(1, 'count', 'canon', 'mentayani-2017', 'Rumah berdiri di atas tongkat ulin. Banjarmasin dibangun di atas rawa dan pasang, jadi ini bukan pilihan melainkan syarat.', 'The house stands on ironwood posts. Banjarmasin is built on swamp and tide, so this is a requirement rather than a preference.'),
   ironwood: dim(1, 'count', 'canon', 'mentayani-2017', 'Tongkat dan sirapnya dari ulin, kayu besi — bahan yang sama dengan rumah betang, karena hutan yang sama, dan karena air yang sama.', 'The posts and shingles are ulin, ironwood — the same material as the rumah betang, because the same forest and because the same water.'),
+
+  /* The site: the river the pelatar meets. */
+  facesTheRiver: dim(1, 'count', 'canon', 'mentayani-2017', 'Rumah menghadap sungai, dan pelataran adalah tempat rumah bertemu air. Di Banjarmasin sungai adalah jalannya, jadi tepi air itulah yang menetapkan ujung mana yang muka — dan karena itu ke arah mana urutan empat atapnya berjalan.', 'The house faces the river, and the pelatar is where the house meets the water. In Banjarmasin the river is the road, so the water’s edge is what fixes which end is the front — and therefore which way the sequence of four roofs runs.'),
+  riverSetback: dim(7, 'm', 'interpolated', 'none', 'Jarak dari muka pelataran ke tepi air. Jaraknya penetapan penulis; bahwa air ada di sana bukan.', 'Distance from the front of the pelatar to the water’s edge. The distance is the author’s; that the water is there is not.'),
+  titianWidth: dim(1.4, 'm', 'interpolated', 'none', 'Lebar titian dari pelataran ke air.', 'Width of the walkway from the platform to the water.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

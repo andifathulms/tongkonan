@@ -155,6 +155,11 @@ export const DIMS = {
   noNails: dim(1, 'ratio', 'canon', 'frick-1997', 'Sambungan purus berpasak; rangka disusun tanpa paku dan dapat dibongkar kembali.', 'Pegged purus joints; the frame goes up without nails and comes apart again.'),
   hipped: dim(1, 'ratio', 'canon', 'prijotomo-1984', 'Atapnya limasan berjenjang: molo lebih pendek daripada bangunannya, dan keempat bidang atap turun ke tepi.', 'The roof is a stepped hip: the molo is shorter than the building, and four planes fall away to the eave.'),
   seatedOnStone: dim(1, 'count', 'canon', 'frick-1997', 'Soko berdiri di atas umpak, tidak ditanam.', 'The soko stand on umpak stones; they are not buried.'),
+
+  /* The site: the yard the house sits inside. */
+  walledYard: dim(1, 'count', 'canon', 'dakung-depdikbud', 'Omah berdiri di dalam pekarangan berpagar, dengan pendhapa di muka dan halaman di antaranya. Rumah Jawa bukan benda di tengah lapangan: ia bagian belakang sebuah pekarangan yang dimasuki dari muka.', 'The omah stands inside a walled pekarangan, with the pendhapa in front and the yard between. A Javanese house is not an object in a field: it is the back of a yard entered from the front.'),
+  pekaranganDepth: dim(16, 'm', 'interpolated', 'none', 'Kedalaman pekarangan dari pagar muka ke belakang rumah.', 'Depth of the pekarangan from the front wall to the back of the house.'),
+  pekaranganWidth: dim(20, 'm', 'interpolated', 'none', 'Lebar pekarangan.', 'Width of the pekarangan.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

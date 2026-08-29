@@ -13,7 +13,8 @@
  * evidence the field was right to be nullable.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect, groundRing } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import { domeProfile } from './roof'
 import type { House, Layout } from './types'
@@ -59,6 +60,44 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   return bands
 }
 
+
+/**
+ * The silimo: the compound a honai is one building of.
+ *
+ * A honai is a device for holding a fire's heat until morning, and it is also
+ * one building of a group — the men's honai, the women's ebei, the wamai for
+ * the pigs, inside one fence. The rule control already builds all three; what
+ * it could not show is that they stand together, which is the unit a Dani
+ * household actually lives in.
+ *
+ * The other two are footprints at their own radii, taken from the same rule
+ * pack that would build them, so the circles are the size the model says they
+ * are rather than a size drawn to look right.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const half = DIMS.compoundSide.value / 2
+  const offset = DIMS.neighbourOffset.value
+  const r = layout.radius
+  return [
+    {
+      key: 'silimo',
+      nameId: 'Silimo',
+      nameEn: 'Silimo',
+      glossId:
+        'Pagar pekarangan, dan jejak dua bangunan lain di dalamnya — ebei dan wamai. Satu honai adalah satu bangunan dari sebuah kelompok, dan kelompok itulah tempat tinggalnya; ketiganya dapat dilihat satu per satu dengan mengganti aturan bangunannya.',
+      glossEn:
+        'The compound fence, and the footprints of the two other buildings inside it — the ebei and the wamai. One honai is one building of a group, and the group is the dwelling; all three can be seen in turn by changing the building rule.',
+      lines: [
+        groundRect(-half, -half, half, half),
+        groundRing(offset, -offset * 0.5, r * 0.9),
+        groundRing(offset * 0.4, offset, r * 0.6),
+      ],
+      closed: true,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   const profile = domeProfile(layout)
@@ -74,6 +113,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: 0,
     zoneLines: layout.loft.present ? [0, layout.loft.y, layout.eaveY, topY] : [0, layout.eaveY, topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [reach + DIMS.eaveOversail.value + 1.2, 0, 0],
   }
 }

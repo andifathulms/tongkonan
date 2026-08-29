@@ -148,6 +148,11 @@ export const DIMS = {
   peakIsFlat: dim(1, 'count', 'canon', 'depdikbud-ntt', 'Puncak menara rata, bukan runcing, dan di sanalah tanduk berdiri. Bentuk yang seluruhnya meruncing akan menghilangkan tempat loteng itu berada.', 'The top of the tower is flat rather than pointed, and the finials stand on it. A form tapering to a point would remove the place the loft occupies.'),
   seatedOnStone: dim(1, 'count', 'canon', 'waterson-1990', 'Kaki tiang berdiri di atas batu, tidak ditanam.', 'The post feet stand on stones; they are not buried.'),
   raisedOnPosts: dim(1, 'count', 'canon', 'waterson-1990', 'Rumah berdiri di atas tiang, tetapi rendah — yang penting di sini bukan kolongnya.', 'The house stands on posts, but low — what matters here is not what is under it.'),
+
+  /* The site: the square, and the stones in it. */
+  villageSquare: dim(1, 'count', 'canon', 'hoskins-1998', 'Uma berdiri mengelilingi sebuah pelataran kampung di puncak bukit, dan di pelataran itu terletak kubur batu megalitik para leluhur. Rumah yang menyimpan marapu di menaranya berdiri berhadapan dengan kubur orang-orang yang diwakilinya.', 'Uma stand around a village square on a hilltop, and in the square lie the megalithic graves of the ancestors. The house that keeps the marapu in its tower stands facing the graves of the people it keeps them for.'),
+  squareDepth: dim(12, 'm', 'interpolated', 'none', 'Jarak dari muka rumah ke seberang pelataran.', 'Distance from the front of the house across the square.'),
+  gravePlan: dim(2.6, 'm', 'interpolated', 'none', 'Sisi denah satu kubur batu. Hanya jejaknya yang digambar; batunya tidak dimodelkan.', 'Plan side of one stone grave. Only the footprint is drawn; the slabs are not modelled.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

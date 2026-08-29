@@ -14,7 +14,9 @@
  * everywhere except here, where there is no wall out that far.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import { groundRect } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 function zones(layout: Layout, topY: number): readonly Zone[] {
@@ -55,6 +57,44 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The row, because a lumbung is never the only building in the yard.
+ *
+ * This is the one building here that is not a house, and the claim it makes —
+ * that the care in a building tracks the value of what is stored rather than
+ * the standing of who lives there — is a comparison. It needs the other
+ * buildings in the yard to be a comparison at all: a granary alone reads as
+ * the house.
+ *
+ * Two footprints for the neighbouring lumbung. The dwellings are not drawn,
+ * because a Sasak bale is a building this project has not built and would be
+ * guessing at.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const spacing = DIMS.neighbourSpacing.value
+  const plan = DIMS.neighbourPlan.value
+  const half = plan / 2
+  void layout
+  return [
+    {
+      key: 'jajaran',
+      nameId: 'Jajaran lumbung',
+      nameEn: 'The row of granaries',
+      glossId:
+        'Jejak dua lumbung lain di pekarangan yang sama. Bahwa bangunan paling dirawat di pekarangan bukan tempat orang tidur hanyalah terbaca bila yang lain ikut terlihat; rumah tinggalnya sendiri tidak dimodelkan.',
+      glossEn:
+        'The footprints of two more lumbung in the same yard. That the most carefully made building in the compound is not the one people sleep in only reads when the others are in view; the dwellings themselves are not modelled.',
+      lines: [
+        groundRect(-half, -spacing - half, half, -spacing + half),
+        groundRect(-half, spacing - half, half, spacing + half),
+      ],
+      closed: true,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   const eave = layout.roof[0]
@@ -67,6 +107,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.floorY,
     zoneLines: [0, layout.floorY, layout.floorY + layout.storeHeight, topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [(eave?.halfX ?? layout.halfX) + 1.3, 0, 0],
   }
 }

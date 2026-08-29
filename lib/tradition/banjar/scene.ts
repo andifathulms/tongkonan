@@ -14,7 +14,8 @@
  * it — and the sequence is stated in the copy and the readout instead.
  */
 
-import type { SceneModel, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
 function zones(layout: Layout, topY: number): readonly Zone[] {
@@ -57,6 +58,54 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
   ]
 }
 
+
+/**
+ * The river the pelatar meets.
+ *
+ * The front segment of this house is an open platform, and the reason it is
+ * open is that it is where the house meets the water. In Banjarmasin the
+ * river is the road, so the bank is what fixes which end is the front — and
+ * therefore which way the sequence of four roofs runs. Take the water away
+ * and the chain still stands, but nothing says which way to walk it.
+ *
+ * A bank line and a walkway, no water. A rendered river would be the first
+ * thing in this model that is not a made object.
+ */
+function site(layout: Layout): readonly SiteMark[] {
+  const setback = DIMS.riverSetback.value
+  const half = DIMS.titianWidth.value / 2
+  const front = -layout.depth / 2
+  const bank = front - setback
+  const reach = layout.halfZ + setback
+  return [
+    {
+      key: 'sungai',
+      nameId: 'Tepi sungai dan titian',
+      nameEn: 'The bank and the walkway',
+      glossId:
+        'Garis air di muka pelataran, dan titian yang menuju ke sana. Sungai adalah jalannya: tepi inilah yang menetapkan ujung mana yang muka, dan karena itu ke arah mana urutan empat atapnya dibaca. Airnya sendiri tidak digambar.',
+      glossEn:
+        'The water’s edge in front of the pelatar, and the walkway down to it. The river is the road: this edge is what fixes which end is the front, and therefore which way the sequence of four roofs is read. The water itself is not drawn.',
+      lines: [
+        [
+          [bank, -reach],
+          [bank, reach],
+        ],
+        [
+          [bank, -half],
+          [front, -half],
+        ],
+        [
+          [bank, half],
+          [front, half],
+        ],
+      ],
+      closed: false,
+      provenance: 'canon',
+    },
+  ]
+}
+
 export function sceneModel(house: House, layout: Layout): SceneModel {
   const topY = house.bounds.max[1]
   const core = layout.segments.find((s) => s.key === 'palidangan')
@@ -73,6 +122,7 @@ export function sceneModel(house: House, layout: Layout): SceneModel {
     underfloorHeight: layout.segments[0]?.floorY ?? 0,
     zoneLines: [0, layout.segments[0]?.floorY ?? 0, core?.eaveY ?? topY, topY],
     zones: zones(layout, topY),
+    site: site(layout),
     figureAt: [-layout.depth / 2 - 1.6, 0, 0],
   }
 }

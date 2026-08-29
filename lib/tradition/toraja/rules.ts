@@ -185,6 +185,12 @@ export const DIMS = {
   noNails: dim(1, 'ratio', 'canon', 'schefold-2003', 'Sambungan pasak; rangka disusun tanpa paku.', 'Pegged joints; the frame goes up without nails.'),
   raftersPerBay: dim(4, 'count', 'interpolated', 'none', 'Jumlah kasau tiap ruang, tiap sisi.', 'Number of rafters per bay, per side.'),
   postsPerRow: dim(2, 'count', 'canon', 'depdikbud-sulsel', 'Tiang berpasangan melintang, simetris terhadap bidang punggung.', 'Posts stand in transverse pairs, symmetric about the ridge plane.'),
+
+  /* The site: what the house faces, which is what facing north means here. */
+  alangOpposite: dim(1, 'count', 'canon', 'waterson-1990', 'Alang — lumbung padi — berdiri berjajar menghadap tongkonan di seberang halaman, jadi rumah dan lumbung saling berhadapan. Aturan hadap utara tidak menyebut arah mata angin saja: ia menyebut apa yang ada di hadapan rumah.', 'The alang — the rice barns — stand in a row facing the tongkonan across the yard, so house and barns face each other. The rule that the house faces north is not only a compass bearing: it says what stands in front of the house.'),
+  halamanDepth: dim(9, 'm', 'interpolated', 'none', 'Jarak dari muka tongkonan ke jajaran alang. Bahwa alang berdiri di seberang halaman adalah kanon; seberapa lebar halaman itu adalah penetapan penulis.', 'Distance from the front of the tongkonan to the row of alang. That the barns stand across the yard is canon; how wide the yard is is the author’s.'),
+  alangPlan: dim(3.6, 'm', 'interpolated', 'none', 'Sisi denah satu alang. Yang digambar hanyalah jejak denahnya di tanah: sebuah alang adalah bangunan tersendiri dan bangunan yang tidak dimodelkan di sini tidak akan didirikan dari terkaan.', 'Plan side of one alang. Only its footprint on the ground is drawn: an alang is a building in its own right, and a building this project does not model will not be raised from a guess.'),
+  alangSpacing: dim(6, 'm', 'interpolated', 'none', 'Jarak antar alang sepanjang jajarannya.', 'Spacing between alang along their row.'),
 } as const
 
 export type DimKey = keyof typeof DIMS

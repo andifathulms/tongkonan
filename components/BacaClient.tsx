@@ -98,6 +98,37 @@ export function BacaClient({ locale, tradisi }: { locale: Locale; tradisi: Tradi
             </dl>
           </RailSection>
 
+          {/*
+            What the house stands in. The marks are drawn on the ground in the
+            viewport and carry no lettering — a font inside the model would be
+            the first typography in it — so this is where they are named, with
+            the provenance of the *arrangement* beside each. The distances are
+            ordinary dimensions and are counted in the bar below like any
+            other.
+          */}
+          {built.scene.site.length > 0 && (
+            <RailSection title={pick(COPY.site.heading, locale)}>
+              <p className="mb-3 text-body text-muted">{pick(COPY.site.intro, locale)}</p>
+              <dl className="flex flex-col gap-3">
+                {built.scene.site.map((mark) => (
+                  <div key={mark.key}>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <dt className="text-body leading-tight">
+                        {locale === 'id' ? mark.nameId : mark.nameEn}
+                      </dt>
+                      <dd className="micro shrink-0">
+                        {pick(COPY.provenance[mark.provenance], locale)}
+                      </dd>
+                    </div>
+                    <p className="mt-0.5 text-body text-muted">
+                      {locale === 'id' ? mark.glossId : mark.glossEn}
+                    </p>
+                  </div>
+                ))}
+              </dl>
+            </RailSection>
+          )}
+
           <RailSection title={pick(COPY.provenance.heading, locale)}>
             <ProvenanceStrip split={built.split} locale={locale} />
           </RailSection>
