@@ -184,6 +184,15 @@ export const WAMENA: Site = {
   tzName: 'WIT',
 }
 
+/** Banda Aceh — the northernmost and westernmost site in the collection. */
+export const BANDA_ACEH: Site = {
+  name: 'Banda Aceh',
+  latitude: 5.55,
+  longitude: 95.32,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /** Kanekes, in the hills of southern Banten. */
 export const KANEKES: Site = {
   name: 'Kanekes',

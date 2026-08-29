@@ -76,6 +76,7 @@ describe('the core is tradition-neutral', () => {
       'woloan', 'minahasa', 'tomohon', 'tontemboan',
       'siwaluh', 'jabu', 'karo', 'bena kayu', 'tersek', 'ayo-ayo',
       'baduy', 'kanekes', 'imah', 'sosoro', 'pikukuh', 'palupuh', 'hateup', 'tihang',
+      'rumoh', 'aceh', 'seuramo', 'tungai', 'tameh', 'reunyeun', 'bubong', 'gaseue', 'binteh',
       'bubungan', 'palimasan', 'baliku', 'palidangan', 'surambi', 'pelatar',
       'anjung', 'banjar', 'tongkat',
     ]

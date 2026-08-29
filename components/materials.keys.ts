@@ -163,6 +163,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * a key belongs to one tradition rather than to the shared list.
    */
   sunda: ['tanah'],
+  /** nothing of its own: timber, board, bamboo and the same sago leaf */
+  aceh: [],
 }
 
 /**
@@ -196,6 +198,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   minahasa: 'kayu',
   karo: 'kayu',
   sunda: 'kayu',
+  aceh: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
