@@ -351,8 +351,8 @@ export const COPY = {
   site: {
     heading: t('Tapak', 'The site'),
     intro: t(
-      'Yang ada di tanah sekeliling rumah, dan hanya yang dikatakan sumbernya. Semuanya datar, jadi tak satu pun dapat menutupi bagian rumah — dan tak ada tanaman, bukit, air atau langit di sini: pemandangan yang meyakinkan akan menyatakan, dengan sangat fasih dan tanpa asal-usul, jauh lebih banyak daripada yang pernah diukur siapa pun.',
-      'What is on the ground around the house, and only what the sources say is. Everything is flat, so none of it can hide any part of the house — and there is no vegetation, no terrain, no water and no sky here: a convincing landscape would state, very fluently and without provenance, a great deal more than anybody has measured.',
+      'Yang ada di tanah sekeliling rumah, dan hanya yang dikatakan sumbernya. Yang berdiri di sini adalah massa: lumbung tampil sebagai badan dan atapnya sebesar yang disebut sumber, tanpa satu pun dari puluhan bagiannya; kubur batu adalah papan di atas kaki, tanpa ukiran; air adalah satu permukaan datar yang tidak bergerak dan tidak memantulkan apa-apa. Tidak ada tanaman dan tidak ada bukit. Ukurannya semua tercatat di tabel dimensi dan hampir semuanya penetapan penulis — yang dibeli dengan menggambarnya adalah letak, bukan pengetahuan baru.',
+      'What is on the ground around the house, and only what the sources say is. What stands here is massing: a granary appears as a body and a roof at the size the sources give it, with none of its dozens of parts; a stone grave is a slab on legs, uncarved; water is one flat surface that neither moves nor reflects. There is no vegetation and no terrain. Every figure is in the dimension table and nearly all of them are the author’s — what drawing them buys is where things are, not new knowledge.',
     ),
     /* The names and glosses are vocabulary, so they live in each scene model. */
   },

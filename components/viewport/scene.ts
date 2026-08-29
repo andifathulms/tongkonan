@@ -15,7 +15,7 @@
 
 import * as THREE from 'three'
 import type { AnyHouse, AnyPart, ProvenanceClass } from '@/lib/core/types'
-import type { SceneModel } from '@/lib/core/scene'
+import type { SceneModel, SiteVolume } from '@/lib/core/scene'
 import { sectionAxis } from '@/lib/core/scene'
 import type { Kinds } from '@/lib/core/kinds'
 import type { SolarPosition } from '@/lib/solar/position'
@@ -981,8 +981,105 @@ class SiteRig {
       if (site.closed) for (const line of closed) this.fill(line, tone)
       this.ribbon(closed, 0.16, edge, 0.014)
       if (!site.closed) this.ribbon(this.tickMarks(closed), 0.12, edge, 0.014)
+      for (const volume of site.volumes) this.solid(volume)
       this.anchorsByKey.set(site.key, anchorOf(closed))
     }
+  }
+
+  /**
+   * One solid in the setting: a grave slab, a barn's massing, a fence, water.
+   *
+   * Built from primitives here for the same reason the scale figure is: this
+   * is scene furniture, not a building. Nothing in it is generated geometry in
+   * the sense the split is about — the tradition states a kind, a place and a
+   * size in metres, and the renderer stands the corresponding solid there. A
+   * shape being *computed* in here would be the violation; a box being made
+   * from a stated size is what the house's own parts already do.
+   *
+   * They cast and receive shadow, because a model of a place where a barn
+   * throws a shadow across a yard at four in the afternoon is telling the
+   * truth about the sun, which is the one thing in this project that was never
+   * interpolated.
+   */
+  private solid(volume: SiteVolume): void {
+    const [w, h, d] = volume.size
+    if (h <= 0 || w <= 0 || d <= 0) return
+    let geometry: THREE.BufferGeometry
+    switch (volume.kind) {
+      case 'box':
+        geometry = new THREE.BoxGeometry(w, h, d)
+        geometry.translate(0, h / 2, 0)
+        break
+      case 'cylinder':
+        geometry = new THREE.CylinderGeometry(w / 2, w / 2, h, 12)
+        geometry.translate(0, h / 2, 0)
+        break
+      case 'cone':
+        geometry = new THREE.ConeGeometry(w / 2, h, 16)
+        geometry.translate(0, h / 2, 0)
+        break
+      case 'gable': {
+        // A prism: two sloping planes over a rectangle. Written out because
+        // three has no gable primitive, and because a cone with four sides is
+        // a pyramid and this is not one.
+        const hx = w / 2
+        const hz = d / 2
+        const ridge = volume.ridgeAxis === 2 ? 2 : 0
+        const a: [number, number, number][] =
+          ridge === 0
+            ? [
+                [-hx, 0, -hz],
+                [hx, 0, -hz],
+                [hx, 0, hz],
+                [-hx, 0, hz],
+                [-hx, h, 0],
+                [hx, h, 0],
+              ]
+            : [
+                [-hx, 0, -hz],
+                [hx, 0, -hz],
+                [hx, 0, hz],
+                [-hx, 0, hz],
+                [0, h, -hz],
+                [0, h, hz],
+              ]
+        const faces =
+          ridge === 0
+            ? [
+                [0, 1, 5],
+                [0, 5, 4],
+                [3, 4, 5],
+                [3, 5, 2],
+                [1, 2, 5],
+                [0, 4, 3],
+              ]
+            : [
+                [0, 1, 4],
+                [1, 5, 2],
+                [1, 4, 5],
+                [3, 2, 5],
+                [3, 5, 4],
+                [0, 4, 3],
+              ]
+        const points: number[] = []
+        for (const [i, j, k] of faces) {
+          for (const n of [i, j, k]) {
+            const v = a[n ?? 0]
+            if (v) points.push(v[0], v[1], v[2])
+          }
+        }
+        geometry = new THREE.BufferGeometry()
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3))
+        geometry.computeVertexNormals()
+        break
+      }
+    }
+    const mesh = new THREE.Mesh(geometry, siteMaterial(volume.material))
+    mesh.position.set(volume.at[0], volume.at[1], volume.at[2])
+    mesh.castShadow = volume.material !== 'air' && volume.material !== 'tanah'
+    mesh.receiveShadow = true
+    this.meshes.push(mesh)
+    this.group.add(mesh)
   }
 
   /** Where each mark's caption belongs, keyed the way the scene model keys it. */
@@ -1150,6 +1247,42 @@ class SiteRig {
     ;(this.lines.material as THREE.Material).dispose()
     this.lines = null
   }
+}
+
+/**
+ * The substances a setting is made of, as materials.
+ *
+ * Five, flat and matte, and shared by every tradition — unlike the house's own
+ * material set, which is generated per tradition because the species and the
+ * working are stated by a builder. Nobody stated the stone of a grave whose
+ * size this model invented, so these are plain colours under the same sun.
+ *
+ * Water is the one with any sheen, and only a little: a model's water is a
+ * poured surface, not a river. There is no ripple, no reflection and no sound,
+ * because those would be the first things in this scene pretending to be
+ * observed rather than made.
+ */
+const siteMaterials = new Map<string, THREE.MeshStandardMaterial>()
+
+function siteMaterial(key: SiteVolume['material']): THREE.MeshStandardMaterial {
+  const found = siteMaterials.get(key)
+  if (found) return found
+  const made = ((): THREE.MeshStandardMaterial => {
+    switch (key) {
+      case 'batu':
+        return new THREE.MeshStandardMaterial({ color: 0x9a958a, roughness: 0.95, metalness: 0 })
+      case 'kayu':
+        return new THREE.MeshStandardMaterial({ color: 0x6b5a43, roughness: 0.85, metalness: 0 })
+      case 'atap':
+        return new THREE.MeshStandardMaterial({ color: 0x4a4033, roughness: 0.95, metalness: 0 })
+      case 'air':
+        return new THREE.MeshStandardMaterial({ color: 0x6f7f7c, roughness: 0.28, metalness: 0 })
+      case 'tanah':
+        return new THREE.MeshStandardMaterial({ color: 0xb3a892, roughness: 1, metalness: 0 })
+    }
+  })()
+  siteMaterials.set(key, made)
+  return made
 }
 
 /** The mean of a figure's vertices: where its caption sits. */

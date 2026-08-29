@@ -16,7 +16,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -73,6 +73,32 @@ function site(layout: Layout): readonly SiteMark[] {
   const depth = DIMS.yardDepth.value
   const half = DIMS.yardWidth.value / 2
   const front = layout.eaveHalfX
+  /* A post-and-rail fence, low enough to see the steps over. */
+  const fh = DIMS.fenceHeight.value
+  const spacing = DIMS.fencePostSpacing.value
+  const post = DIMS.fencePostWidth.value
+  const rail = DIMS.fenceRailDepth.value
+  const volumes: SiteVolume[] = []
+  const nearX = -front - depth
+  for (let z = -half; z <= half + 1e-6; z += spacing) {
+    volumes.push({ kind: 'box', at: [nearX, 0, z], size: [post, fh, post], material: 'kayu' })
+  }
+  for (const sz of [-1, 1] as const) {
+    volumes.push({
+      kind: 'box',
+      at: [nearX + depth / 2, 0, sz * half],
+      size: [depth, fh - rail, rail],
+      material: 'kayu',
+    })
+  }
+  // One rail along the front, at the head of the posts.
+  volumes.push({
+    kind: 'box',
+    at: [nearX, fh - rail, 0],
+    size: [rail, rail, half * 2],
+    material: 'kayu',
+  })
+
   return [
     {
       key: 'halaman',
@@ -84,6 +110,7 @@ function site(layout: Layout): readonly SiteMark[] {
         'The fence of the yard in front of the stair. The kekijing sequence starts here: a guest stops on the ground, climbs, and is seated on the step that states their standing. The arrangement is ordinary rather than documented, which is why it is marked as the author’s.',
       lines: [groundRect(-front - depth, -half, -front, half)],
       closed: true,
+      volumes,
       provenance: 'interpolated',
     },
   ]

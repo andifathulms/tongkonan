@@ -65,6 +65,38 @@ describe('the site figures', () => {
       }
     })
 
+    /**
+     * The condition the whole setting was accepted under: it may not get in
+     * the way of the house.
+     *
+     * A rice barn is a building and it now stands as a solid, so this is no
+     * longer true by construction the way it was when everything was flat. A
+     * volume overlapping the house's own plan would be a barn built through
+     * a wall; one taller than the house would be a neighbour drawn to hide the
+     * thing the reader came for.
+     */
+    it(`${tradition.key}: keeps its solids out of the house`, () => {
+      const halfX = built.scene.footprint.x / 2
+      const halfZ = built.scene.footprint.z / 2
+      const ridge = built.house.bounds.max[1]
+      for (const mark of marks) {
+        for (const v of mark.volumes) {
+          // Touching is allowed and meant: a walkway that stops short of the
+          // platform it serves is a walkway to nowhere.
+          const clearX = Math.abs(v.at[0]) - v.size[0] / 2 >= halfX - 1e-6
+          const clearZ = Math.abs(v.at[2]) - v.size[2] / 2 >= halfZ - 1e-6
+          expect(`${mark.key}: ${clearX || clearZ ? 'clear' : 'through the house'}`).toBe(
+            `${mark.key}: clear`,
+          )
+          expect(v.at[1] + v.size[1]).toBeLessThanOrEqual(ridge)
+          for (const n of [...v.at, ...v.size]) expect(Number.isFinite(n)).toBe(true)
+          expect(v.size[0]).toBeGreaterThan(0)
+          expect(v.size[1]).toBeGreaterThan(0)
+          expect(v.size[2]).toBeGreaterThan(0)
+        }
+      }
+    })
+
     /** Names in both languages, since the legend prints one of them. */
     it(`${tradition.key}: names every mark in both languages`, () => {
       for (const mark of marks) {

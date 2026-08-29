@@ -24,7 +24,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -86,6 +86,35 @@ function site(layout: Layout): readonly SiteMark[] {
   const depth = DIMS.pekaranganDepth.value
   // The house faces −X, so the yard runs forward from the back of the body.
   const rear = layout.bodyDepth / 2 + 2
+  /*
+   * The wall as a low masonry run, with the entrance left open in the front.
+   *
+   * Low on purpose: a compound wall that hid the house would be a wall doing
+   * something a compound wall in Java does not do, and it would also break the
+   * one condition the setting was accepted under.
+   */
+  const h = DIMS.yardWallHeight.value
+  const t = DIMS.yardWallThickness.value
+  const gate = DIMS.gateWidth.value / 2
+  const front = rear - depth
+  const volumes: SiteVolume[] = [
+    { kind: 'box', at: [rear, 0, 0], size: [t, h, halfWidth * 2], material: 'batu' },
+    { kind: 'box', at: [(rear + front) / 2, 0, -halfWidth], size: [depth, h, t], material: 'batu' },
+    { kind: 'box', at: [(rear + front) / 2, 0, halfWidth], size: [depth, h, t], material: 'batu' },
+    {
+      kind: 'box',
+      at: [front, 0, (halfWidth + gate) / 2],
+      size: [t, h, halfWidth - gate],
+      material: 'batu',
+    },
+    {
+      kind: 'box',
+      at: [front, 0, -(halfWidth + gate) / 2],
+      size: [t, h, halfWidth - gate],
+      material: 'batu',
+    },
+  ]
+
   return [
     {
       key: 'pekarangan',
@@ -97,6 +126,7 @@ function site(layout: Layout): readonly SiteMark[] {
         'The wall of the yard. The omah stands at its back and is entered from the front, with the pendhapa and the open ground between — so the pendhapa is not a porch stuck on the front but a building holding one side of a yard.',
       lines: [groundRect(rear - depth, -halfWidth, rear, halfWidth)],
       closed: true,
+      volumes,
       provenance: 'canon',
     },
   ]

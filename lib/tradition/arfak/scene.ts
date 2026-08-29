@@ -11,7 +11,7 @@
  */
 
 import { groundRing } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -68,6 +68,35 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
  */
 function site(layout: Layout): readonly SiteMark[] {
   const radius = Math.max(DIMS.clearingRadius.value, layout.eaveHalfX + 4)
+  /*
+   * Stumps at the edge, and no forest.
+   *
+   * The house stands on ground that was cut out of woodland, and a stump says
+   * that in one object. A wall of guessed trees would be scenery — the thing
+   * this whole layer was accepted on the condition of not being.
+   */
+  const stumpH = DIMS.stumpHeight.value
+  const stumpW = DIMS.stumpWidth.value
+  const count = Math.round(DIMS.stumpCount.value)
+  const volumes: SiteVolume[] = []
+  const setback = DIMS.stumpSetback.value
+  for (let i = 0; i < count; i++) {
+    /*
+     * Spread by the golden angle so they do not fall into a ring of evenly
+     * spaced posts, which would read as a fence — the same problem the legs of
+     * this house solve by leaning, and solved the same way: deterministically,
+     * because `Math.random` would give a different clearing on every load.
+     */
+    const a = (i * Math.PI * (3 - Math.sqrt(5))) % (Math.PI * 2)
+    const r = radius - setback * (1 + (i % 3) / 2)
+    volumes.push({
+      kind: 'cylinder',
+      at: [Math.cos(a) * r, 0, Math.sin(a) * r],
+      size: [stumpW, stumpH, stumpW],
+      material: 'kayu',
+    })
+  }
+
   return [
     {
       key: 'bukaan',
@@ -79,6 +108,7 @@ function site(layout: Layout): readonly SiteMark[] {
         'The edge of the ground cleared on a wooded slope. The unbraced legs are an answer to this ground. The forest is not drawn: a row of guessed trees is scenery, and this project does not do scenery.',
       lines: [groundRing(0, 0, radius)],
       closed: true,
+      volumes,
       provenance: 'interpolated',
     },
   ]

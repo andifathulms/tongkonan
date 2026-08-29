@@ -14,7 +14,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import { thatchTop } from './roof'
 import type { House, Layout } from './types'
@@ -78,6 +78,33 @@ function site(layout: Layout): readonly SiteMark[] {
   const street = DIMS.streetWidth.value
   const edge = layout.eaveHalfZ + gap
   const front = layout.eaveHalfX
+  /*
+   * The neighbours as blocks, and the street as stone.
+   *
+   * A neighbour is another omo, and another omo is a whole model. What stands
+   * here is a block to the height of the eave: enough to see that this house
+   * is one unit of a terrace, and nothing that pretends to be a house.
+   */
+  const nh = DIMS.neighbourHeight.value
+  const paving = DIMS.pavingDepth.value
+  const volumes: SiteVolume[] = []
+  for (const sz of [-1, 1] as const) {
+    // The neighbour is the same building: its block is this house's own eave
+    // plan, one gap away. Nothing here is a proportion somebody chose.
+    volumes.push({
+      kind: 'box',
+      at: [0, 0, sz * (edge + layout.eaveHalfZ)],
+      size: [layout.eaveHalfX * 2, nh, layout.eaveHalfZ * 2],
+      material: 'kayu',
+    })
+  }
+  volumes.push({
+    kind: 'box',
+    at: [-front - street / 2, 0, 0],
+    size: [street, paving, (edge + layout.eaveHalfZ * 2) * 2],
+    material: 'batu',
+  })
+
   return [
     {
       key: 'jalan',
@@ -102,6 +129,7 @@ function site(layout: Layout): readonly SiteMark[] {
         ],
       ],
       closed: false,
+      volumes,
       provenance: 'canon',
     },
   ]

@@ -152,6 +152,11 @@ export const DIMS = {
   /* The site: the square, and the stones in it. */
   villageSquare: dim(1, 'count', 'canon', 'hoskins-1998', 'Uma berdiri mengelilingi sebuah pelataran kampung di puncak bukit, dan di pelataran itu terletak kubur batu megalitik para leluhur. Rumah yang menyimpan marapu di menaranya berdiri berhadapan dengan kubur orang-orang yang diwakilinya.', 'Uma stand around a village square on a hilltop, and in the square lie the megalithic graves of the ancestors. The house that keeps the marapu in its tower stands facing the graves of the people it keeps them for.'),
   squareDepth: dim(12, 'm', 'interpolated', 'none', 'Jarak dari muka rumah ke seberang pelataran.', 'Distance from the front of the house across the square.'),
+  graveLegHeight: dim(0.85, 'm', 'interpolated', 'none', 'Tinggi kaki batu yang menyangga papan kubur. Kubur batu Sumba adalah papan besar di atas beberapa kaki batu; ukurannya di sini penetapan penulis, dan kubur sungguhan berukir sedangkan yang ini tidak.', 'Height of the stone legs carrying the grave slab. A Sumbanese stone grave is a great slab on stone legs; the figures here are the author’s, and a real grave is carved where this one is not.'),
+  graveLegWidth: dim(0.5, 'm', 'interpolated', 'none', 'Sisi satu kaki batu.', 'Side of one stone leg.'),
+  graveSlabOverhang: dim(0.25, 'm', 'interpolated', 'none', 'Berapa jauh papan batu menjorok di luar kaki-kakinya.', 'How far the grave slab oversails its legs.'),
+  graveGap: dim(1.8, 'm', 'interpolated', 'none', 'Jarak antara kedua kubur di pelataran.', 'Distance between the two graves in the square.'),
+  graveSlabDepth: dim(0.42, 'm', 'interpolated', 'none', 'Tebal papan batu di atasnya.', 'Thickness of the slab over them.'),
   gravePlan: dim(2.6, 'm', 'interpolated', 'none', 'Sisi denah satu kubur batu. Hanya jejaknya yang digambar; batunya tidak dimodelkan.', 'Plan side of one stone grave. Only the footprint is drawn; the slabs are not modelled.'),
 } as const
 

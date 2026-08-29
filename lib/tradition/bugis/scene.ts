@@ -13,7 +13,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -69,6 +69,18 @@ function site(layout: Layout): readonly SiteMark[] {
   const depth = DIMS.yardDepth.value
   const half = DIMS.yardWidth.value / 2
   const front = layout.eaveHalfZ
+  /* The road itself: a band of packed earth, and nothing on it. */
+  const roadW = DIMS.roadWidth.value
+  const roadD = DIMS.roadDepth.value
+  const volumes: SiteVolume[] = [
+    {
+      kind: 'box',
+      at: [0, 0, -front - depth + roadW / 2],
+      size: [half * 2, roadD, roadW],
+      material: 'tanah',
+    },
+  ]
+
   return [
     {
       key: 'halaman',
@@ -80,6 +92,7 @@ function site(layout: Layout): readonly SiteMark[] {
         'The edge of the road in front of the stair, across the yard. The timpa laja is read from here — the stack of boards is addressed to whoever passes, so how far away they stand is part of what it means.',
       lines: [groundRect(-half, -front - depth, half, -front)],
       closed: true,
+      volumes,
       provenance: 'interpolated',
     },
   ]

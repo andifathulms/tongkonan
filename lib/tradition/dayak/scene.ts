@@ -15,7 +15,7 @@
  * can hold, and the division that matters here is stated in the copy instead.
  */
 
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -72,6 +72,26 @@ function site(layout: Layout): readonly SiteMark[] {
   const setback = DIMS.riverSetback.value
   const bank = -(layout.eaveHalfX + setback)
   const reach = layout.length / 2 + setback
+  /*
+   * The water, as a model makes water: one flat surface, a little below the
+   * bank, with nothing moving on it.
+   *
+   * Not a river — a river is wider than anything that fits here, and it moves.
+   * This is the surface a model of this house would have on the table beside
+   * it: enough to say the front of the building is a bank, and no more. There
+   * is no ripple, no reflection written by hand and no sound.
+   */
+  const width = DIMS.riverWidth.value
+  const drop = DIMS.bankDrop.value
+  const volumes: SiteVolume[] = [
+    {
+      kind: 'box',
+      at: [bank - width / 2, -drop, 0],
+      size: [width, drop, reach * 2],
+      material: 'air',
+    },
+  ]
+
   return [
     {
       key: 'sungai',
@@ -88,6 +108,7 @@ function site(layout: Layout): readonly SiteMark[] {
         ],
       ],
       closed: false,
+      volumes,
       provenance: 'canon',
     },
   ]

@@ -139,6 +139,12 @@ export const DIMS = {
   /* The site: the river the pelatar meets. */
   facesTheRiver: dim(1, 'count', 'canon', 'mentayani-2017', 'Rumah menghadap sungai, dan pelataran adalah tempat rumah bertemu air. Di Banjarmasin sungai adalah jalannya, jadi tepi air itulah yang menetapkan ujung mana yang muka — dan karena itu ke arah mana urutan empat atapnya berjalan.', 'The house faces the river, and the pelatar is where the house meets the water. In Banjarmasin the river is the road, so the water’s edge is what fixes which end is the front — and therefore which way the sequence of four roofs runs.'),
   riverSetback: dim(7, 'm', 'interpolated', 'none', 'Jarak dari muka pelataran ke tepi air. Jaraknya penetapan penulis; bahwa air ada di sana bukan.', 'Distance from the front of the pelatar to the water’s edge. The distance is the author’s; that the water is there is not.'),
+  riverWidth: dim(22, 'm', 'interpolated', 'none', 'Lebar air yang digambar di muka pelataran. Sungai Barito jauh lebih lebar daripada apa pun yang muat dalam model; ini permukaan air secukupnya untuk menyatakan bahwa muka rumah adalah tepian.', 'Width of the water drawn in front of the platform. The Barito is far wider than anything that fits in the model; this is enough water surface to state that the front of the house is a bank.'),
+  bankDrop: dim(0.6, 'm', 'interpolated', 'none', 'Turunnya muka air di bawah tanah tempat tongkat berdiri.', 'How far the water sits below the ground the posts stand on.'),
+  titianPostWidth: dim(0.16, 'm', 'interpolated', 'none', 'Garis tengah tongkat titian.', 'Diameter of a walkway post.'),
+  titianDeckThickness: dim(0.08, 'm', 'interpolated', 'none', 'Tebal papan titian.', 'Thickness of the walkway planks.'),
+  titianDeckY: dim(0.35, 'm', 'interpolated', 'none', 'Tinggi papan titian di atas tanah tepian.', 'Height of the walkway deck above the bank.'),
+  titianPostSpacing: dim(2, 'm', 'interpolated', 'none', 'Jarak antar tongkat titian.', 'Spacing of the walkway posts.'),
   titianWidth: dim(1.4, 'm', 'interpolated', 'none', 'Lebar titian dari pelataran ke air.', 'Width of the walkway from the platform to the water.'),
 } as const
 

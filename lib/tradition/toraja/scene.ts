@@ -13,7 +13,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -84,6 +84,49 @@ function site(layout: Layout): readonly SiteMark[] {
   const lines = [-1, 0, 1].map((n) =>
     groundRect(near - plan, n * spacing - plan / 2, near, n * spacing + plan / 2),
   )
+
+  /*
+   * Each barn as its massing: six posts, a body, a gable over it.
+   *
+   * Not a modelled alang. A real one is a building with its own carving, its
+   * own swept roof and its own rank, and this is four solids at the size the
+   * sources give the barn — enough to see that something stands there and what
+   * kind of thing it is, and not enough to pretend it was drawn from one.
+   */
+  const floorY = DIMS.alangFloorY.value
+  const body = DIMS.alangBodyHeight.value
+  const rise = DIMS.alangRoofRise.value
+  const post = DIMS.alangPostWidth.value
+  const eave = DIMS.alangEave.value
+  const volumes: SiteVolume[] = []
+  for (const n of [-1, 0, 1]) {
+    const cx = near - plan / 2
+    const cz = n * spacing
+    for (const sx of [-1, 1] as const) {
+      for (const sz of [-1, 0, 1] as const) {
+        volumes.push({
+          kind: 'cylinder',
+          at: [cx + sx * (plan - post) / 2, 0, cz + sz * (plan - post) / 2],
+          size: [post, floorY, post],
+          material: 'kayu',
+        })
+      }
+    }
+    volumes.push({
+      kind: 'box',
+      at: [cx, floorY, cz],
+      size: [plan, body, plan],
+      material: 'kayu',
+    })
+    volumes.push({
+      kind: 'gable',
+      at: [cx, floorY + body, cz],
+      size: [plan + eave * 2, rise, plan + eave * 2],
+      ridgeAxis: 0,
+      material: 'atap',
+    })
+  }
+
   return [
     {
       key: 'alang',
@@ -95,6 +138,7 @@ function site(layout: Layout): readonly SiteMark[] {
         'The footprints of three rice barns, in a row facing the tongkonan across the yard. House and barns face each other, and that is what the rule about facing north actually contains. The barns themselves are not modelled.',
       lines,
       closed: true,
+      volumes,
       provenance: 'canon',
     },
   ]

@@ -170,6 +170,10 @@ export const DIMS = {
   /* The site: the compound, which is the thing this house is one piece of. */
   walledCompound: dim(1, 'count', 'canon', 'gelebet-1986', 'Sebuah bale berdiri di dalam pekarangan bertembok bersama beberapa bale lain mengelilingi natah, dengan sanggah di sudut kaja-kangin. Bangunan tunggal adalah bagian; pekarangan itulah rumahnya.', 'A bale stands inside a walled compound with several others around the natah, with the shrine in the kaja-kangin corner. The single building is a part; the compound is the house.'),
   compoundSide: dim(22, 'm', 'interpolated', 'none', 'Sisi pekarangan bertembok. Bahwa ada pekarangan adalah kanon; ukurannya penetapan penulis.', 'Side of the walled compound. That there is a compound is canon; its size is the author’s.'),
+  wallHeightSite: dim(1.8, 'm', 'interpolated', 'none', 'Tinggi tembok penyengker pekarangan. Tembok Bali adalah bata dan paras dengan gerbang; di sini hanya massanya, tanpa ukiran dan tanpa bentuk gerbangnya.', 'Height of the compound wall. A Balinese wall is brick and paras with a gate; this is its massing only, with no carving and no gate form.'),
+  wallThicknessSite: dim(0.35, 'm', 'interpolated', 'none', 'Tebal tembok itu.', 'Thickness of that wall.'),
+  shrineInset: dim(1, 'm', 'interpolated', 'none', 'Jarak sanggah dari tembok di sudut kaja-kangin.', 'How far the shrine stands off the wall in the kaja-kangin corner.'),
+  shrineHeight: dim(2.6, 'm', 'interpolated', 'none', 'Tinggi massa sanggah di sudut kaja-kangin. Sanggah sungguhan adalah bangunan bertingkat berukir; ini balok batu setinggi itu dan tidak lebih.', 'Height of the shrine massing in the kaja-kangin corner. A real shrine is a tiered, carved structure; this is a stone block of that height and nothing more.'),
   shrinePlan: dim(3, 'm', 'interpolated', 'none', 'Sisi denah sanggah di sudut kaja-kangin. Hanya jejaknya yang digambar.', 'Plan side of the shrine in the kaja-kangin corner. Only its footprint is drawn.'),
 } as const
 

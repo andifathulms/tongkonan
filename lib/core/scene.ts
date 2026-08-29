@@ -52,6 +52,48 @@ export interface Zone {
  * dimensions and live in the rule pack with everything else, so a site figure
  * moves the interpolated bar the way any other invented number does.
  */
+/**
+ * What a site volume is made of, in the few substances a setting needs.
+ *
+ * Deliberately not the tradition's own material keys. Those name a species and
+ * a working — ulin, jati, nipah, paras — because on the house the choice was
+ * made and stated by a builder. Nobody stated the stone of a grave this model
+ * invented the size of, so the setting gets a short neutral list and no claim
+ * beyond substance.
+ */
+export type SiteMaterial = 'batu' | 'kayu' | 'atap' | 'air' | 'tanah'
+
+/**
+ * One solid in the setting: a grave slab, a barn's massing, a fence post, the
+ * water in front of a house.
+ *
+ * These are not parts. They carry no stage, no joint and no order, they are
+ * not in `house.parts`, and no structural invariant runs over them — because
+ * nothing here is claimed to be a building that was surveyed, jointed or
+ * raised. A rice barn appears as its massing: a body and a roof at the size
+ * the sources give the barn, with none of the sixty parts a real one has.
+ *
+ * The distances and heights are ordinary dimensions in the rule pack, so the
+ * setting is counted in the provenance bar like everything else. What is
+ * bought by giving them volume is that a reader can see where they are and
+ * what they are; what is not bought is any new knowledge, and the legend says
+ * so.
+ */
+export interface SiteVolume {
+  /**
+   * `gable` is a prism: a box with a ridge over it, along `ridgeAxis`.
+   * `cone` and `cylinder` take their radius from half of `size` in X.
+   */
+  readonly kind: 'box' | 'gable' | 'cone' | 'cylinder'
+  /** centre in plan, base on the ground: [x, baseY, z] */
+  readonly at: Vec3
+  /** [x, height, z] */
+  readonly size: Vec3
+  /** for a gable, the axis its ridge runs on; 0 = X, 2 = Z */
+  readonly ridgeAxis?: 0 | 2
+  readonly material: SiteMaterial
+}
+
 export interface SiteMark {
   readonly key: string
   readonly nameId: string
@@ -62,6 +104,13 @@ export interface SiteMark {
   readonly lines: readonly (readonly (readonly [number, number])[])[]
   /** true when every line closes back onto its first point */
   readonly closed: boolean
+  /**
+   * The solids standing on that ground, if any.
+   *
+   * A figure may be lines alone — a river's edge is an edge, not an object —
+   * but where the sources say a thing stands there, it stands there.
+   */
+  readonly volumes: readonly SiteVolume[]
   readonly provenance: ProvenanceClass
 }
 

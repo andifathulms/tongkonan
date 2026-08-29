@@ -18,7 +18,7 @@
  */
 
 import { groundRing } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { coneAt } from '@/lib/core/cone'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -74,6 +74,27 @@ function site(layout: Layout): readonly SiteMark[] {
   // radius away — out on +X, which puts the compang behind the viewer's
   // default vantage rather than under the house.
   const cx = plaza
+  /* The dais itself, and three uprights on it. Stone, and nothing carved. */
+  const platform = DIMS.compangHeight.value
+  const upright = DIMS.compangStoneHeight.value
+  const width = DIMS.compangStoneWidth.value
+  const volumes: SiteVolume[] = [
+    {
+      kind: 'cylinder',
+      at: [cx, 0, 0],
+      size: [stone * 2, platform, stone * 2],
+      material: 'batu',
+    },
+  ]
+  for (const a of [0, (Math.PI * 2) / 3, (Math.PI * 4) / 3]) {
+    volumes.push({
+      kind: 'box',
+      at: [cx + Math.cos(a) * (stone - width), platform, Math.sin(a) * (stone - width)],
+      size: [width, upright, width],
+      material: 'batu',
+    })
+  }
+
   return [
     {
       key: 'compang',
@@ -85,6 +106,7 @@ function site(layout: Layout): readonly SiteMark[] {
         'The ceremonial stone platform at the centre of the village, and the circle of the plaza the houses stand on. Mbaru niang stand in a ring facing inward: this house has no front until the circle gives it one. The stones themselves are not modelled.',
       lines: [groundRing(cx, 0, stone), groundRing(cx, 0, plaza)],
       closed: true,
+      volumes,
       provenance: 'canon',
     },
   ]

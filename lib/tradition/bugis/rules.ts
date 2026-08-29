@@ -140,6 +140,8 @@ export const DIMS = {
 
   /* The site: the yard the boards are counted from. */
   yardDepth: dim(10, 'm', 'interpolated', 'none', 'Jarak dari muka rumah ke tepi jalan. Timpa laja dibaca dari jarak ini: susunan papan pada tampak gable adalah pernyataan yang ditujukan kepada orang yang lewat, jadi jarak berdirinya orang itu adalah bagian dari maknanya. Angkanya penetapan penulis.', 'Distance from the front of the house to the edge of the road. The timpa laja is read from here: the stack of boards on the gable is a statement addressed to whoever passes, so how far away they stand is part of what it means. The figure is the author’s.'),
+  roadWidth: dim(4.5, 'm', 'interpolated', 'none', 'Lebar jalan tanah di muka halaman, tempat papan timpa laja dibaca. Ukurannya penetapan penulis.', 'Width of the earth road across the yard, from where the timpa laja is read. The figure is the author’s.'),
+  roadDepth: dim(0.1, 'm', 'interpolated', 'none', 'Tebal perkerasan jalan itu.', 'Thickness of that road surface.'),
   yardWidth: dim(14, 'm', 'interpolated', 'none', 'Lebar halaman muka.', 'Width of the front yard.'),
 } as const
 

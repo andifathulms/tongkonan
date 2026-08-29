@@ -14,7 +14,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -78,6 +78,41 @@ function site(layout: Layout): readonly SiteMark[] {
   const depth = DIMS.squareDepth.value
   const plan = DIMS.gravePlan.value
   const front = layout.eaveHalfX
+  /*
+   * The graves as stone: a slab on legs, which is what they are.
+   *
+   * A Sumbanese grave is a single great capstone carried clear of the ground
+   * on stone legs, and it is carved. This is the slab and the legs at a size
+   * the author chose, with no carving on it — the shape of the thing, not a
+   * portrait of one.
+   */
+  const legH = DIMS.graveLegHeight.value
+  const legW = DIMS.graveLegWidth.value
+  const slab = DIMS.graveSlabDepth.value
+  const volumes: SiteVolume[] = []
+  const overhang = DIMS.graveSlabOverhang.value
+  const gap = DIMS.graveGap.value
+  for (const sz of [-1, 1] as const) {
+    const cx = -front - depth + plan / 2
+    const cz = sz * (plan + gap) / 2
+    for (const ex of [-1, 1] as const) {
+      for (const ez of [-1, 1] as const) {
+        volumes.push({
+          kind: 'box',
+          at: [cx + (ex * (plan - legW)) / 2, 0, cz + (ez * (plan - legW)) / 2],
+          size: [legW, legH, legW],
+          material: 'batu',
+        })
+      }
+    }
+    volumes.push({
+      kind: 'box',
+      at: [cx, legH, cz],
+      size: [plan + overhang * 2, slab, plan + overhang * 2],
+      material: 'batu',
+    })
+  }
+
   return [
     {
       key: 'kubur',
@@ -87,11 +122,12 @@ function site(layout: Layout): readonly SiteMark[] {
         'Jejak dua kubur batu megalitik di pelataran kampung, di muka rumah. Rumah yang menyimpan marapu di menaranya berdiri berhadapan dengan kubur orang-orang yang diwakilinya. Batunya sendiri tidak dimodelkan.',
       glossEn:
         'The footprints of two megalithic graves in the village square in front of the house. The house that keeps the marapu in its tower stands facing the graves of the people it keeps them for. The slabs themselves are not modelled.',
-      lines: [
-        groundRect(-front - depth, -plan * 1.2, -front - depth + plan, -plan * 0.2),
-        groundRect(-front - depth, plan * 0.2, -front - depth + plan, plan * 1.2),
-      ],
+      lines: [-1, 1].map((sz) => {
+        const cz = (sz * (plan + DIMS.graveGap.value)) / 2
+        return groundRect(-front - depth, cz - plan / 2, -front - depth + plan, cz + plan / 2)
+      }),
       closed: true,
+      volumes,
       provenance: 'canon',
     },
   ]

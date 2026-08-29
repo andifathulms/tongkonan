@@ -15,7 +15,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -76,6 +76,39 @@ function site(layout: Layout): readonly SiteMark[] {
   const plan = DIMS.neighbourPlan.value
   const half = plan / 2
   void layout
+  /* The neighbours as massing: a raised block under a hood. */
+  const floorY = DIMS.neighbourFloorY.value
+  const bodyH = DIMS.neighbourBodyHeight.value
+  const hood = DIMS.neighbourHoodHeight.value
+  const post = DIMS.neighbourPostWidth.value
+  const eave = DIMS.neighbourHoodEave.value
+  const volumes: SiteVolume[] = []
+  for (const sz of [-1, 1] as const) {
+    const cz = sz * spacing
+    for (const ex of [-1, 1] as const) {
+      for (const ez of [-1, 1] as const) {
+        volumes.push({
+          kind: 'cylinder',
+          at: [(ex * (plan - post)) / 2, 0, cz + (ez * (plan - post)) / 2],
+          size: [post, floorY, post],
+          material: 'kayu',
+        })
+      }
+    }
+    volumes.push({
+      kind: 'box',
+      at: [0, floorY, cz],
+      size: [plan, bodyH, plan],
+      material: 'kayu',
+    })
+    volumes.push({
+      kind: 'cone',
+      at: [0, floorY + bodyH, cz],
+      size: [plan + eave * 2, hood, plan + eave * 2],
+      material: 'atap',
+    })
+  }
+
   return [
     {
       key: 'jajaran',
@@ -90,6 +123,7 @@ function site(layout: Layout): readonly SiteMark[] {
         groundRect(-half, spacing - half, half, spacing + half),
       ],
       closed: true,
+      volumes,
       provenance: 'canon',
     },
   ]

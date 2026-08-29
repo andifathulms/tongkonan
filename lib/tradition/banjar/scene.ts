@@ -14,7 +14,7 @@
  * it — and the sequence is stated in the copy and the readout instead.
  */
 
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -77,6 +77,47 @@ function site(layout: Layout): readonly SiteMark[] {
   const front = -layout.depth / 2
   const bank = front - setback
   const reach = layout.halfZ + setback
+  /*
+   * The water and the walkway over it.
+   *
+   * A model's water: one flat surface a little below the ground, with nothing
+   * moving on it and nothing reflected in it. The titian is planks on posts,
+   * which is how a house on a tidal swamp reaches its own front door when the
+   * water is up.
+   */
+  const width = DIMS.riverWidth.value
+  const drop = DIMS.bankDrop.value
+  const spacing = DIMS.titianPostSpacing.value
+  const postW = DIMS.titianPostWidth.value
+  const deck = DIMS.titianDeckThickness.value
+  const deckY = DIMS.titianDeckY.value
+  const volumes: SiteVolume[] = [
+    {
+      kind: 'box',
+      at: [bank - width / 2, -drop, 0],
+      size: [width, drop, reach * 2],
+      material: 'air',
+    },
+    {
+      kind: 'box',
+      at: [(bank + front) / 2, deckY, 0],
+      size: [front - bank, deck, half * 2],
+      material: 'kayu',
+    },
+  ]
+  // The posts stop a post's width short of the platform: the last one would
+  // otherwise stand under the house it walks up to.
+  for (let x = bank + spacing / 2; x < front - postW; x += spacing) {
+    for (const sz of [-1, 1] as const) {
+      volumes.push({
+        kind: 'cylinder',
+        at: [x, -drop, sz * (half - postW / 2)],
+        size: [postW, drop + deckY, postW],
+        material: 'kayu',
+      })
+    }
+  }
+
   return [
     {
       key: 'sungai',
@@ -101,6 +142,7 @@ function site(layout: Layout): readonly SiteMark[] {
         ],
       ],
       closed: false,
+      volumes,
       provenance: 'canon',
     },
   ]

@@ -163,6 +163,9 @@ export const DIMS = {
   /* The site: the village, which is a circle with a stone at its centre. */
   villageCircle: dim(1, 'count', 'canon', 'erb-1999', 'Mbaru niang berdiri melingkari sebuah pelataran bundar dengan compang — susunan batu upacara — di pusatnya, dan tiap rumah menghadap ke pusat itu. Rumah ini tidak punya muka sampai ada lingkaran yang menghadapkannya.', 'Mbaru niang stand around a circular plaza with the compang — a ceremonial stone platform — at its centre, and every house faces that centre. This house has no front until there is a circle to give it one.'),
   plazaRadius: dim(14, 'm', 'interpolated', 'none', 'Jari-jari pelataran kampung, diukur dari compang.', 'Radius of the village plaza, measured from the compang.'),
+  compangHeight: dim(0.7, 'm', 'interpolated', 'none', 'Tinggi susunan batu di pusat kampung. Compang adalah panggung batu tempat kurban dipersembahkan; bahwa ia ada dan berada di pusat adalah kanon, tinggi dan bentuknya penetapan penulis.', 'Height of the stone platform at the centre of the village. A compang is a stone dais where offerings are made; that it exists and is central is canon, its height and shape are the author’s.'),
+  compangStoneWidth: dim(0.4, 'm', 'interpolated', 'none', 'Lebar satu batu tegak di atas compang.', 'Width of one upright stone on the compang.'),
+  compangStoneHeight: dim(1.1, 'm', 'interpolated', 'none', 'Tinggi batu tegak di atas panggung itu.', 'Height of an upright stone standing on it.'),
   compangRadius: dim(2.2, 'm', 'interpolated', 'none', 'Jari-jari susunan batu di pusat. Bahwa ia ada dan berada di pusat adalah kanon; ukurannya penetapan penulis.', 'Radius of the stone platform at the centre. That it exists and is central is canon; its size is the author’s.'),
 } as const
 

@@ -12,7 +12,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
 
@@ -75,6 +75,42 @@ function site(layout: Layout): readonly SiteMark[] {
   const lines = [-1, 0, 1].map((n) =>
     groundRect(near, n * spacing - plan / 2, near + plan, n * spacing + plan / 2),
   )
+
+  /* Each granary as its massing — posts, a body, a roof — and no gonjong. */
+  const floorY = DIMS.rangkiangFloorY.value
+  const body = DIMS.rangkiangBodyHeight.value
+  const rise = DIMS.rangkiangRoofRise.value
+  const post = DIMS.rangkiangPostWidth.value
+  const eave = DIMS.rangkiangEave.value
+  const volumes: SiteVolume[] = []
+  for (const n of [-1, 0, 1]) {
+    const cx = near + plan / 2
+    const cz = n * spacing
+    for (const sx of [-1, 1] as const) {
+      for (const sz of [-1, 1] as const) {
+        volumes.push({
+          kind: 'box',
+          at: [cx + sx * (plan - post) / 2, 0, cz + sz * (plan - post) / 2],
+          size: [post, floorY, post],
+          material: 'kayu',
+        })
+      }
+    }
+    volumes.push({
+      kind: 'box',
+      at: [cx, floorY, cz],
+      size: [plan, body, plan],
+      material: 'kayu',
+    })
+    volumes.push({
+      kind: 'gable',
+      at: [cx, floorY + body, cz],
+      size: [plan + eave * 2, rise, plan + eave * 2],
+      ridgeAxis: 2,
+      material: 'atap',
+    })
+  }
+
   return [
     {
       key: 'rangkiang',
@@ -86,6 +122,7 @@ function site(layout: Layout): readonly SiteMark[] {
         'The footprints of three rangkiang across the halaman, facing the house’s long front. The rumah gadang’s orientation is relational: it faces the yard with the rangkiang across it, so without them the rule says nothing.',
       lines,
       closed: true,
+      volumes,
       provenance: 'canon',
     },
   ]

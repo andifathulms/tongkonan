@@ -143,6 +143,8 @@ export const DIMS = {
 
   /* The site: the river, which is the road. */
   facesTheRiver: dim(1, 'count', 'canon', 'sellato-1989', 'Rumah betang berdiri sejajar sungai dengan galerinya menghadap air, dan di Kalimantan sungai adalah jalannya. Panjang rumah ini adalah sensus; letaknya adalah sebuah tepian.', 'A rumah betang stands parallel to the river with its gallery facing the water, and in Borneo the river is the road. This house’s length is a census; its position is a bank.'),
+  riverWidth: dim(26, 'm', 'interpolated', 'none', 'Lebar air yang digambar di muka rumah. Sungainya sendiri lebih lebar daripada apa pun yang muat dalam model; ini permukaan air yang cukup untuk menyatakan bahwa rumah berdiri di tepian.', 'Width of the water drawn in front of the house. The river itself is wider than anything that fits in the model; this is enough water surface to state that the house stands on a bank.'),
+  bankDrop: dim(0.5, 'm', 'interpolated', 'none', 'Turunnya muka air di bawah tanah tempat rumah berdiri.', 'How far the water surface sits below the ground the house stands on.'),
   riverSetback: dim(14, 'm', 'interpolated', 'none', 'Jarak dari muka rumah ke tepi air.', 'Distance from the front of the house to the water’s edge.'),
 } as const
 

@@ -142,6 +142,10 @@ export const DIMS = {
 
   /* The site: the yard the sequence starts in. */
   yardDepth: dim(11, 'm', 'interpolated', 'none', 'Kedalaman halaman muka dari tangga ke pagar. Kekijing dimulai sebelum tangga: tamu berhenti di halaman, naik, lalu didudukkan pada tingkat yang menyatakan kedudukannya. Bahwa ada halaman di muka adalah lazim; ukuran dan pagarnya penetapan penulis.', 'Depth of the front yard from the stair to the fence. The kekijing begins before the stair: a guest stops in the yard, climbs, and is then seated on the step that states their standing. That there is a yard in front is ordinary; its size and its fence are the author’s.'),
+  fenceHeight: dim(1.1, 'm', 'interpolated', 'none', 'Tinggi pagar halaman muka. Rendah, agar tangga dan tingkat lantai tetap terbaca dari luar; ukurannya penetapan penulis seperti seluruh susunan ini.', 'Height of the fence around the front yard. Low, so the stair and the stepping floor stay readable from outside; the figure is the author’s, like the whole arrangement.'),
+  fencePostWidth: dim(0.12, 'm', 'interpolated', 'none', 'Sisi tiang pagar.', 'Side of a fence post.'),
+  fenceRailDepth: dim(0.1, 'm', 'interpolated', 'none', 'Tebal palang pagar.', 'Thickness of a fence rail.'),
+  fencePostSpacing: dim(2.4, 'm', 'interpolated', 'none', 'Jarak antar tiang pagar.', 'Spacing of the fence posts.'),
   yardWidth: dim(16, 'm', 'interpolated', 'none', 'Lebar halaman muka.', 'Width of the front yard.'),
 } as const
 

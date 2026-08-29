@@ -14,7 +14,7 @@
  */
 
 import { groundRect, groundRing } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import { domeProfile } from './roof'
 import type { House, Layout } from './types'
@@ -77,7 +77,38 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
 function site(layout: Layout): readonly SiteMark[] {
   const half = DIMS.compoundSide.value / 2
   const offset = DIMS.neighbourOffset.value
-  const r = layout.radius
+  /*
+   * The fence as four runs, and the other two buildings as cones.
+   *
+   * The ebei and the wamai are real entries in this pack's own building rule —
+   * a reader can build either one properly by changing it — so their massing
+   * here is a stand-in for something the model can show in full, which is the
+   * least dishonest kind of massing in the collection.
+   */
+  const fh = DIMS.fenceHeightSite.value
+  const nh = DIMS.neighbourHeightSite.value
+  const ft = DIMS.fenceThickness.value
+  const ebei = DIMS.ebeiRadius.value
+  const wamai = DIMS.wamaiRadius.value
+  const volumes: SiteVolume[] = [
+    { kind: 'box', at: [-half, 0, 0], size: [ft, fh, half * 2], material: 'kayu' },
+    { kind: 'box', at: [half, 0, 0], size: [ft, fh, half * 2], material: 'kayu' },
+    { kind: 'box', at: [0, 0, -half], size: [half * 2, fh, ft], material: 'kayu' },
+    { kind: 'box', at: [0, 0, half], size: [half * 2, fh, ft], material: 'kayu' },
+    {
+      kind: 'cone',
+      at: [offset, 0, -offset],
+      size: [ebei * 2, nh, ebei * 2],
+      material: 'atap',
+    },
+    {
+      kind: 'cone',
+      at: [-offset, 0, offset],
+      size: [wamai * 2, nh - ebei + wamai, wamai * 2],
+      material: 'atap',
+    },
+  ]
+
   return [
     {
       key: 'silimo',
@@ -89,10 +120,11 @@ function site(layout: Layout): readonly SiteMark[] {
         'The compound fence, and the footprints of the two other buildings inside it — the ebei and the wamai. One honai is one building of a group, and the group is the dwelling; all three can be seen in turn by changing the building rule.',
       lines: [
         groundRect(-half, -half, half, half),
-        groundRing(offset, -offset * 0.5, r * 0.9),
-        groundRing(offset * 0.4, offset, r * 0.6),
+        groundRing(offset, -offset, ebei),
+        groundRing(-offset, offset, wamai),
       ],
       closed: true,
+      volumes,
       provenance: 'canon',
     },
   ]

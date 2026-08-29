@@ -17,7 +17,7 @@
  */
 
 import { groundRect } from '@/lib/core/scene'
-import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
+import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { stockLength } from './module'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -80,6 +80,24 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
 function site(layout: Layout): readonly SiteMark[] {
   const half = DIMS.compoundSide.value / 2
   const shrine = DIMS.shrinePlan.value
+  /* The wall as four low runs, and the shrine as a block at its corner. */
+  const wh = DIMS.wallHeightSite.value
+  const wt = DIMS.wallThicknessSite.value
+  const sh = DIMS.shrineHeight.value
+  const inset = DIMS.shrineInset.value
+  const volumes: SiteVolume[] = [
+    { kind: 'box', at: [-half, 0, 0], size: [wt, wh, half * 2], material: 'batu' },
+    { kind: 'box', at: [half, 0, 0], size: [wt, wh, half * 2], material: 'batu' },
+    { kind: 'box', at: [0, 0, -half], size: [half * 2, wh, wt], material: 'batu' },
+    { kind: 'box', at: [0, 0, half], size: [half * 2, wh, wt], material: 'batu' },
+    {
+      kind: 'box',
+      at: [-half + inset + shrine / 2, 0, half - inset - shrine / 2],
+      size: [shrine, sh, shrine],
+      material: 'batu',
+    },
+  ]
+
   return [
     {
       key: 'pekarangan',
@@ -91,9 +109,10 @@ function site(layout: Layout): readonly SiteMark[] {
         'The compound wall, and the footprint of the shrine in the kaja-kangin corner. A Balinese house is a walled yard of several bale around the natah; this model builds one of them, and these lines show the shape of what is not here.',
       lines: [
         groundRect(-half, -half, half, half),
-        groundRect(-half + 1, half - 1 - shrine, -half + 1 + shrine, half - 1),
+        groundRect(-half + inset, half - inset - shrine, -half + inset + shrine, half - inset),
       ],
       closed: true,
+      volumes,
       provenance: 'canon',
     },
   ]

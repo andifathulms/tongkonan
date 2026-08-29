@@ -132,6 +132,10 @@ export const DIMS = {
   tiedNotPegged: dim(1, 'count', 'canon', 'waterson-1990', 'Sambungannya ikat, bukan pasak dan bukan takik. Ikatan boleh bekerja sedikit tanpa patah, dan itulah seluruh gagasan bangunan ini dinyatakan pada satu sambungan.', 'The joints are lashings rather than pegs or notches. A lashing can work a little without breaking, and that is the whole idea of the building stated at one connection.'),
 
   /* The site: the clearing. */
+  stumpHeight: dim(0.55, 'm', 'interpolated', 'none', 'Tinggi tunggul di tepi lahan yang dibuka. Rumah ini berdiri di tanah yang ditebang; tunggul adalah cara menyatakan itu tanpa menggambar hutan yang tidak diukur siapa pun.', 'Height of the stumps at the edge of the cleared ground. This house stands on ground that was felled; stumps state that without drawing a forest nobody measured.'),
+  stumpWidth: dim(0.5, 'm', 'interpolated', 'none', 'Garis tengah tunggul.', 'Diameter of a stump.'),
+  stumpSetback: dim(2, 'm', 'interpolated', 'none', 'Jarak tunggul ke dalam dari tepi lahan yang dibuka.', 'How far inside the edge of the clearing the stumps stand.'),
+  stumpCount: dim(7, 'count', 'interpolated', 'none', 'Berapa tunggul yang digambar di tepi lahan. Sebuah angka yang dipilih agar terbaca, bukan bacaan atas suatu tempat.', 'How many stumps are drawn at the edge of the clearing. A number chosen to read, not a reading of any place.'),
   clearingRadius: dim(13, 'm', 'interpolated', 'none', 'Jari-jari lahan terbuka di sekeliling rumah, di antara rumah dan hutan. Rumah kaki seribu berdiri di tanah yang dibuka di lereng berhutan; letak persisnya dan besar bukaannya adalah penetapan penulis, seperti hampir semua angka pada pak ini.', 'Radius of the cleared ground around the house, between the house and the forest. A rumah kaki seribu stands on ground cut out of a wooded slope; the exact siting and the size of the clearing are the author’s, like nearly every figure in this pack.'),
 } as const
 
