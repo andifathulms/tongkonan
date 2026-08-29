@@ -148,6 +148,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * happened, and the test that keeps the two lists apart is what asks.
    */
   maluku: [],
+  /** nothing of its own: driven ironwood posts aside, it is board, bamboo and the same sago leaf */
+  tobati: [],
 }
 
 /**
@@ -177,6 +179,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   dani: 'kayu',
   banjar: 'ulin',
   maluku: 'kayu',
+  tobati: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

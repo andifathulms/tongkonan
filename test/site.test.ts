@@ -81,6 +81,16 @@ describe('the site figures', () => {
       const ridge = built.house.bounds.max[1]
       for (const mark of marks) {
         for (const v of mark.volumes) {
+          /*
+           * Water is the exception, and it is the only one.
+           *
+           * This rule was written while every building in the collection stood
+           * on land, and it says a solid may not stand where the house stands.
+           * A house in a bay stands *in* the water — the fourth test in this
+           * project fitted to the examples that happened to exist — so the
+           * substance is exempted rather than the building.
+           */
+          if (v.material === 'air') continue
           // Touching is allowed and meant: a walkway that stops short of the
           // platform it serves is a walkway to nowhere.
           const clearX = Math.abs(v.at[0]) - v.size[0] / 2 >= halfX - 1e-6
@@ -118,7 +128,9 @@ describe('the site figures', () => {
 
       for (const mark of marks) {
         for (const v of mark.volumes) {
-          if (v.size[1] < 1) continue
+          // Nothing under a metre is in the way, and neither is water: you see
+          // across a bay, you do not see through a wall.
+          if (v.size[1] < 1 || v.material === 'air') continue
           const blocking = crosses([ax, az], [0, 0], v)
           expect(`${mark.key}: ${blocking ? 'in the way' : 'clear'}`).toBe(`${mark.key}: clear`)
         }

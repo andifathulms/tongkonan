@@ -184,6 +184,15 @@ export const WAMENA: Site = {
   tzName: 'WIT',
 }
 
+/** Jayapura, on Youtefa Bay in Papua — the easternmost site in the collection. */
+export const JAYAPURA: Site = {
+  name: 'Jayapura',
+  latitude: -2.6,
+  longitude: 140.7,
+  tzOffsetHours: 9,
+  tzName: 'WIT',
+}
+
 /** Ambon, in Central Maluku. */
 export const AMBON: Site = {
   name: 'Ambon',
