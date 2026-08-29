@@ -73,6 +73,7 @@ describe('the core is tradition-neutral', () => {
       'honai', 'ebei', 'wamai', 'dani', 'baliem',
       'baileo', 'negeri', 'soa', 'saniri', 'pamali', 'maluku', 'rumbia',
       'kariwari', 'tobati', 'enggros', 'youtefa', 'titian',
+      'woloan', 'minahasa', 'tomohon', 'tontemboan',
       'bubungan', 'palimasan', 'baliku', 'palidangan', 'surambi', 'pelatar',
       'anjung', 'banjar', 'tongkat',
     ]

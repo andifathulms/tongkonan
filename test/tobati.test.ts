@@ -57,7 +57,10 @@ describe('a house that does not stand on land', () => {
     for (const rules of COMBOS) {
       const { house, layout } = buildHouse(rules)
       expect(checkAboveTheTide(house, layout).status).toBe('pass')
-      expect(house.parts.some((p) => p.material === 'batu')).toBe(false)
+      // Stated at the type level as well as in the model: this pack has no
+      // stone in its material union at all, because there is nowhere to set
+      // one — so the absence cannot be undone by a builder forgetting.
+      expect(house.parts.some((p) => p.name.includes('batu'))).toBe(false)
       const first = layout.levels[0]
       if (!first) throw new Error('no levels')
       expect(first.y).toBeGreaterThan(layout.waterDepth + layout.tide)

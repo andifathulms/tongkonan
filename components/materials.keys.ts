@@ -150,6 +150,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   maluku: [],
   /** nothing of its own: driven ironwood posts aside, it is board, bamboo and the same sago leaf */
   tobati: [],
+  /** nothing of its own: pegged timber, boards, shingles and pad stones */
+  minahasa: [],
 }
 
 /**
@@ -180,6 +182,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   banjar: 'ulin',
   maluku: 'kayu',
   tobati: 'kayu',
+  minahasa: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

@@ -184,6 +184,15 @@ export const WAMENA: Site = {
   tzName: 'WIT',
 }
 
+/** Tomohon, in the North Sulawesi highlands — the second site north of the equator. */
+export const TOMOHON: Site = {
+  name: 'Tomohon',
+  latitude: 1.33,
+  longitude: 124.84,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Jayapura, on Youtefa Bay in Papua — the easternmost site in the collection. */
 export const JAYAPURA: Site = {
   name: 'Jayapura',
