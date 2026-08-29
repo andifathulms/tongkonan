@@ -220,6 +220,7 @@ export const COPY = {
     date: t('Tanggal', 'Date'),
     figure: t('Sosok skala 1,68 m', 'Scale figure, 1.68 m'),
     rain: t('Hujan', 'Rain'),
+    site: t('Tapak', 'The site'),
     unusual: t(
       'Jumlah ruang ini melampaui yang lazim untuk pangkat tersebut.',
       'This bay count exceeds what the rank customarily reaches.',

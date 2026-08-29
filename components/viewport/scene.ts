@@ -38,6 +38,17 @@ export interface CameraState {
 export interface SceneOptions {
   figure: boolean
   rain: boolean
+  /**
+   * Draw the ground the house stands on: the setting-out grid, the north
+   * point, and whatever the tradition says is around it.
+   *
+   * Off leaves the house and nothing else, which is a real way to look at a
+   * building and was the only way to look at these until the setting existed.
+   * A reader comparing two houses wants the object; a reader asking what it
+   * would be like to be there wants the yard. Both are legitimate and neither
+   * is the truthful one.
+   */
+  site: boolean
   /** null when the house is simply standing there */
   reveal: { timeline: Timeline<Kinds>; t: number } | null
   /** 0 assembled, 1 fully exploded along the build order */
@@ -367,6 +378,7 @@ export class HouseScene {
 
   apply(options: SceneOptions, elapsedSeconds: number): void {
     this.figure.visible = options.figure
+    this.site.setVisible(options.site)
     this.setSection(options.section)
     this.rain.setActive(options.rain, this.model)
     const raining = options.rain && !options.reducedMotion
@@ -637,6 +649,8 @@ export class HouseScene {
    */
   siteLabels(): readonly { key: string; left: number; top: number }[] {
     const out: { key: string; left: number; top: number }[] = []
+    // Nothing to name when there is nothing drawn.
+    if (!this.site.group.visible) return out
     const v = new THREE.Vector3()
     for (const [key, anchor] of this.site.anchors()) {
       v.copy(anchor).project(this.camera)
@@ -886,6 +900,9 @@ class SiteRig {
   private meshes: THREE.Mesh[] = []
   /** where each mark's caption is anchored, in world metres */
   private anchorsByKey = new Map<string, THREE.Vector3>()
+  /** what the reader asked for, and whether there is light to see it by */
+  private wanted = true
+  private lit = true
 
   /** Set out the grid for a particular building, and draw what is around it. */
   configure(model: SceneModel): void {
@@ -1264,7 +1281,13 @@ class SiteRig {
    * daylight and gone at night, so they follow the sun like everything else
    * here rather than glowing through it.
    */
+  setVisible(on: boolean): void {
+    this.wanted = on
+    this.group.visible = on && this.lit
+  }
+
   setDaylight(day: number): void {
+    this.lit = day > 0.02
     const opacity = 0.15 + 0.85 * day
     const material = this.lines?.material
     if (material instanceof THREE.LineBasicMaterial) material.opacity = opacity
@@ -1272,7 +1295,7 @@ class SiteRig {
       const m = mesh.material
       if (m instanceof THREE.MeshBasicMaterial) m.opacity = opacity
     }
-    this.group.visible = day > 0.02
+    this.group.visible = this.wanted && this.lit
   }
 
   dispose(): void {

@@ -38,6 +38,8 @@ const BANGUN_DEFAULTS = {
   view: 'perspektif' as ViewKey,
   // On by default: it is the scale bar.
   figure: true,
+  // On by default too: the ground is where half of these houses' rules point.
+  site: true,
   rain: false,
   marking: false,
   presetKey: 'kulminasi' as DatePreset['key'],
@@ -50,6 +52,7 @@ function decodeBangun(p: ReadonlyMap<string, string>): BangunVantage {
   return {
     view: readChoice(p.get('tampilan'), VIEWS, BANGUN_DEFAULTS.view),
     figure: readFlag(p.get('sosok'), BANGUN_DEFAULTS.figure),
+    site: readFlag(p.get('tapak'), BANGUN_DEFAULTS.site),
     rain: readFlag(p.get('hujan'), BANGUN_DEFAULTS.rain),
     marking: readFlag(p.get('tanda'), BANGUN_DEFAULTS.marking),
     presetKey: readChoice(
@@ -68,6 +71,7 @@ function encodeBangun(v: BangunVantage): readonly (readonly [string, string | nu
     ['tanggal', unless(v.presetKey, d.presetKey, String)],
     ['waktu', unless(v.minutes, d.minutes, String)],
     ['sosok', unless(v.figure, d.figure, flag)],
+    ['tapak', unless(v.site, d.site, flag)],
     ['hujan', unless(v.rain, d.rain, flag)],
     ['tanda', unless(v.marking, d.marking, flag)],
   ]
@@ -96,7 +100,7 @@ export function BangunClient({ locale, tradisi }: { locale: Locale; tradisi: Tra
     someone what you were looking at.
   */
   const [vantage, setVantage] = useReaderState(BANGUN_DEFAULTS, decodeBangun, encodeBangun)
-  const { view, figure, rain, marking, presetKey } = vantage
+  const { view, figure, rain, site, marking, presetKey } = vantage
   const minutes = vantage.minutes
 
   const presets = useMemo(() => datePresets(t.site), [t])
@@ -157,8 +161,10 @@ export function BangunClient({ locale, tradisi }: { locale: Locale; tradisi: Tra
           <SceneToggles
             figure={figure}
             rain={rain}
+            site={site}
             onFigure={(v) => setVantage({ figure: v })}
             onRain={(v) => setVantage({ rain: v })}
+            onSite={(v) => setVantage({ site: v })}
             locale={locale}
           />
           <OrientationNote locale={locale} tradition={t} />
@@ -173,6 +179,7 @@ export function BangunClient({ locale, tradisi }: { locale: Locale; tradisi: Tra
         view={view}
         figure={figure}
         rain={rain}
+        site={site}
         provenance={marking}
         reveal={rebuild < 1 ? { timeline: built.timeline, t: rebuild } : null}
       >

@@ -23,6 +23,8 @@ export interface ViewportProps {
   view: ViewKey
   figure: boolean
   rain: boolean
+  /** draw the ground the house stands on; default on */
+  site?: boolean
   reveal: { timeline: Timeline<Kinds>; t: number } | null
   explode?: number
   /** cut the house open to show the occupancy zones, on the axis the tradition names */
@@ -44,6 +46,7 @@ export function Viewport({
   view,
   figure,
   rain,
+  site = true,
   reveal,
   explode = 0,
   section = false,
@@ -77,6 +80,7 @@ export function Viewport({
   const state = useRef({
     figure,
     rain,
+    site,
     reveal,
     explode,
     section,
@@ -87,6 +91,7 @@ export function Viewport({
   state.current = {
     ...state.current,
     figure,
+    site,
     rain,
     reveal,
     explode,
@@ -130,6 +135,7 @@ export function Viewport({
         {
           figure: state.current.figure,
           rain: state.current.rain,
+          site: state.current.site,
           reveal: state.current.reveal,
           explode: state.current.explode,
           section: state.current.section,

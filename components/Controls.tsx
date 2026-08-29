@@ -155,14 +155,18 @@ export function SunControls({
 export function SceneToggles({
   figure,
   rain,
+  site,
   onFigure,
   onRain,
+  onSite,
   locale,
 }: {
   figure: boolean
   rain: boolean
+  site: boolean
   onFigure: (v: boolean) => void
   onRain: (v: boolean) => void
+  onSite: (v: boolean) => void
   locale: Locale
 }) {
   return (
@@ -175,6 +179,22 @@ export function SceneToggles({
           locale === 'id'
             ? 'Sosok ini bukan hiasan; ia adalah tongkat ukur.'
             : 'The figure is not set dressing; it is the scale bar.'
+        }
+      />
+      {/*
+        The setting, and a way to be rid of it. Everything around the house is
+        the author's arrangement of what the sources describe, and a reader
+        comparing two buildings has every reason to want the object on its own
+        — which is how these models looked until the ground had anything on it.
+      */}
+      <Toggle
+        checked={site}
+        onChange={onSite}
+        label={pick(COPY.controls.site, locale)}
+        hint={
+          locale === 'id'
+            ? 'Menggambar tanah tempat rumah berdiri: kisi ukur, arah utara, dan apa yang menurut sumber ada di sekelilingnya. Matikan dan yang tersisa hanya rumahnya.'
+            : 'Draws the ground the house stands on: the setting-out grid, the north point, and what the sources say is around it. Turn it off and the house is all that is left.'
         }
       />
       <Toggle
