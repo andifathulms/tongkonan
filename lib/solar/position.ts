@@ -184,6 +184,15 @@ export const WAMENA: Site = {
   tzName: 'WIT',
 }
 
+/** Ambon, in Central Maluku. */
+export const AMBON: Site = {
+  name: 'Ambon',
+  latitude: -3.7,
+  longitude: 128.18,
+  tzOffsetHours: 9,
+  tzName: 'WIT',
+}
+
 /** Banjarmasin, on the Barito delta in South Kalimantan. */
 export const BANJARMASIN: Site = {
   name: 'Banjarmasin',

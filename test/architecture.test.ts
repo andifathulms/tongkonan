@@ -71,6 +71,7 @@ describe('the core is tradition-neutral', () => {
       'kaki seribu', 'arfak', 'igkojei',
       'lumbung', 'sasak', 'penghalang tikus',
       'honai', 'ebei', 'wamai', 'dani', 'baliem',
+      'baileo', 'negeri', 'soa', 'saniri', 'pamali', 'maluku', 'rumbia',
       'bubungan', 'palimasan', 'baliku', 'palidangan', 'surambi', 'pelatar',
       'anjung', 'banjar', 'tongkat',
     ]

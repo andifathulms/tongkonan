@@ -16,6 +16,7 @@ import { ArfakControls } from './arfak'
 import { SasakControls } from './sasak'
 import { DaniControls } from './dani'
 import { BanjarControls } from './banjar'
+import { MalukuControls } from './maluku'
 
 /**
  * The rule controls, chosen by tradition.
@@ -74,5 +75,7 @@ export function RuleControlsFor({
       return <DaniControls {...props} />
     case 'banjar':
       return <BanjarControls {...props} />
+    case 'maluku':
+      return <MalukuControls {...props} />
   }
 }

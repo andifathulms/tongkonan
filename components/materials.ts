@@ -943,6 +943,16 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'maluku') {
+    set.kayu = timber(1313, 0.1, 0.4, 0.84)
+    // The same sago leaf as the omo's, off the same generator, because it is
+    // the same leaf — which is why the key is in the shared list.
+    set.rumbia = new THREE.MeshStandardMaterial({
+      map: tex(rumbiaCanvas()),
+      roughness: 0.95,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
   } else if (tradition === 'banjar') {
     set.ulin = timber(606, 0, 0.5, 0.84)
     set.sirap = new THREE.MeshStandardMaterial({ map: tex(sirapCanvas()), roughness: 0.88, metalness: 0 })

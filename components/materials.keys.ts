@@ -37,6 +37,7 @@ export const SHARED_MATERIALS: readonly string[] = [
   'bambu',
   'ijuk',
   'alang',
+  'rumbia',
   'genteng',
   'batu',
 ]
@@ -74,7 +75,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   /** quarried paras and brick; the grass thatch is shared, see above */
   bali: ['paras', 'bata'],
   /** sago-palm leaf, and a dressed standing stone that is not a river cobble */
-  nias: ['rumbia', 'behu'],
+  /** the sago leaf moved to the shared list when the baileo was roofed in it */
+  nias: ['behu'],
   /** ironwood, named because the species is the point, and shingles split from it */
   /** the ironwood moved to the shared list when a second Bornean house used it */
   dayak: [],
@@ -139,6 +141,13 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * house's own.
    */
   banjar: [],
+  /**
+   * Nothing of its own: the sago-leaf roof is the omo's `rumbia`, off the same
+   * generator, because it is the same leaf. That key moved to the shared list
+   * the moment a second building was roofed in it — the fourth time this has
+   * happened, and the test that keeps the two lists apart is what asks.
+   */
+  maluku: [],
 }
 
 /**
@@ -167,6 +176,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   sasak: 'kayu',
   dani: 'kayu',
   banjar: 'ulin',
+  maluku: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
