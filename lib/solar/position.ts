@@ -184,6 +184,21 @@ export const WAMENA: Site = {
   tzName: 'WIT',
 }
 
+/**
+ * The waters of Wakatobi, off south-east Sulawesi.
+ *
+ * The only site in this project that is not a place a building stands. It is
+ * where the lepa is tonight, and the pack says as much: a position is not a
+ * property of a house that floats.
+ */
+export const WAKATOBI: Site = {
+  name: 'Wakatobi',
+  latitude: -5.3,
+  longitude: 123.6,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Banda Aceh — the northernmost and westernmost site in the collection. */
 export const BANDA_ACEH: Site = {
   name: 'Banda Aceh',

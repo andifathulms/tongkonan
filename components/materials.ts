@@ -943,6 +943,17 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'bajau') {
+    set.kayu = timber(1919, 0.3, 0.55, 0.8)
+    set.nipah = new THREE.MeshStandardMaterial({
+      map: tex(nipahCanvas()),
+      roughness: 0.94,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
+    // Sand: the only loose material in the project, and the bed of a fire that
+    // has to be carried along.
+    set.pasir = new THREE.MeshStandardMaterial({ color: 0xc9bda3, roughness: 1, metalness: 0 })
   } else if (tradition === 'aceh') {
     set.kayu = timber(1818, 0.25, 0.6, 0.82)
     set.rumbia = new THREE.MeshStandardMaterial({

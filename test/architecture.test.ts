@@ -77,13 +77,26 @@ describe('the core is tradition-neutral', () => {
       'siwaluh', 'jabu', 'karo', 'bena kayu', 'tersek', 'ayo-ayo',
       'baduy', 'kanekes', 'imah', 'sosoro', 'pikukuh', 'palupuh', 'hateup', 'tihang',
       'rumoh', 'aceh', 'seuramo', 'tungai', 'tameh', 'reunyeun', 'bubong', 'gaseue', 'binteh',
+      'lepa', 'bajau', 'kajang', 'cadik', 'lunas', 'gading', 'kelson',
       'bubungan', 'palimasan', 'baliku', 'palidangan', 'surambi', 'pelatar',
       'anjung', 'banjar', 'tongkat',
     ]
+    /*
+     * Whole words, not substrings.
+     *
+     * The list was matched with `includes` until a boat joined the collection
+     * and "lepa" turned out to be inside `RulePack` — so the guard reported
+     * every file in the core at once. The bluntness of this check is its
+     * value, and a false positive on a type name is the one thing that would
+     * get it deleted, so the match got a boundary and kept everything else.
+     */
+    const escape = (word: string) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const offenders: string[] = []
     for (const file of core) {
       const text = code(file).toLowerCase()
-      for (const word of forbidden) if (text.includes(word)) offenders.push(`${file}: ${word}`)
+      for (const word of forbidden) {
+        if (new RegExp(`\\b${escape(word)}\\b`).test(text)) offenders.push(`${file}: ${word}`)
+      }
     }
     expect(offenders).toEqual([])
   })

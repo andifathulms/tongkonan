@@ -15,7 +15,16 @@ describe('every tradition answers the same questions', () => {
       const built = t.build(t.defaultQuery)
 
       it('builds a house with parts, joints and bounds', () => {
-        expect(built.house.parts.length).toBeGreaterThan(50)
+        /*
+         * Twenty was fifty until a boat joined the collection.
+         *
+         * The threshold was a stand-in for "this actually built something",
+         * and fifty was the number the buildings that existed happened to
+         * clear. A lepa is a hull, a deck, an awning and a hearth: forty-one
+         * parts, and complete. The fifth test in this project fitted to its
+         * own examples rather than to what it meant.
+         */
+        expect(built.house.parts.length).toBeGreaterThan(20)
         expect(built.house.joints.length).toBeGreaterThan(0)
         expect(built.house.bounds.max[1]).toBeGreaterThan(built.house.bounds.min[1])
       })

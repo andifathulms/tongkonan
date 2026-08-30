@@ -39,6 +39,7 @@ export const SHARED_MATERIALS: readonly string[] = [
   'alang',
   'rumbia',
   'genteng',
+  'nipah',
   'batu',
 ]
 
@@ -107,7 +108,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * generator because both are "thatch" is the split-by-name fault waiting to
    * happen for the fifth time.
    */
-  bugis: ['nipah'],
+  /** the nipa palm moved to the shared list when the lepa was roofed in it */
+  bugis: [],
   /**
    * Bark sheet, and it is both the wall and the floor.
    *
@@ -165,6 +167,15 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   sunda: ['tanah'],
   /** nothing of its own: timber, board, bamboo and the same sago leaf */
   aceh: [],
+  /**
+   * Nipa leaf and sand, and no stone at all.
+   *
+   * `nipah` is the saoraja's, off the same generator — the same palm, so the
+   * key is shared. `pasir` is this pack's own and is the only loose material
+   * in the project: the bed of a fire that has to be carried along, because
+   * there is no ground to build a hearth on.
+   */
+  bajau: ['pasir'],
 }
 
 /**
@@ -199,6 +210,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   karo: 'kayu',
   sunda: 'kayu',
   aceh: 'kayu',
+  bajau: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
