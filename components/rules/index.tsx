@@ -30,6 +30,7 @@ import { MaduraControls } from './madura'
 import { ButonControls } from './buton'
 import { NgadaControls } from './ngada'
 import { AtoniControls } from './atoni'
+import { RimbaControls } from './rimba'
 
 /**
  * The rule controls, chosen by tradition.
@@ -116,5 +117,7 @@ export function RuleControlsFor({
       return <NgadaControls {...props} />
     case 'atoni':
       return <AtoniControls {...props} />
+    case 'rimba':
+      return <RimbaControls {...props} />
   }
 }

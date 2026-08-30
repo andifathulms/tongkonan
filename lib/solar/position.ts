@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Bukit Duabelas, in Jambi: the forest the Orang Rimba move through. */
+export const BUKIT_DUABELAS: Site = {
+  name: 'Bukit Duabelas',
+  latitude: -2.0,
+  longitude: 102.6,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /**
  * Soe, in the hills of South Central Timor: the southernmost site in the
  * collection, a little past Waingapu.

@@ -30,7 +30,7 @@ import type { Split } from '@/lib/core/provenance'
 import type { AnyHouse, AnyPart, Dim, ProvenanceClass, Source } from '@/lib/core/types'
 import type { Sensitivity } from '@/lib/core/sensitivity'
 import type { Site } from '@/lib/solar/position'
-import { AIRMADIDI, AMBON, BAUBAU, BENA, GIANYAR, ANGGI, BANDA_ACEH, WAKATOBI, JAYAPURA, KABANJAHE, KANEKES, TOMOHON, BANJARMASIN, BAWOMATALUO, MATARAM, WAMENA, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, SOE, SUMENEP, UBUD, WAE_REBO, WAINGAPU, YANIRUMA, YOGYAKARTA } from '@/lib/solar/position'
+import { AIRMADIDI, AMBON, BAUBAU, BENA, BUKIT_DUABELAS, GIANYAR, ANGGI, BANDA_ACEH, WAKATOBI, JAYAPURA, KABANJAHE, KANEKES, TOMOHON, BANJARMASIN, BAWOMATALUO, MATARAM, WAMENA, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, SOE, SUMENEP, UBUD, WAE_REBO, WAINGAPU, YANIRUMA, YOGYAKARTA } from '@/lib/solar/position'
 
 import * as toraja from './toraja/facade'
 import * as minang from './minang/facade'
@@ -60,8 +60,9 @@ import * as madura from './madura/facade'
 import * as buton from './buton/facade'
 import * as ngada from './ngada/facade'
 import * as atoni from './atoni/facade'
+import * as rimba from './rimba/facade'
 
-export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak', 'dani', 'banjar', 'maluku', 'tobati', 'minahasa', 'karo', 'sunda', 'aceh', 'bajau', 'waruga', 'bade', 'korowai', 'madura', 'buton', 'ngada', 'atoni'] as const
+export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak', 'dani', 'banjar', 'maluku', 'tobati', 'minahasa', 'karo', 'sunda', 'aceh', 'bajau', 'waruga', 'bade', 'korowai', 'madura', 'buton', 'ngada', 'atoni', 'rimba'] as const
 export type TraditionKey = (typeof TRADITION_KEYS)[number]
 
 export function isTraditionKey(value: string): value is TraditionKey {
@@ -207,6 +208,7 @@ export const TRADITIONS: readonly Tradition[] = [
   buton.tradition(BAUBAU),
   ngada.tradition(BENA),
   atoni.tradition(SOE),
+  rimba.tradition(BUKIT_DUABELAS),
 ]
 
 export function tradition(key: TraditionKey): Tradition {

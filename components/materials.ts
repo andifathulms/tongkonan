@@ -943,6 +943,20 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'rimba') {
+    set.kayu = timber(3030, 0.3, 0.2, 0.9)
+    set.bambu = new THREE.MeshStandardMaterial({ map: tex(bambooCanvas()), roughness: 0.74, metalness: 0 })
+    /*
+     * A sheet of leaf, not a thatch. Broader and flatter than the thatch
+     * generators, because what is drawn is whole fronds laid over rafters in
+     * an afternoon rather than courses bound over weeks.
+     */
+    set.daun = new THREE.MeshStandardMaterial({
+      color: 0x6e6a4a,
+      roughness: 0.93,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
   } else if (tradition === 'atoni') {
     set.kayu = timber(2929, 0.24, 0.3, 0.87)
     set.bambu = new THREE.MeshStandardMaterial({ map: tex(bambooCanvas()), roughness: 0.72, metalness: 0 })

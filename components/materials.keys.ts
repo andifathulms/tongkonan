@@ -235,6 +235,20 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   ngada: [],
   /** nothing of its own: timber, bamboo, grass thatch, hearth stone and earth */
   atoni: [],
+  /**
+   * Leaf, and only leaf.
+   *
+   * `daun` is a sheet of palm frond laid whole rather than a thatch built of
+   * many courses — the difference between one afternoon's roof and a season's
+   * work, and the reason it is not the shared thatch.
+   *
+   * Rattan was here too, and the test that asks whether a claimed material is
+   * actually used took it away again: the lashings are joints, and a joint is
+   * not a part. Nothing in that building is *made of* rattan, so the pack has
+   * no business declaring it — which is the same discipline that keeps the
+   * material sets honest everywhere else.
+   */
+  rimba: ['daun'],
 }
 
 /**
@@ -277,6 +291,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   buton: 'kayu',
   ngada: 'kayu',
   atoni: 'kayu',
+  rimba: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
