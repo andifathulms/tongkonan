@@ -534,7 +534,7 @@ export const SITE_ORIGIN = (
   process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'https://andifathulms.github.io'
 ).replace(/\/$/, '')
 
-export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '/tongkonan'
+export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '/rumah-adat-nusantara'
 
 /** The absolute, canonical address of a route. */
 export function pageUrl(route: Route, locale: Locale, tradition: string): string {
