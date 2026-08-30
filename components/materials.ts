@@ -943,6 +943,22 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'riau') {
+    set.kayu = timber(3636, 0.15, 0.65, 0.78)
+    set.sirap = new THREE.MeshStandardMaterial({ map: tex(sirapCanvas()), roughness: 0.9, metalness: 0 })
+    /*
+     * The selembayung, built plain.
+     *
+     * A real one is pierced and carved along its whole length, and none of
+     * that is modelled — so what is drawn is a paler timber from the frame,
+     * which is as much as an honest surface can say when the carving that
+     * makes the thing what it is has been left out.
+     */
+    set.ukiran = new THREE.MeshStandardMaterial({
+      map: tex(timberCanvas(3737, 1, 0.35)),
+      roughness: 0.62,
+      metalness: 0,
+    })
   } else if (tradition === 'sahu') {
     set.kayu = timber(3535, 0.2, 0.4, 0.84)
     set.rumbia = new THREE.MeshStandardMaterial({

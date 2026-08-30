@@ -275,6 +275,15 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * generator for both would be the split-by-name fault in reverse.
    */
   sahu: ['kain'],
+  /**
+   * The selembayung, and it is carving even when it is built plain.
+   *
+   * `ukiran` is this pack's own for the reason every carving key is: the
+   * motifs belong to particular carvers, and a shared generator would put one
+   * people's work on another people's building — which is exactly how the
+   * rumah gadang once wore a Toraja sun disc.
+   */
+  riau: ['ukiran'],
 }
 
 /**
@@ -322,6 +331,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   sabu: 'kayu',
   betawi: 'kayu',
   sahu: 'kayu',
+  riau: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Siak Sri Indrapura, on the Siak river in Riau. */
+export const SIAK: Site = {
+  name: 'Siak Sri Indrapura',
+  latitude: 0.79,
+  longitude: 102.05,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /** Jailolo, in West Halmahera: north of the equator, and east of Ambon. */
 export const JAILOLO: Site = {
   name: 'Jailolo',
