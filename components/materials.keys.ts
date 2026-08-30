@@ -249,6 +249,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * material sets honest everywhere else.
    */
   rimba: ['daun'],
+  /** the jaraik's carving, which is the one thing on this house that is its own */
+  mentawai: ['ukiran'],
 }
 
 /**
@@ -292,6 +294,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   ngada: 'kayu',
   atoni: 'kayu',
   rimba: 'kayu',
+  mentawai: 'ulin',
 }
 
 /** Every key a tradition is entitled to use. */

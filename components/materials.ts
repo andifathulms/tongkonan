@@ -943,6 +943,27 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'mentawai') {
+    set.ulin = timber(3131, 0, 0.5, 0.78)
+    set.rumbia = new THREE.MeshStandardMaterial({
+      map: tex(rumbiaCanvas()),
+      roughness: 0.95,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
+    /*
+     * The jaraik, and it is the one material this house owns.
+     *
+     * A real one is carved through and hung with skulls, and none of that is
+     * modelled — so what is drawn is a board of a different timber from the
+     * frame, pale against the ironwood, which is as much as an honest surface
+     * can claim when the carving itself is absent.
+     */
+    set.ukiran = new THREE.MeshStandardMaterial({
+      map: tex(timberCanvas(3232, 1, 0.2)),
+      roughness: 0.7,
+      metalness: 0,
+    })
   } else if (tradition === 'rimba') {
     set.kayu = timber(3030, 0.3, 0.2, 0.9)
     set.bambu = new THREE.MeshStandardMaterial({ map: tex(bambooCanvas()), roughness: 0.74, metalness: 0 })

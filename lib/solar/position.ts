@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Muara Siberut, in the Mentawai Islands: the second-westernmost site here. */
+export const SIBERUT: Site = {
+  name: 'Muara Siberut',
+  latitude: -1.6,
+  longitude: 99.15,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /** Bukit Duabelas, in Jambi: the forest the Orang Rimba move through. */
 export const BUKIT_DUABELAS: Site = {
   name: 'Bukit Duabelas',
