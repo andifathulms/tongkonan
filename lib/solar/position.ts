@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Sumbawa Besar, on Sumbawa: the sultanate's own ground. */
+export const SUMBAWA_BESAR: Site = {
+  name: 'Sumbawa Besar',
+  latitude: -8.49,
+  longitude: 117.42,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Siak Sri Indrapura, on the Siak river in Riau. */
 export const SIAK: Site = {
   name: 'Siak Sri Indrapura',

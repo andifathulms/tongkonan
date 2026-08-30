@@ -284,6 +284,12 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * rumah gadang once wore a Toraja sun disc.
    */
   riau: ['ukiran'],
+  /**
+   * Nothing of its own: timber, board, shingle and pad stone, every one of
+   * them a substance another building here is already made of. What is
+   * distinctive about this palace is a number, and a number has no surface.
+   */
+  sumbawa: [],
 }
 
 /**
@@ -332,6 +338,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   betawi: 'kayu',
   sahu: 'kayu',
   riau: 'kayu',
+  sumbawa: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

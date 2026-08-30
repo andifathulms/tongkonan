@@ -93,6 +93,7 @@ describe('the core is tradition-neutral', () => {
       'kebaya', 'langkan', 'betawi', 'gigi balang', 'condet',
       'sasadu', 'sahu', 'jailolo', 'halmahera',
       'selaso', 'kembar', 'selembayung', 'pelantar', 'siak',
+      'dalam loka', 'bala rea', 'sumbawa',
     ]
     /*
      * Whole words, not substrings.
