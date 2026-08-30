@@ -35,6 +35,42 @@ const RULE_W = 0.1
 
 const f = (n: number) => (Math.round(n * 100) / 100).toString()
 
+/**
+ * A building at glyph size: the silhouette alone, scaled to fit a box on a
+ * larger drawing — the site map's marker. Every glyph gets the same box, so
+ * every building reads at the same visual size; this is deliberately not the
+ * shelf's same-scale claim, which lives where the scale bar is. The nested
+ * svg carries its own viewBox, so the silhouette's metres never leak into the
+ * host drawing's units.
+ */
+export function ElevationGlyph({
+  s,
+  x,
+  y,
+  w,
+  h,
+}: {
+  s: Silhouette
+  x: number
+  y: number
+  w: number
+  h: number
+}) {
+  const sw = s.max[0] - s.min[0]
+  return (
+    <svg
+      x={f(x)}
+      y={f(y)}
+      width={f(w)}
+      height={f(h)}
+      viewBox={`0 0 ${f(sw)} ${f(s.max[1])}`}
+      preserveAspectRatio="xMidYMax meet"
+    >
+      <path d={pathOf(s, 0, s.max[1])} fill="var(--bolu)" fillRule="evenodd" />
+    </svg>
+  )
+}
+
 function pathOf(s: Silhouette, ox: number, baseY: number): string {
   return s.loops
     .map(
