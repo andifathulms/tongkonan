@@ -943,6 +943,9 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'buton') {
+    set.kayu = timber(2727, 0.12, 0.62, 0.8)
+    set.sirap = new THREE.MeshStandardMaterial({ map: tex(sirapCanvas()), roughness: 0.9, metalness: 0 })
   } else if (tradition === 'madura') {
     set.kayu = timber(2626, 0.2, 0.55, 0.82)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })

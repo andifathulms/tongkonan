@@ -225,6 +225,12 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * it is an arrangement, which is exactly the case an empty list states.
    */
   madura: [],
+  /**
+   * Nothing of its own: timber, board, shingle and coral-block stone, all of
+   * them substances another building here is already made of. What is
+   * distinctive about a malige is its shape and who may stand on which floor.
+   */
+  buton: [],
 }
 
 /**
@@ -264,6 +270,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   bade: 'bambu',
   korowai: 'kayu',
   madura: 'kayu',
+  buton: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

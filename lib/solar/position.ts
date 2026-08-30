@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Baubau, on Buton: the Wolio keraton, and the malige inside its wall. */
+export const BAUBAU: Site = {
+  name: 'Baubau',
+  latitude: -5.47,
+  longitude: 122.62,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Sumenep, at the east end of Madura: the tanean lanjang country. */
 export const SUMENEP: Site = {
   name: 'Sumenep',

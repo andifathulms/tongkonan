@@ -27,6 +27,7 @@ import { WarugaControls } from './waruga'
 import { BadeControls } from './bade'
 import { KorowaiControls } from './korowai'
 import { MaduraControls } from './madura'
+import { ButonControls } from './buton'
 
 /**
  * The rule controls, chosen by tradition.
@@ -107,5 +108,7 @@ export function RuleControlsFor({
       return <KorowaiControls {...props} />
     case 'madura':
       return <MaduraControls {...props} />
+    case 'buton':
+      return <ButonControls {...props} />
   }
 }
