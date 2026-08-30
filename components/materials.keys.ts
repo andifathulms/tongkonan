@@ -178,6 +178,16 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   bajau: ['pasir'],
   /** nothing of its own, and nothing else either: this building is stone */
   waruga: [],
+  /**
+   * Cloth and paper, and they are the first two materials here that are not
+   * building materials at all.
+   *
+   * Every other substance in this project is quarried, felled, split, fired or
+   * cut. These two are bought by the metre and are on the building because it
+   * only has to hold together until the afternoon it is burned. Nothing else
+   * here is clad in something that would be ruined by one night of rain.
+   */
+  bade: ['kain', 'kertas'],
 }
 
 /**
@@ -214,6 +224,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   aceh: 'kayu',
   bajau: 'kayu',
   waruga: 'batu',
+  bade: 'bambu',
 }
 
 /** Every key a tradition is entitled to use. */

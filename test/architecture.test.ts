@@ -81,6 +81,7 @@ describe('the core is tradition-neutral', () => {
       'waruga', 'minahasa', 'airmadidi', 'sawangan',
       'bubungan', 'palimasan', 'baliku', 'palidangan', 'surambi', 'pelatar',
       'anjung', 'banjar', 'tongkat',
+      'bade', 'usungan', 'pemikul', 'pempatan', 'setra', 'payung',
     ]
     /*
      * Whole words, not substrings.

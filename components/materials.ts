@@ -943,6 +943,27 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'bade') {
+    set.kayu = timber(2323, 0.22, 0.5, 0.78)
+    /*
+     * Cloth and gold paper: the only two surfaces in this project that are not
+     * a building material. Both are given a little sheen and no texture map —
+     * a bade's cloth is worked to the limit and none of that work is modelled,
+     * so a flat, slightly bright surface says "clad" without pretending to
+     * ornament nobody here drew.
+     */
+    set.kain = new THREE.MeshStandardMaterial({
+      color: 0xe8e2d4,
+      roughness: 0.86,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
+    set.kertas = new THREE.MeshStandardMaterial({
+      color: 0xd6b661,
+      roughness: 0.52,
+      metalness: 0.12,
+      side: THREE.DoubleSide,
+    })
   } else if (tradition === 'bajau') {
     set.kayu = timber(1919, 0.3, 0.55, 0.8)
     set.nipah = new THREE.MeshStandardMaterial({

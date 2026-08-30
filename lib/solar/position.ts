@@ -235,6 +235,18 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/**
+ * Gianyar, in southern Bali: the second site in this collection for one people,
+ * and the second time that has happened — Airmadidi and Tomohon were the first.
+ */
+export const GIANYAR: Site = {
+  name: 'Gianyar',
+  latitude: -8.54,
+  longitude: 115.33,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Tomohon, in the North Sulawesi highlands — the second site north of the equator. */
 export const TOMOHON: Site = {
   name: 'Tomohon',
