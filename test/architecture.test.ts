@@ -85,6 +85,7 @@ describe('the core is tradition-neutral', () => {
       'khaim', 'korowai', 'wanbon', 'yaniruma', 'cagak',
       'tanean', 'lanjang', 'langgar', 'tonghuh', 'madura', 'trompesan', 'pacenan', 'sumenep',
       'malige', 'buton', 'wolio', 'baubau', 'baji',
+      'ngadhu', 'bhaga', 'ngada', 'nua', 'sa’o', 'ture', 'bena',
     ]
     /*
      * Whole words, not substrings.

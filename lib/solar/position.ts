@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Bena, in the Ngada highlands of Flores: the second site on that island. */
+export const BENA: Site = {
+  name: 'Bena',
+  latitude: -8.87,
+  longitude: 120.98,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Baubau, on Buton: the Wolio keraton, and the malige inside its wall. */
 export const BAUBAU: Site = {
   name: 'Baubau',

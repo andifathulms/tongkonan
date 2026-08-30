@@ -231,6 +231,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * distinctive about a malige is its shape and who may stand on which floor.
    */
   buton: [],
+  /** nothing of its own: timber, board, palm-fibre thatch, stone and beaten earth */
+  ngada: [],
 }
 
 /**
@@ -271,6 +273,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   korowai: 'kayu',
   madura: 'kayu',
   buton: 'kayu',
+  ngada: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
