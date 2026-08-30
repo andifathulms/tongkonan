@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Sumenep, at the east end of Madura: the tanean lanjang country. */
+export const SUMENEP: Site = {
+  name: 'Sumenep',
+  latitude: -7.0,
+  longitude: 113.87,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /**
  * Yaniruma, in the Becking headwaters of South Papua: the deepest inland site
  * in the collection, and the fourth in the eastern time zone.

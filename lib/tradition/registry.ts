@@ -30,7 +30,7 @@ import type { Split } from '@/lib/core/provenance'
 import type { AnyHouse, AnyPart, Dim, ProvenanceClass, Source } from '@/lib/core/types'
 import type { Sensitivity } from '@/lib/core/sensitivity'
 import type { Site } from '@/lib/solar/position'
-import { AIRMADIDI, AMBON, GIANYAR, ANGGI, BANDA_ACEH, WAKATOBI, JAYAPURA, KABANJAHE, KANEKES, TOMOHON, BANJARMASIN, BAWOMATALUO, MATARAM, WAMENA, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, UBUD, WAE_REBO, WAINGAPU, YANIRUMA, YOGYAKARTA } from '@/lib/solar/position'
+import { AIRMADIDI, AMBON, GIANYAR, ANGGI, BANDA_ACEH, WAKATOBI, JAYAPURA, KABANJAHE, KANEKES, TOMOHON, BANJARMASIN, BAWOMATALUO, MATARAM, WAMENA, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, SUMENEP, UBUD, WAE_REBO, WAINGAPU, YANIRUMA, YOGYAKARTA } from '@/lib/solar/position'
 
 import * as toraja from './toraja/facade'
 import * as minang from './minang/facade'
@@ -56,8 +56,9 @@ import * as bajau from './bajau/facade'
 import * as waruga from './waruga/facade'
 import * as bade from './bade/facade'
 import * as korowai from './korowai/facade'
+import * as madura from './madura/facade'
 
-export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak', 'dani', 'banjar', 'maluku', 'tobati', 'minahasa', 'karo', 'sunda', 'aceh', 'bajau', 'waruga', 'bade', 'korowai'] as const
+export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak', 'dani', 'banjar', 'maluku', 'tobati', 'minahasa', 'karo', 'sunda', 'aceh', 'bajau', 'waruga', 'bade', 'korowai', 'madura'] as const
 export type TraditionKey = (typeof TRADITION_KEYS)[number]
 
 export function isTraditionKey(value: string): value is TraditionKey {
@@ -199,6 +200,7 @@ export const TRADITIONS: readonly Tradition[] = [
   waruga.tradition(AIRMADIDI),
   bade.tradition(GIANYAR),
   korowai.tradition(YANIRUMA),
+  madura.tradition(SUMENEP),
 ]
 
 export function tradition(key: TraditionKey): Tradition {

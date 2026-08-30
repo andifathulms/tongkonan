@@ -52,6 +52,11 @@ export const SHARED_MATERIALS: readonly string[] = [
    */
   'kulit',
   'tanah',
+  /*
+   * Brick was the bale's own until a Madurese plinth turned out to be the same
+   * fired clay — the sixth key to move here, and the list's test applied again.
+   */
+  'bata',
 ]
 
 /**
@@ -85,7 +90,7 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    */
   manggarai: [],
   /** quarried paras and brick; the grass thatch is shared, see above */
-  bali: ['paras', 'bata'],
+  bali: ['paras'],
   /** sago-palm leaf, and a dressed standing stone that is not a river cobble */
   /** the sago leaf moved to the shared list when the baileo was roofed in it */
   nias: ['behu'],
@@ -211,6 +216,15 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * every other building's supports stopped growing before they were put in.
    */
   korowai: ['pohon'],
+  /**
+   * Nothing of its own, and for the reason the empty lists exist.
+   *
+   * Timber, board, tile, brick, pad stone and beaten earth — every one of them
+   * a substance another building here is already made of, off the same
+   * generator. What is distinctive about this entry is not a material at all;
+   * it is an arrangement, which is exactly the case an empty list states.
+   */
+  madura: [],
 }
 
 /**
@@ -249,6 +263,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   waruga: 'batu',
   bade: 'bambu',
   korowai: 'kayu',
+  madura: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

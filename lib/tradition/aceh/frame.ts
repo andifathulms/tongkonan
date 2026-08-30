@@ -7,7 +7,7 @@
  * the back veranda. Z is the length, and it runs **east–west**, because that is
  * the direction prayer is made in. The ridge lies along it.
  *
- * That is the one rule this house has that came from outside the archipelago,
+ * That is the rule this house has that came from outside the archipelago,
  * and in the geometry it is simply which axis is long. The check reads it off
  * the scene model rather than off a comment.
  */

@@ -5,8 +5,9 @@
  *
  * Two of the particular ones are unlike anything else in the project.
  * `checkRidgeRunsEastWest` is a claim about an axis whose *reason* is a
- * doctrine — the only rule in the collection that arrived from outside the
- * archipelago — and in the model it is simply which way the building is long.
+ * doctrine — the first rule in the collection to arrive from outside the
+ * archipelago, and after the Madurese tanean lanjang no longer the only one —
+ * and in the model it is simply which way the building is long.
  * `checkOddSteps` is the only parity check here: it does not ask whether a
  * number is large enough or small enough but whether it is odd, and it fails
  * by one.

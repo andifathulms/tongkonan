@@ -943,6 +943,14 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'madura') {
+    set.kayu = timber(2626, 0.2, 0.55, 0.82)
+    set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
+    // Brick and beaten earth: the plinth every building here stands on, and
+    // the yard they are all arranged around. Both generators are shared —
+    // fired clay is fired clay, and the yard is the same earth as a hillside.
+    set.bata = new THREE.MeshStandardMaterial({ map: tex(bataCanvas()), roughness: 0.95, metalness: 0 })
+    set.tanah = new THREE.MeshStandardMaterial({ color: 0x8d7f66, roughness: 1, metalness: 0 })
   } else if (tradition === 'korowai') {
     set.kayu = timber(2424, 0.15, 0.4, 0.88)
     /*
