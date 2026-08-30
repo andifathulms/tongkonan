@@ -265,6 +265,16 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * bought by the piece from a shop.
    */
   betawi: ['ubin'],
+  /**
+   * The red and white cloth tied at the guests' opening.
+   *
+   * `kain` is the bade's too and it does not move to the shared list, because
+   * on that building cloth is the *cladding* — bought by the metre and burned
+   * the same afternoon — while here it is two pieces tied to a jamb. Same
+   * substance, and the difference in what it is doing is large enough that one
+   * generator for both would be the split-by-name fault in reverse.
+   */
+  sahu: ['kain'],
 }
 
 /**
@@ -311,6 +321,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   mentawai: 'ulin',
   sabu: 'kayu',
   betawi: 'kayu',
+  sahu: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */

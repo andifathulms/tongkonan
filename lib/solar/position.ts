@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Jailolo, in West Halmahera: north of the equator, and east of Ambon. */
+export const JAILOLO: Site = {
+  name: 'Jailolo',
+  latitude: 1.08,
+  longitude: 127.48,
+  tzOffsetHours: 9,
+  tzName: 'WIT',
+}
+
 /** Jakarta, at Condet: the only city site in the collection. */
 export const JAKARTA: Site = {
   name: 'Jakarta',
