@@ -235,6 +235,18 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/**
+ * Soe, in the hills of South Central Timor: the southernmost site in the
+ * collection, a little past Waingapu.
+ */
+export const SOE: Site = {
+  name: 'Soe',
+  latitude: -9.86,
+  longitude: 124.28,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Bena, in the Ngada highlands of Flores: the second site on that island. */
 export const BENA: Site = {
   name: 'Bena',

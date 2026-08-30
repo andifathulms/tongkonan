@@ -943,6 +943,17 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'atoni') {
+    set.kayu = timber(2929, 0.24, 0.3, 0.87)
+    set.bambu = new THREE.MeshStandardMaterial({ map: tex(bambooCanvas()), roughness: 0.72, metalness: 0 })
+    set.alang = new THREE.MeshStandardMaterial({
+      map: tex(alangCanvas()),
+      roughness: 0.95,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
+    // The swept earth floor, which is also what holds the night's heat.
+    set.tanah = new THREE.MeshStandardMaterial({ color: 0x8d7f66, roughness: 1, metalness: 0 })
   } else if (tradition === 'ngada') {
     set.kayu = timber(2828, 0.18, 0.35, 0.86)
     set.ijuk = new THREE.MeshStandardMaterial({

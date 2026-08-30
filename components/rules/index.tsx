@@ -29,6 +29,7 @@ import { KorowaiControls } from './korowai'
 import { MaduraControls } from './madura'
 import { ButonControls } from './buton'
 import { NgadaControls } from './ngada'
+import { AtoniControls } from './atoni'
 
 /**
  * The rule controls, chosen by tradition.
@@ -113,5 +114,7 @@ export function RuleControlsFor({
       return <ButonControls {...props} />
     case 'ngada':
       return <NgadaControls {...props} />
+    case 'atoni':
+      return <AtoniControls {...props} />
   }
 }

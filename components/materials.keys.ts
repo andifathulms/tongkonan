@@ -233,6 +233,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   buton: [],
   /** nothing of its own: timber, board, palm-fibre thatch, stone and beaten earth */
   ngada: [],
+  /** nothing of its own: timber, bamboo, grass thatch, hearth stone and earth */
+  atoni: [],
 }
 
 /**
@@ -274,6 +276,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   madura: 'kayu',
   buton: 'kayu',
   ngada: 'kayu',
+  atoni: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
