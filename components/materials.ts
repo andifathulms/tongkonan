@@ -943,6 +943,21 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'sabu') {
+    set.kayu = timber(3333, 0.28, 0.45, 0.85)
+    /*
+     * Lontar leaf: the fifth plant in this project's roofs, after ijuk,
+     * alang-alang, sago and nipa. A fan-palm leaf laid in broad overlapping
+     * strips — paler and more regular than any of the four, because it is cut
+     * and folded rather than bundled.
+     */
+    set.lontar = new THREE.MeshStandardMaterial({
+      map: tex(alangCanvas()),
+      color: new THREE.Color(0xbdb08c),
+      roughness: 0.93,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
   } else if (tradition === 'mentawai') {
     set.ulin = timber(3131, 0, 0.5, 0.78)
     set.rumbia = new THREE.MeshStandardMaterial({

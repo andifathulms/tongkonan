@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Seba, on Rai Hawu: the southernmost site in the collection. */
+export const SEBA: Site = {
+  name: 'Seba',
+  latitude: -10.49,
+  longitude: 121.83,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Muara Siberut, in the Mentawai Islands: the second-westernmost site here. */
 export const SIBERUT: Site = {
   name: 'Muara Siberut',

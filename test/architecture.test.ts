@@ -89,6 +89,7 @@ describe('the core is tradition-neutral', () => {
       'ume kbubu', 'kbubu', 'lopo', 'atoni', 'para', 'soe',
       'sudung', 'melangun', 'rimba', 'kubu', 'duabelas',
       'jaraik', 'rimata', 'turuk', 'mentawai', 'siberut',
+      'ammu', 'hawu', 'duru', 'lontar', 'gewang', 'seba',
     ]
     /*
      * Whole words, not substrings.

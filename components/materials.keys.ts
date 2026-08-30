@@ -251,6 +251,13 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
   rimba: ['daun'],
   /** the jaraik's carving, which is the one thing on this house that is its own */
   mentawai: ['ukiran'],
+  /**
+   * Lontar leaf, and it is this pack's own for a reason that is about an
+   * island rather than a surface: Sabu lives on this palm, and the roof and
+   * what is stored under it come off the same tree. The other thatches here
+   * are ijuk, alang-alang, sago and nipa; this is a fifth plant.
+   */
+  sabu: ['lontar'],
 }
 
 /**
@@ -295,6 +302,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   atoni: 'kayu',
   rimba: 'kayu',
   mentawai: 'ulin',
+  sabu: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
