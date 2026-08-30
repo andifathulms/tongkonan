@@ -943,6 +943,17 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'betawi') {
+    set.kayu = timber(3434, 0.1, 0.7, 0.76)
+    set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
+    set.bata = new THREE.MeshStandardMaterial({ map: tex(bataCanvas()), roughness: 0.95, metalness: 0 })
+    /*
+     * A floor tile: flatter and cooler than anything else underfoot here, and
+     * the only surface in the collection that came out of a shop. Drawn plain
+     * — the patterned tegel of a real one is ornament, and this project does
+     * not invent ornament.
+     */
+    set.ubin = new THREE.MeshStandardMaterial({ color: 0xcfc7b4, roughness: 0.45, metalness: 0 })
   } else if (tradition === 'sabu') {
     set.kayu = timber(3333, 0.28, 0.45, 0.85)
     /*

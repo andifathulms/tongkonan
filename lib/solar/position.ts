@@ -235,6 +235,15 @@ export const AIRMADIDI: Site = {
   tzName: 'WITA',
 }
 
+/** Jakarta, at Condet: the only city site in the collection. */
+export const JAKARTA: Site = {
+  name: 'Jakarta',
+  latitude: -6.27,
+  longitude: 106.86,
+  tzOffsetHours: 7,
+  tzName: 'WIB',
+}
+
 /** Seba, on Rai Hawu: the southernmost site in the collection. */
 export const SEBA: Site = {
   name: 'Seba',

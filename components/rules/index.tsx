@@ -33,6 +33,7 @@ import { AtoniControls } from './atoni'
 import { RimbaControls } from './rimba'
 import { MentawaiControls } from './mentawai'
 import { SabuControls } from './sabu'
+import { BetawiControls } from './betawi'
 
 /**
  * The rule controls, chosen by tradition.
@@ -125,5 +126,7 @@ export function RuleControlsFor({
       return <MentawaiControls {...props} />
     case 'sabu':
       return <SabuControls {...props} />
+    case 'betawi':
+      return <BetawiControls {...props} />
   }
 }

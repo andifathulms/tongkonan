@@ -258,6 +258,13 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * are ijuk, alang-alang, sago and nipa; this is a fifth plant.
    */
   sabu: ['lontar'],
+  /**
+   * A fired floor tile, and it is this pack's own because of where it comes
+   * from rather than what it looks like: every other floor in this collection
+   * is split, sawn, beaten or laid from what was to hand, and this one was
+   * bought by the piece from a shop.
+   */
+  betawi: ['ubin'],
 }
 
 /**
@@ -303,6 +310,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   rimba: 'kayu',
   mentawai: 'ulin',
   sabu: 'kayu',
+  betawi: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
