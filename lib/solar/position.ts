@@ -236,6 +236,18 @@ export const AIRMADIDI: Site = {
 }
 
 /**
+ * Yaniruma, in the Becking headwaters of South Papua: the deepest inland site
+ * in the collection, and the fourth in the eastern time zone.
+ */
+export const YANIRUMA: Site = {
+  name: 'Yaniruma',
+  latitude: -5.28,
+  longitude: 139.66,
+  tzOffsetHours: 9,
+  tzName: 'WIT',
+}
+
+/**
  * Gianyar, in southern Bali: the second site in this collection for one people,
  * and the second time that has happened — Airmadidi and Tomohon were the first.
  */

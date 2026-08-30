@@ -25,6 +25,7 @@ import { AcehControls } from './aceh'
 import { BajauControls } from './bajau'
 import { WarugaControls } from './waruga'
 import { BadeControls } from './bade'
+import { KorowaiControls } from './korowai'
 
 /**
  * The rule controls, chosen by tradition.
@@ -101,5 +102,7 @@ export function RuleControlsFor({
       return <WarugaControls {...props} />
     case 'bade':
       return <BadeControls {...props} />
+    case 'korowai':
+      return <KorowaiControls {...props} />
   }
 }

@@ -943,6 +943,38 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
     set.jati = timber(303, 0, 0.35, 0.74)
     set.genteng = new THREE.MeshStandardMaterial({ map: tex(gentengCanvas()), roughness: 0.82, metalness: 0 })
     set.ukiran = new THREE.MeshStandardMaterial({ map: tex(jawaCarvingCanvas()), roughness: 0.66, metalness: 0 })
+  } else if (tradition === 'korowai') {
+    set.kayu = timber(2424, 0.15, 0.4, 0.88)
+    /*
+     * The living tree.
+     *
+     * Greener and darker than any felled timber in the set, and rougher,
+     * because what is being drawn is bark on a standing trunk rather than a
+     * dressed pole. It is the only material here whose subject is alive, and
+     * the only one drawn from a timber generator on purpose: a wanbon is a
+     * tree, and the difference this pack cares about is that it has not been
+     * cut, which is a fact about the building and not about the surface.
+     */
+    set.pohon = new THREE.MeshStandardMaterial({
+      map: tex(timberCanvas(2525, 0, 0.15)),
+      color: new THREE.Color(0x7d7a5e),
+      roughness: 0.95,
+      metalness: 0,
+    })
+    set.kulit = new THREE.MeshStandardMaterial({
+      map: tex(kulitCanvas()),
+      roughness: 0.96,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
+    set.rumbia = new THREE.MeshStandardMaterial({
+      map: tex(rumbiaCanvas()),
+      roughness: 0.95,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    })
+    // The clay a fire is lit on, hung over a hole in the floor.
+    set.tanah = new THREE.MeshStandardMaterial({ color: 0x8d7f66, roughness: 1, metalness: 0 })
   } else if (tradition === 'bade') {
     set.kayu = timber(2323, 0.22, 0.5, 0.78)
     /*
@@ -992,7 +1024,8 @@ export function createMaterials(tradition: TraditionKey, anisotropy: number): Ma
       metalness: 0,
       side: THREE.DoubleSide,
     })
-    // Earth, and the only pack that has any: the hillside is a part here.
+    // Earth: the hillside is a part here. The same generator now also makes a
+    // Korowai hearth, which is the same substance doing the opposite job.
     set.tanah = new THREE.MeshStandardMaterial({ color: 0x8d7f66, roughness: 1, metalness: 0 })
   } else if (tradition === 'karo') {
     set.kayu = timber(1616, 0.1, 0.35, 0.85)

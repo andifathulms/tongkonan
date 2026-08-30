@@ -41,6 +41,17 @@ export const SHARED_MATERIALS: readonly string[] = [
   'genteng',
   'nipah',
   'batu',
+  /*
+   * Bark and earth were each one pack's own until a second pack used them, and
+   * both moved here on the test this list applies. The bark of an Arfak wall
+   * and of a Korowai floor is the same sheet off the same tree and off the
+   * same generator. Earth is the more interesting move: it was the Baduy
+   * hillside, a thing nobody may cut, and it is now also a Korowai hearth — a
+   * bed of clay hung twenty metres above the ground. Same substance, opposite
+   * jobs, and the split-by-name fault would have been to keep two of it.
+   */
+  'kulit',
+  'tanah',
 ]
 
 /**
@@ -119,7 +130,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * tree's own fibre still running through it, which nothing else in the set
    * does.
    */
-  arfak: ['kulit'],
+  /** nothing of its own now: its bark sheet moved to the shared list when a second pack was built from the same tree */
+  arfak: [],
   /**
    * Nothing of its own, and it is the third entry here to be empty.
    *
@@ -164,7 +176,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * list, so no other building needs a material for it — which is exactly when
    * a key belongs to one tradition rather than to the shared list.
    */
-  sunda: ['tanah'],
+  /** its earth moved to the shared list when a Korowai hearth turned out to be the same substance */
+  sunda: [],
   /** nothing of its own: timber, board, bamboo and the same sago leaf */
   aceh: [],
   /**
@@ -188,6 +201,16 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * here is clad in something that would be ruined by one night of rain.
    */
   bade: ['kain', 'kertas'],
+  /**
+   * A living tree, and it is the only material key in the project naming
+   * something that is not dead.
+   *
+   * `pohon` is a standing wanbon with its roots in the ground, not timber —
+   * timber is what a tree becomes when it is felled, and this one is not. It
+   * cannot be shared with any other pack for the same reason the bark could:
+   * every other building's supports stopped growing before they were put in.
+   */
+  korowai: ['pohon'],
 }
 
 /**
@@ -225,6 +248,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   bajau: 'kayu',
   waruga: 'batu',
   bade: 'bambu',
+  korowai: 'kayu',
 }
 
 /** Every key a tradition is entitled to use. */
