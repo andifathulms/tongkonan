@@ -123,12 +123,12 @@ export const COPY = {
         'It began with one house: the tongkonan. Three social rules — rank, bay count, the tally of funerals on the horns of its post — produce every dimension, and from those dimensions the model stands.',
       ),
       t(
-        'Lalu rumah gadang, yang menolak menyerupainya; lalu joglo, yang bahkan tidak berdiri di atas tiang; lalu mbaru niang, yang bulat. Penolakan itulah gunanya: tiap rumah membawa pak aturannya sendiri, dan tidak ada yang dipaksa memakai bentuk rumah lain.',
-        'Then the rumah gadang, which refused to resemble it; then the joglo, which does not even stand on posts; then the mbaru niang, which is round. The refusal is the point: each house carries its own rule pack, and none is made to wear another’s shape.',
+        'Lalu rumah gadang, yang menolak menyerupainya — dan penolakan itu terus berulang: ada yang tidak berdiri di atas tiang, ada yang bulat, ada yang mengapung, ada yang berdiri di pohon hidup, ada yang dibangun untuk satu sore lalu dibakar. Justru itulah gunanya: tiap tradisi membawa pak aturannya sendiri, dan tidak ada yang dipaksa memakai bentuk milik yang lain.',
+        'Then the rumah gadang, which refused to resemble it — and the refusals kept coming: some do not stand on posts, one is round, one floats, one stands in a living tree, one is built for a single afternoon and then burned. That is the point: each tradition carries its own rule pack, and none is made to wear another’s shape.',
       ),
       t(
-        'Setiap ukuran menyatakan asalnya — terukur, kanon, atau perkiraan penulis — dan angka tiap rumah tidak pernah dirata-ratakan dengan rumah lain. Yang bersumber adalah logika bentuknya; ukurannya sebagian besar belum.',
-        'Every dimension states where it came from — measured, canon, or the author’s own — and no house’s figures are ever averaged with another’s. What is sourced is the logic of each shape; the sizes mostly are not.',
+        'Setiap ukuran menyatakan asalnya — terukur, kanon, atau perkiraan penulis — dan angka tiap tradisi tidak pernah dirata-ratakan dengan yang lain. Yang bersumber adalah logika bentuknya; ukurannya sebagian besar belum.',
+        'Every dimension states where it came from — measured, canon, or the author’s own — and no tradition’s figures are ever averaged with another’s. What is sourced is the logic of each shape; the sizes mostly are not.',
       ),
       t(
         'Belum satu pun rumah ini disurvei. Bilah asal ukuran pada tiap halaman adalah tolok kemajuan proyek ini, dan hari ini bilah itu hampir seluruhnya merah. Ia dibiarkan terlihat, karena gambar tiga dimensi yang mulus menyiratkan ketelitian yang tidak dimiliki sumbernya.',
@@ -157,10 +157,9 @@ export const COPY = {
     ),
     sitesHeading: t('Tapak', 'The sites'),
     sitesNote: t(
-      'Matahari pada tiap model dihitung untuk tapak rumahnya sendiri. Garis lintang pada peta ini adalah masukan perhitungan itu, bukan hiasan.',
-      'The sun in each model is computed for that house’s own site. The latitudes on this map are inputs to that arithmetic, not decoration.',
+      'Setiap bangunan digambar dari bagian-bagian modelnya sendiri dan berdiri di tapaknya. Matahari pada tiap model dihitung untuk koordinat tapak itu — koordinat yang sama yang menempatkannya di peta ini.',
+      'Each building is drawn from its own model’s parts and stands at its site. The sun in each model is computed for that site’s coordinates — the same coordinates that place it on this map.',
     ),
-    equator: t('Khatulistiwa', 'Equator'),
     housesHeading: t('Rumah-rumahnya', 'The houses'),
     parts: t('bagian', 'parts'),
     joints: t('sambungan', 'joints'),
