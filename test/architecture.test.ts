@@ -78,6 +78,7 @@ describe('the core is tradition-neutral', () => {
       'baduy', 'kanekes', 'imah', 'sosoro', 'pikukuh', 'palupuh', 'hateup', 'tihang',
       'rumoh', 'aceh', 'seuramo', 'tungai', 'tameh', 'reunyeun', 'bubong', 'gaseue', 'binteh',
       'lepa', 'bajau', 'kajang', 'cadik', 'lunas', 'gading', 'kelson',
+      'waruga', 'minahasa', 'airmadidi', 'sawangan',
       'bubungan', 'palimasan', 'baliku', 'palidangan', 'surambi', 'pelatar',
       'anjung', 'banjar', 'tongkat',
     ]

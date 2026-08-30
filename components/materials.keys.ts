@@ -176,6 +176,8 @@ export const OWN_MATERIALS: Record<TraditionKey, readonly string[]> = {
    * there is no ground to build a hearth on.
    */
   bajau: ['pasir'],
+  /** nothing of its own, and nothing else either: this building is stone */
+  waruga: [],
 }
 
 /**
@@ -211,6 +213,7 @@ export const FALLBACK_MATERIAL: Record<TraditionKey, string> = {
   sunda: 'kayu',
   aceh: 'kayu',
   bajau: 'kayu',
+  waruga: 'batu',
 }
 
 /** Every key a tradition is entitled to use. */

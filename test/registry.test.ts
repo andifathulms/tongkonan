@@ -16,15 +16,17 @@ describe('every tradition answers the same questions', () => {
 
       it('builds a house with parts, joints and bounds', () => {
         /*
-         * Twenty was fifty until a boat joined the collection.
+         * A count, not a threshold.
          *
-         * The threshold was a stand-in for "this actually built something",
-         * and fifty was the number the buildings that existed happened to
-         * clear. A lepa is a hull, a deck, an awning and a hearth: forty-one
-         * parts, and complete. The fifth test in this project fitted to its
-         * own examples rather than to what it meant.
+         * This was "more than fifty parts" until a boat joined the collection
+         * at forty-one, then "more than twenty" until a stone tomb joined it
+         * at eleven. The number was never the claim: what it stands in for is
+         * that the build produced something, and the invariant suite next door
+         * is what actually gates whether that something is a building. Twice
+         * fitted to the examples that happened to exist, and now written as
+         * what it means.
          */
-        expect(built.house.parts.length).toBeGreaterThan(20)
+        expect(built.house.parts.length).toBeGreaterThan(0)
         expect(built.house.joints.length).toBeGreaterThan(0)
         expect(built.house.bounds.max[1]).toBeGreaterThan(built.house.bounds.min[1])
       })

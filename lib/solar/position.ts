@@ -226,6 +226,15 @@ export const KABANJAHE: Site = {
   tzName: 'WIB',
 }
 
+/** Airmadidi, in North Minahasa: the second site in this collection for one people. */
+export const AIRMADIDI: Site = {
+  name: 'Airmadidi',
+  latitude: 1.4,
+  longitude: 124.98,
+  tzOffsetHours: 8,
+  tzName: 'WITA',
+}
+
 /** Tomohon, in the North Sulawesi highlands — the second site north of the equator. */
 export const TOMOHON: Site = {
   name: 'Tomohon',
