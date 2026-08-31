@@ -4,10 +4,13 @@ import { tradition } from '@/lib/tradition/registry'
 import { silhouette } from '@/lib/core/silhouette'
 
 /**
- * The favicon is the first house's computed silhouette, so it is an output of
- * the generator like every other picture here — and like every other output
- * it can drift when the model changes. This builds the icon the generator
- * would draw today and holds it against the committed file.
+ * The first house's computed silhouette, as a file.
+ *
+ * It was the favicon until the collection got a mark of its own — a tab icon
+ * of one house was a reasonable thing for a site about one house, and became
+ * a claim about the other thirty-four. The drawing is still an output of the
+ * generator like every other picture here, and like every other output it can
+ * drift when the model changes, so it is still held against the generator.
  *
  * To regenerate after a deliberate model change:
  *   WRITE_ICON=1 pnpm vitest run test/icon.test.ts
@@ -41,8 +44,8 @@ function iconSvg(): string {
   ].join('\n')
 }
 
-test('the committed favicon is what the generator draws', () => {
+test('the committed silhouette is what the generator draws', () => {
   const svg = iconSvg()
-  if (process.env.WRITE_ICON) writeFileSync('app/icon.svg', svg)
-  expect(readFileSync('app/icon.svg', 'utf8')).toBe(svg)
+  if (process.env.WRITE_ICON) writeFileSync('public/tongkonan.svg', svg)
+  expect(readFileSync('public/tongkonan.svg', 'utf8')).toBe(svg)
 })
