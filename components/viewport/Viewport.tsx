@@ -33,6 +33,13 @@ export interface ViewportProps {
   rain: boolean
   /** draw the ground the house stands on; default on */
   site?: boolean
+  /**
+   * Write the names of what is on the ground. Separate from `site` because
+   * the drawing and the lettering are different claims on attention: the
+   * assembly route keeps the ground and declines the captions, whose subject
+   * is the finished arrangement and not the raising of the frame.
+   */
+  siteCaptions?: boolean
   reveal: { timeline: Timeline<Kinds>; t: number } | null
   explode?: number
   /** cut the house open to show the occupancy zones, on the axis the tradition names */
@@ -56,6 +63,7 @@ export function Viewport({
   figure,
   rain,
   site = true,
+  siteCaptions = true,
   reveal,
   explode = 0,
   section = false,
@@ -345,9 +353,12 @@ export function Viewport({
         The names of what is on the ground, in the interface's type over the
         canvas. They are captions on a drawing, not lettering in the model, and
         they carry the provenance of the arrangement the way every other figure
-        on this site does.
+        on this site does. They yield while a reveal is running: the captions
+        read the finished arrangement, and during the raising — the one
+        orchestrated moment — nothing may compete, least of all a chip of
+        text standing where the roof is about to arrive.
       */}
-      {siteLabels.map((label) => {
+      {siteCaptions && !reveal ? siteLabels.map((label) => {
         const mark = built.scene.site.find((m) => m.key === label.key)
         if (!mark) return null
         return (
@@ -362,7 +373,7 @@ export function Viewport({
             {locale === 'id' ? mark.nameId : mark.nameEn}
           </p>
         )
-      })}
+      }) : null}
       {scaleBar ? <ScaleBar {...scaleBar} /> : null}
       {/*
         Rotation is drag-only and deliberately never idles, so nothing about a

@@ -336,6 +336,10 @@ function RakitInner({ locale, t0 }: { locale: Locale; t0: Tradition }) {
         label={fill(pick(COPY.modelLabel, locale), { house: t0.house[locale] })}
         sun={sun}
         view="perspektif"
+        // The ground stays — half these houses' rules point at it — but its
+        // captions do not: this route's subject is the raising of the frame,
+        // and the stage caption is the one piece of lettering it carries.
+        siteCaptions={false}
         figure
         rain={false}
         explode={explode}
