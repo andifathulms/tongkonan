@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { IndexFilter } from '@/components/IndexFilter'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
 import { MapDoors } from '@/components/MapDoors'
+import { groupByIsland, searchText } from '@/components/islands'
 import { Mark } from '@/components/Mark'
 import { ElevationGlyph, ElevationMark, ElevationShelf } from '@/components/Elevation'
 import { COASTLINE, FRAME } from '@/lib/geo/nusantara'
@@ -216,52 +217,18 @@ export default function Landing({ params }: { params: { locale: string } }) {
           ))}
         </IndexFilter>
         <p className="mt-4 max-w-2xl text-body text-muted">{pick(COPY.tradition.note, locale)}</p>
+        {/* The pair is a reading the index cannot give: one link, said once. */}
+        <p className="mt-3">
+          <Link
+            href={`/${locale}/banding/`}
+            className="text-body text-bolu underline underline-offset-4"
+          >
+            {pick(COPY.banding.open, locale)} <span aria-hidden>→</span>
+          </Link>
+        </p>
       </section>
     </main>
   )
-}
-
-/**
- * The index, grouped by the island its sites stand in, west to east.
- *
- * Both facts are computed: the island comes off each site and the order off
- * each group's westernmost longitude, so the arrangement is geography rather
- * than an editorial list a new house would have to be filed into by hand.
- * The plate number is carried through untouched — it stamps collection
- * history and no longer pretends to be the order.
- */
-function groupByIsland<T extends { t: Tradition }>(built: readonly T[]) {
-  interface Group {
-    island: { id: string; en: string }
-    west: number
-    items: (T & { plate: number })[]
-  }
-  const groups = new Map<string, Group>()
-  built.forEach((entry, i) => {
-    const island = entry.t.site.island
-    const group: Group = groups.get(island.id) ?? { island, west: Infinity, items: [] }
-    group.west = Math.min(group.west, entry.t.site.longitude)
-    group.items.push({ ...entry, plate: i + 1 })
-    groups.set(island.id, group)
-  })
-  return [...groups.values()].sort((a, b) => a.west - b.west)
-}
-
-/** Everything a reader might type to find this card, in either language. */
-function searchText(t: Tradition): string {
-  return [
-    t.house.id,
-    t.house.en,
-    t.people.id,
-    t.people.en,
-    t.place.id,
-    t.place.en,
-    t.site.name,
-    t.site.island.id,
-    t.site.island.en,
-  ]
-    .join(' ')
-    .toLowerCase()
 }
 
 function HouseCard({

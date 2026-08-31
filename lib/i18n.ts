@@ -379,6 +379,24 @@ export const COPY = {
     kolong: t('Kolong', 'Underfloor'),
   },
 
+  /*
+   * The comparison. Two buildings drawn on one ground line at one scale,
+   * each with its own figures — the classroom's natural unit of reading,
+   * and the one thing a single page per house cannot do. Hard rule 7 stands
+   * untouched: this is adjacency, not a morph, and nothing is merged.
+   */
+  banding: {
+    title: t('Perbandingan', 'Comparison'),
+    heading: t('Dua tradisi, satu skala', 'Two traditions, one scale'),
+    lede: t(
+      'Pilih dua bangunan: keduanya digambar pada satu garis tanah dengan satu skala, dan angka masing-masing berdiri di bawahnya. Tidak ada yang digabung, dan tidak ada yang berubah menjadi yang lain.',
+      'Choose two buildings: both are drawn on one ground line at one scale, with each one\u2019s own figures beneath it. Nothing is merged, and neither turns into the other.',
+    ),
+    first: t('Bangunan pertama', 'First building'),
+    second: t('Bangunan kedua', 'Second building'),
+    open: t('Bandingkan dua bangunan', 'Compare two buildings'),
+  },
+
   tradition: {
     /*
      * Said where the houses are listed, because a reader who has just watched
@@ -686,6 +704,22 @@ export function landingMetadata(locale: Locale, houses: string) {
     (l) => landingUrl(l),
     /* The collection's card is the shelf, and its caption already says
        exactly what the picture is. */
+    { file: `og/${locale}/semua.png`, alt: pick(COPY.landing.shelfCaption, locale) },
+  )
+}
+
+/** The absolute address of the comparison. The pair rides the query string. */
+export function bandingUrl(locale: Locale): string {
+  return `${SITE_ORIGIN}${BASE_PATH}/${locale}/banding/`
+}
+
+/** The comparison's head. Its card is the collection's: the shelf. */
+export function bandingMetadata(locale: Locale) {
+  return head(
+    locale,
+    `${pick(COPY.banding.title, locale)} — ${pick(COPY.appName, locale)}`,
+    `${pick(COPY.banding.heading, locale)}. ${pick(COPY.banding.lede, locale)}`,
+    (l) => bandingUrl(l),
     { file: `og/${locale}/semua.png`, alt: pick(COPY.landing.shelfCaption, locale) },
   )
 }

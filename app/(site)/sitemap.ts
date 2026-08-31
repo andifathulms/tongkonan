@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { LOCALES, ROUTES, houseUrl, landingUrl, pageUrl } from '@/lib/i18n'
+import { LOCALES, ROUTES, bandingUrl, houseUrl, landingUrl, pageUrl } from '@/lib/i18n'
 import { TRADITIONS } from '@/lib/tradition/registry'
 
 /**
@@ -45,5 +45,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       })),
     ),
   )
-  return [...landing, ...homes, ...routes]
+  /* One address for every pairing: the pair rides the query string. */
+  const banding = LOCALES.map((locale) => ({
+    url: bandingUrl(locale),
+    alternates: {
+      languages: Object.fromEntries(LOCALES.map((l) => [l, bandingUrl(l)])),
+    },
+  }))
+  return [...landing, ...banding, ...homes, ...routes]
 }
