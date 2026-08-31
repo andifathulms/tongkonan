@@ -287,6 +287,18 @@ export const COPY = {
 
   derivation: {
     heading: t('Cara rumah ini dihitung', 'How this house was worked out'),
+    /*
+     * The stated gap, for the thirty-four buildings whose derivation has not
+     * been written. At four houses a missing section was honest; at
+     * thirty-five, a silent absence reads as a feature that exists elsewhere
+     * and is broken here. The sentence says why, and the link shows the one
+     * that exists.
+     */
+    absent: t(
+      'Penurunan terinci untuk bangunan ini belum ditulis: menyalin milik tongkonan hanya akan menghasilkan contoh kerja yang tidak pernah dikerjakan.',
+      'The worked derivation for this building has not been written yet: copying the tongkonan’s would produce a worked example that was never worked.',
+    ),
+    absentLink: t('Lihat caranya pada tongkonan', 'See the method on the tongkonan'),
     intro: t(
       'Tiga aturan di atas menghasilkan setiap ukuran di bawah. Ini perhitungannya, bukan ringkasannya — angka yang sama yang membentuk model di sebelah.',
       'The three rules above produce every dimension below. This is the working, not a summary of it — the same numbers that built the model beside it.',
@@ -304,6 +316,9 @@ export const COPY = {
     measured: t('Terukur', 'Measured'),
     canon: t('Kanon', 'Canon'),
     interpolated: t('Perkiraan penulis', 'Interpolated'),
+    /* The disclosure that opens the three glosses below. "Kanon" is
+       load-bearing jargon and a student meets it first here. */
+    classesSummary: t('Apa arti ketiga kelas ini?', 'What do these three classes mean?'),
     measuredGloss: t(
       'Diambil dari gambar ukur rumah yang disurvei dan disebut namanya.',
       'Taken from a measured drawing of a named, surveyed house.',
@@ -353,6 +368,13 @@ export const COPY = {
 
   draw: {
     heading: t('Unduh gambar', 'Download drawing'),
+    /* The same stated gap as the derivation's: the orthographic layer reads
+       one layout so far, and a button producing a wrong sheet would be worse
+       than none. */
+    absent: t(
+      'Unduhan gambar untuk bangunan ini belum tersedia: lapisan gambar ortografis baru membaca tata letak tongkonan, dan tombol yang menghasilkan lembar yang salah lebih buruk daripada tidak ada.',
+      'The drawing download does not exist for this building yet: the orthographic layer so far reads only the tongkonan’s layout, and a button that produced a wrong sheet would be worse than none.',
+    ),
     denah: t('Denah', 'Plan'),
     tampak: t('Tampak muka', 'Front elevation'),
     potongan: t('Potongan memanjang', 'Long section'),

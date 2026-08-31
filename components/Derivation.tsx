@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { COPY, pick } from '@/lib/i18n'
+import Link from 'next/link'
+import { COPY, href, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { derivation } from '@/lib/tradition/toraja/derivation'
 import type { Step, Term } from '@/lib/tradition/toraja/derivation'
@@ -42,9 +43,23 @@ export function Derivation({
    * bilik to the metres has not been written out, and inventing a generic one
    * from the tongkonan's would produce a worked example that was not worked.
    * A missing section is honest; a section that says the wrong arithmetic
-   * confidently is not. It is a real gap and it is recorded as one.
+   * confidently is not. It is a real gap — and at thirty-five buildings it is
+   * stated rather than silent, because a silent absence reads as a feature
+   * that exists elsewhere and is broken here. The link shows the one worked
+   * example, which is the honest substitute for thirty-four unwritten ones.
    */
-  if (tradition !== 'toraja') return null
+  if (tradition !== 'toraja')
+    return (
+      <RailSection title={pick(COPY.derivation.heading, locale)}>
+        <p className="text-body text-muted">{pick(COPY.derivation.absent, locale)}</p>
+        <Link
+          href={`${href(locale, 'toraja', 'bangun')}/`}
+          className="mt-2 inline-block text-body text-bolu underline underline-offset-4"
+        >
+          {pick(COPY.derivation.absentLink, locale)} <span aria-hidden>→</span>
+        </Link>
+      </RailSection>
+    )
   return <TorajaDerivation query={query} locale={locale} />
 }
 

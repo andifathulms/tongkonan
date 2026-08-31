@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ElevationShelf } from './Elevation'
 import { LocaleSwitch } from './LocaleSwitch'
-import { SplitBar, SplitLegend } from './split'
+import { ClassGlosses, SplitBar, SplitLegend } from './split'
 import { groupByIsland } from './islands'
 import { silhouette } from '@/lib/core/silhouette'
 import { COPY, LOCALES, homeHref, houseHref, pick } from '@/lib/i18n'
@@ -143,6 +143,7 @@ export function BandingClient({ locale }: { locale: Locale }) {
 
       <div className="mt-6">
         <SplitLegend locale={locale} />
+        <ClassGlosses locale={locale} />
       </div>
 
       {/*

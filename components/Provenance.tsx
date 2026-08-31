@@ -2,6 +2,7 @@
 
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
+import { ClassGlosses } from './split'
 import type { ProvenanceClass } from '@/lib/tradition/toraja/types'
 
 /** The three counts and their total. All this component needs. */
@@ -189,6 +190,9 @@ export function ProvenanceStrip({
           <span className="text-muted">{pick(COPY.provenance.markWhy, locale)}</span>
         </p>
       ) : null}
+
+      {/* The class definitions, folded: needed once per reader, furniture after. */}
+      {!compact ? <ClassGlosses locale={locale} /> : null}
 
       {/* The standing warning: always true, so it never competes for attention. */}
       {!compact ? (

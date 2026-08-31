@@ -8,7 +8,7 @@ import { groupByIsland, searchText } from '@/components/islands'
 import { Mark } from '@/components/Mark'
 import { ElevationGlyph, ElevationMark, ElevationShelf } from '@/components/Elevation'
 import { COASTLINE, FRAME } from '@/lib/geo/nusantara'
-import { SplitBar, SplitLegend } from '@/components/split'
+import { ClassGlosses, SplitBar, SplitLegend } from '@/components/split'
 import { silhouette } from '@/lib/core/silhouette'
 import type { Silhouette } from '@/lib/core/silhouette'
 import {
@@ -191,6 +191,9 @@ export default function Landing({ params }: { params: { locale: string } }) {
           <p className="max-w-md text-meta text-muted">
             {pick(COPY.landing.plateGloss, locale)}
           </p>
+        </div>
+        <div className="-mt-2 mb-4">
+          <ClassGlosses locale={locale} />
         </div>
         {/*
           One enumeration, findable two ways: grouped by island west to east

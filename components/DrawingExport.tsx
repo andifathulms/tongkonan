@@ -45,9 +45,16 @@ export function DrawingExport({
    * problem rather than a threading one, because the rumah gadang's ridge
    * runs on the other axis and its plan is a grid rather than a row of bays.
    * Offering a button that produced a wrong sheet would be worse than not
-   * offering one, so the section is absent and the gap is recorded.
+   * offering one — so the gap is stated where the section would stand,
+   * because at thirty-five buildings a silent absence reads as a feature
+   * that exists elsewhere and is broken here.
    */
-  if (tradition !== 'toraja') return null
+  if (tradition !== 'toraja')
+    return (
+      <RailSection title={pick(COPY.draw.heading, locale)}>
+        <p className="text-body text-muted">{pick(COPY.draw.absent, locale)}</p>
+      </RailSection>
+    )
   return <TorajaDrawings query={query} locale={locale} />
 }
 

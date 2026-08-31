@@ -52,3 +52,38 @@ export function SplitLegend({ locale, split }: { locale: Locale; split?: Split }
     </dl>
   )
 }
+
+/**
+ * The three class names, defined.
+ *
+ * "Kanon" is load-bearing jargon and the glosses that explain it were
+ * written, in both locales — and rendered nowhere: a legend named the
+ * colours and nothing named the words. Folded shut, because the definitions
+ * are needed exactly once per reader and are furniture after that.
+ */
+export function ClassGlosses({ locale }: { locale: Locale }) {
+  return (
+    <details className="mt-2">
+      <summary className="micro cursor-pointer text-muted underline-offset-4 hover:underline">
+        {pick(COPY.provenance.classesSummary, locale)}
+      </summary>
+      <dl className="mt-2 flex max-w-prose flex-col gap-2">
+        {CLASSES.map(([key, colour]) => (
+          <div key={key} className="flex items-baseline gap-2">
+            <dt className="flex shrink-0 items-center gap-2">
+              <span
+                className="h-2 w-2 rounded-none"
+                style={{ background: colour }}
+                aria-hidden
+              />
+              <span className="micro">{pick(COPY.provenance[key], locale)}</span>
+            </dt>
+            <dd className="text-meta text-muted">
+              {pick(COPY.provenance[`${key}Gloss`], locale)}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </details>
+  )
+}
