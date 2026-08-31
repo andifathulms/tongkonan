@@ -142,7 +142,6 @@ export function ElevationShelf({
     { gap: GAP, pad: PAD },
   )
   const W = shelf.width
-  let raised = 0
 
   return (
     <div className="overflow-x-auto rounded border border-hairline">
@@ -166,28 +165,28 @@ export function ElevationShelf({
                   className="rule-draw"
                 />
                 {/*
-                  The houses rise in shelf order once the ground line has drawn,
-                  one state-timing apart — the landing's echo of the
-                  frame-raising, run once on arrival. The delay counts across
-                  rows rather than restarting, because it is one sequence read
-                  left to right and then down. Reduced motion gets the finished
-                  drawing.
+                  Each row rises as one beat once the ground line has drawn,
+                  a state-timing after the row above — the landing's echo of
+                  the frame-raising, run once on arrival. The stagger used to
+                  count houses rather than rows, which at thirty-five meant
+                  the last silhouette landed five and a half seconds in,
+                  popping up behind a reader who had already scrolled past
+                  it: a queue, not a gesture. Per row the whole entrance
+                  finishes inside a couple of beats of the layout timing.
+                  Reduced motion gets the finished drawing.
                 */}
-                {row.items.map((p) => {
-                  const delay = raised++
-                  return (
-                    <path
-                      key={p.key}
-                      d={pathOf(p.s, p.ox, baseY)}
-                      fill="var(--bolu)"
-                      fillRule="evenodd"
-                      className="house-raise"
-                      style={{
-                        animationDelay: `calc(var(--t-layout) + ${delay} * var(--t-state))`,
-                      }}
-                    />
-                  )
-                })}
+                {row.items.map((p) => (
+                  <path
+                    key={p.key}
+                    d={pathOf(p.s, p.ox, baseY)}
+                    fill="var(--bolu)"
+                    fillRule="evenodd"
+                    className="house-raise"
+                    style={{
+                      animationDelay: `calc(var(--t-layout) + ${r} * var(--t-state))`,
+                    }}
+                  />
+                ))}
               </svg>
               {/*
                 Each name sits over its own house and is allowed the width of
