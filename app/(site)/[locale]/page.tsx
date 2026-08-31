@@ -311,6 +311,42 @@ function SiteMap({
     a.by + a.bh + GAP <= b.by ||
     b.by + b.bh + GAP <= a.by
 
+  /*
+   * Whether a segment crosses a box (inflated by the gap) — Liang–Barsky.
+   * Used twice, in both directions: a candidate label may not sit on an
+   * existing leader, and a candidate's own leader may not cross anyone
+   * else's label. A leader through a name reads as a strike-through.
+   */
+  const segHitsBox = (x1: number, y1: number, x2: number, y2: number, b: Box): boolean => {
+    const minx = b.bx - GAP
+    const maxx = b.bx + b.bw + GAP
+    const miny = b.by - GAP
+    const maxy = b.by + b.bh + GAP
+    const dx = x2 - x1
+    const dy = y2 - y1
+    let t0 = 0
+    let t1 = 1
+    const clip = (p: number, q: number): boolean => {
+      if (p === 0) return q >= 0
+      const r = q / p
+      if (p < 0) {
+        if (r > t1) return false
+        if (r > t0) t0 = r
+      } else {
+        if (r < t0) return false
+        if (r < t1) t1 = r
+      }
+      return true
+    }
+    return (
+      clip(-dx, x1 - minx) &&
+      clip(dx, maxx - x1) &&
+      clip(-dy, y1 - miny) &&
+      clip(dy, maxy - y1) &&
+      t0 <= t1
+    )
+  }
+
   const anchors = items.map(({ t }) => ({
     ax: x(t.site.longitude),
     ay: y(t.site.latitude),
@@ -319,28 +355,56 @@ function SiteMap({
      a site the map has silently dropped. */
   const dots: Box[] = anchors.map(({ ax, ay }) => ({ bx: ax - 5, by: ay - 5, bw: 10, bh: 10 }))
 
+  /*
+   * Ring bearings, south first. When a label has to travel, the open water
+   * is below the archipelago — the Lesser Sunda cluster spills into the
+   * Indian Ocean instead of trekking northwest across Java with a leader
+   * dragged behind it. Sites near the bottom edge fail the frame test on
+   * these and fall through to the sideways and northward bearings.
+   */
+  const bearings = Array.from({ length: 12 }, (_, k) => (k / 12) * 2 * Math.PI).sort(
+    (a, b) => Math.sin(b) - Math.sin(a) || a - b,
+  )
+
+  /*
+   * The crowded sites choose first. In registry order the last house added
+   * to a tight cluster inherited whatever ground was left and travelled a
+   * quarter of the map for it; letting density set the placing order keeps
+   * every cluster's labels near their dots, and the sparse sites — which
+   * have room by definition — adapt. Density is a plain count, so the order
+   * is as deterministic as the registry itself.
+   */
+  const density = anchors.map(
+    (a) => anchors.filter((b) => Math.hypot(b.ax - a.ax, b.ay - a.ay) < 3 * S).length,
+  )
+  const placeOrder = anchors
+    .map((_, i) => i)
+    .sort((a, b) => density[b]! - density[a]! || a - b)
+
+  const boxes: Box[] = new Array<Box>(items.length)
+  const leaders: ({ px: number; py: number } | null)[] = new Array(items.length).fill(null)
   const placed: Box[] = []
-  const labels = items.map(({ t, s }, i) => {
+  const leaderSegs: { x1: number; y1: number; x2: number; y2: number }[] = []
+  for (const i of placeOrder) {
+    const { t } = items[i]!
     const name = t.house[locale]
     const bw = Math.max(GW, name.length * CH)
     const bh = GH + LH
     const { ax, ay } = anchors[i]!
 
-    /* Standing over its own site first, then beside it, then rings outward at
-       twelve bearings. The first clear ground wins, so labels stay as close
-       to their dots as the crowd allows. */
+    /* Standing over its own site first, then beside it, then rings outward.
+       The first clear ground wins, so labels stay as close to their dots as
+       the crowd allows; the rings run far enough that the tightest cluster
+       on the map — Bali, Lombok and Sumbawa within three degrees — still
+       resolves. */
     const candidates: Box[] = [
       { bx: ax - bw / 2, by: ay - bh - 8, bw, bh },
       { bx: ax - bw / 2, by: ay + 10, bw, bh },
       { bx: ax + 10, by: ay - bh / 2, bw, bh },
       { bx: ax - bw - 10, by: ay - bh / 2, bw, bh },
     ]
-    /* The rings run far enough that the tightest cluster on the map — Bali,
-       Lombok and Sumbawa within three degrees — still resolves; the far
-       rings land labels in open sea, tied back by their leaders. */
     for (const r of [30, 50, 74, 102, 134, 170, 210, 254, 302, 354, 410]) {
-      for (let k = 0; k < 12; k++) {
-        const a = (k / 12) * 2 * Math.PI
+      for (const a of bearings) {
         candidates.push({
           bx: ax + r * Math.cos(a) - bw / 2,
           by: ay + r * Math.sin(a) - bh / 2,
@@ -349,26 +413,52 @@ function SiteMap({
         })
       }
     }
+
+    const inFrame = (c: Box) =>
+      c.bx >= MARGIN && c.by >= MARGIN && c.bx + c.bw <= w - MARGIN && c.by + c.bh <= h - MARGIN
+    const onClearGround = (c: Box) =>
+      placed.every((p) => clearOf(c, p)) && dots.every((d) => clearOf(c, d))
+    /* Where this candidate's leader would meet it: the nearest edge point. */
+    const endpoint = (c: Box): [number, number] => [
+      Math.min(Math.max(ax, c.bx), c.bx + c.bw),
+      Math.min(Math.max(ay, c.by), c.by + c.bh),
+    ]
+    /* The tidiness tier: this label's leader crosses nobody, and nobody's
+       leader crosses this label. */
+    const tidy = (c: Box) => {
+      const [px, py] = endpoint(c)
+      return (
+        leaderSegs.every((l) => !segHitsBox(l.x1, l.y1, l.x2, l.y2, c)) &&
+        placed.every((p) => !segHitsBox(ax, ay, px, py, p)) &&
+        dots.every((d, j) => j === i || !segHitsBox(ax, ay, px, py, d))
+      )
+    }
+
     const box =
-      candidates.find(
-        (c) =>
-          c.bx >= MARGIN &&
-          c.by >= MARGIN &&
-          c.bx + c.bw <= w - MARGIN &&
-          c.by + c.bh <= h - MARGIN &&
-          placed.every((p) => clearOf(c, p)) &&
-          dots.every((d) => clearOf(c, d)),
-      ) ?? candidates[0]!
+      candidates.find((c) => inFrame(c) && onClearGround(c) && tidy(c)) ??
+      candidates.find((c) => inFrame(c) && onClearGround(c)) ??
+      candidates[0]!
     placed.push(box)
+    boxes[i] = box
 
     /* The leader runs to the label's nearest edge, and only when the label
        has actually moved away from its dot. */
-    const px = Math.min(Math.max(ax, box.bx), box.bx + box.bw)
-    const py = Math.min(Math.max(ay, box.by), box.by + box.bh)
-    const leader = Math.hypot(ax - px, ay - py) > 12 ? { px, py } : null
+    const [px, py] = endpoint(box)
+    if (Math.hypot(ax - px, ay - py) > 12) {
+      leaders[i] = { px, py }
+      leaderSegs.push({ x1: ax, y1: ay, x2: px, y2: py })
+    }
+  }
 
-    return { t, s, name, ax, ay, box, leader }
-  })
+  const labels = items.map(({ t, s }, i) => ({
+    t,
+    s,
+    name: t.house[locale],
+    ax: anchors[i]!.ax,
+    ay: anchors[i]!.ay,
+    box: boxes[i]!,
+    leader: leaders[i]!,
+  }))
 
   return (
     <>
@@ -430,13 +520,12 @@ function SiteMap({
         </svg>
       </div>
       <ol className="mt-3 grid max-w-3xl grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
-        {items.map(({ t }, i) => (
+        {items.map(({ t }) => (
           <li key={t.key}>
             <Link
               href={`${houseHref(locale, t.slug)}/`}
               className="flex items-baseline gap-3 rounded py-1 transition-colors duration-state hover:bg-wash"
             >
-              <span className="micro shrink-0 text-bolu">{plateNo(i + 1)}</span>
               <span className="min-w-0 truncate text-body text-bolu">{t.house[locale]}</span>
               <span className="ml-auto shrink-0 font-mono text-meta text-muted">
                 {t.site.name}
