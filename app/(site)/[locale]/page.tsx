@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { IndexFilter } from '@/components/IndexFilter'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
+import { MapDoors } from '@/components/MapDoors'
 import { Mark } from '@/components/Mark'
 import { ElevationGlyph, ElevationMark, ElevationShelf } from '@/components/Elevation'
 import { COASTLINE, FRAME } from '@/lib/geo/nusantara'
@@ -470,7 +471,11 @@ function SiteMap({
 
   return (
     <div className="bleed px-6">
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full rounded border border-hairline bg-sheet">
+      <MapDoors>
+        <svg
+          viewBox={`0 0 ${w} ${h}`}
+          className="w-full rounded border border-hairline bg-sheet"
+        >
         <style>{tipCss}</style>
         {/*
           The land first, everything else over it. One path for the whole
@@ -497,8 +502,17 @@ function SiteMap({
             aria-label={`${name} — ${site}`}
           >
             {/* The silhouette's thin members are a mean hover target; the
-                invisible rect makes the whole box one. */}
-            <rect x={g(box.bx)} y={g(box.by)} width={box.bw} height={box.bh} fill="transparent" />
+                invisible rect makes the whole box one, padded past the glyph
+                so the target clears the pointer floor at page widths the
+                glyph itself cannot. Overlaps between neighbouring pads are
+                harmless: a wrong first tap only names the wrong house. */}
+            <rect
+              x={g(box.bx - 8)}
+              y={g(box.by - 8)}
+              width={box.bw + 16}
+              height={box.bh + 16}
+              fill="transparent"
+            />
             <ElevationGlyph s={s} x={box.bx} y={box.by} w={box.bw} h={box.bh} />
           </a>
         ))}
@@ -534,7 +548,8 @@ function SiteMap({
             </text>
           </g>
         ))}
-      </svg>
+        </svg>
+      </MapDoors>
     </div>
   )
 }
