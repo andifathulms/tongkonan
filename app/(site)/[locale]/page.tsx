@@ -138,7 +138,9 @@ export default function Landing({ params }: { params: { locale: string } }) {
         The map takes the width of the window and the reading takes the width
         of a column. The archipelago is four thousand kilometres of ocean with
         islands in it: in a prose measure Sumatra is a smudge and three of the
-        sites share a marker. The legend and the note stay where prose belongs.
+        sites share a marker. The map is its own index now — every glyph is a
+        link and names arrive on hover or focus — so only the note stays in
+        the prose measure.
       */}
       <section id="tapak" className="reveal scroll-mt-16">
         <h2 className="micro mb-4">{pick(COPY.landing.sitesHeading, locale)}</h2>
@@ -237,8 +239,7 @@ function HouseCard({
       </Link>
     </li>
   )
-}
-/**
+}/**
  * The sites, plotted on the archipelago.
  *
  * This was a bare graticule for a long time, and the note here said why: an
@@ -251,17 +252,18 @@ function HouseCard({
  * credited in the file it writes. It is a file and not a fetch because hard
  * rule 4 says there is no runtime network.
  *
- * Each site carries the building itself: its silhouette at glyph size with its
- * name under it, standing on a dot at the true coordinates. Numbers stopped
- * working the moment there were thirty-five sites — a code that has to be
- * looked up below the map is a map read twice — and a graticule with degree
- * labels answered a question nobody standing here asks. The glyphs are laid
- * out by a deterministic solver: each label tries positions in rings around
- * its site until it finds clear ground, and a hairline leader ties a displaced
- * label back to its dot. Deterministic, so the same registry always draws the
- * same map.
+ * Each site is the building itself and nothing else: its silhouette at glyph
+ * size, standing at the true coordinates, linked to its front door. The names
+ * came off the map because they were the space problem — with text, a third
+ * of the labels hung off leaders in the open sea; without it, everything but
+ * one glyph in the Bali crowd stands on its own ground. The name and the site
+ * come back on hover or keyboard focus, as a plaque, and they travel with the
+ * link's aria-label, so the map is now the index and the old legend list
+ * below it is gone.
  *
- * The svg is aria-hidden; the legend below is the real, linked content.
+ * Still deterministic: a solver walks the crowded sites first and rings
+ * outward for the few that need nudging, and a dot with a hairline leader
+ * marks any glyph that stands off its exact coordinates.
  */
 function SiteMap({
   locale,
@@ -284,20 +286,13 @@ function SiteMap({
   /** two decimals: the data is rounded to a kilometre, so the path may be too */
   const g = (n: number) => Math.round(n * 100) / 100
 
-  /*
-   * Label geometry, in viewBox units. The glyph box is the same for every
-   * building — these are markers, and a marker's job is to be found, not to
-   * restate the shelf's same-scale claim. Text width is estimated from the
-   * mono face's advance, which is the one thing a monospace face makes
-   * estimable.
-   */
+  /* Marker and plaque geometry, in viewBox units. */
   const GW = 46 // glyph box
-  const GH = 30
-  const FS = 15 // label size
-  const LH = 21 // glyph foot to text baseline
+  const GH = 32
+  const FS = 15 // plaque name size; the site line is a step down
   const CH = FS * 0.66 // one mono character, tracking included
-  const MARGIN = 8 // labels keep off the frame edge
-  const GAP = 5 // and off each other
+  const MARGIN = 6
+  const GAP = 4
 
   interface Box {
     bx: number
@@ -311,99 +306,43 @@ function SiteMap({
     a.by + a.bh + GAP <= b.by ||
     b.by + b.bh + GAP <= a.by
 
-  /*
-   * Whether a segment crosses a box (inflated by the gap) — Liang–Barsky.
-   * Used twice, in both directions: a candidate label may not sit on an
-   * existing leader, and a candidate's own leader may not cross anyone
-   * else's label. A leader through a name reads as a strike-through.
-   */
-  const segHitsBox = (x1: number, y1: number, x2: number, y2: number, b: Box): boolean => {
-    const minx = b.bx - GAP
-    const maxx = b.bx + b.bw + GAP
-    const miny = b.by - GAP
-    const maxy = b.by + b.bh + GAP
-    const dx = x2 - x1
-    const dy = y2 - y1
-    let t0 = 0
-    let t1 = 1
-    const clip = (p: number, q: number): boolean => {
-      if (p === 0) return q >= 0
-      const r = q / p
-      if (p < 0) {
-        if (r > t1) return false
-        if (r > t0) t0 = r
-      } else {
-        if (r < t0) return false
-        if (r < t1) t1 = r
-      }
-      return true
-    }
-    return (
-      clip(-dx, x1 - minx) &&
-      clip(dx, maxx - x1) &&
-      clip(-dy, y1 - miny) &&
-      clip(dy, maxy - y1) &&
-      t0 <= t1
-    )
-  }
-
   const anchors = items.map(({ t }) => ({
     ax: x(t.site.longitude),
     ay: y(t.site.latitude),
   }))
-  /* No label may cover any site's dot — a marker under a neighbour's name is
-     a site the map has silently dropped. */
-  const dots: Box[] = anchors.map(({ ax, ay }) => ({ bx: ax - 5, by: ay - 5, bw: 10, bh: 10 }))
+  /* No glyph may cover any site's dot — a marker under a neighbour is a site
+     the map has silently dropped. */
+  const dots: Box[] = anchors.map(({ ax, ay }) => ({ bx: ax - 4, by: ay - 4, bw: 8, bh: 8 }))
 
-  /*
-   * Ring bearings, south first. When a label has to travel, the open water
-   * is below the archipelago — the Lesser Sunda cluster spills into the
-   * Indian Ocean instead of trekking northwest across Java with a leader
-   * dragged behind it. Sites near the bottom edge fail the frame test on
-   * these and fall through to the sideways and northward bearings.
-   */
-  const bearings = Array.from({ length: 12 }, (_, k) => (k / 12) * 2 * Math.PI).sort(
-    (a, b) => Math.sin(b) - Math.sin(a) || a - b,
-  )
-
-  /*
-   * The crowded sites choose first. In registry order the last house added
-   * to a tight cluster inherited whatever ground was left and travelled a
-   * quarter of the map for it; letting density set the placing order keeps
-   * every cluster's labels near their dots, and the sparse sites — which
-   * have room by definition — adapt. Density is a plain count, so the order
-   * is as deterministic as the registry itself.
-   */
+  /* The crowded sites choose first; the sparse ones, which have room by
+     definition, adapt. Rings prefer south, where the open water is. */
   const density = anchors.map(
     (a) => anchors.filter((b) => Math.hypot(b.ax - a.ax, b.ay - a.ay) < 3 * S).length,
   )
   const placeOrder = anchors
     .map((_, i) => i)
     .sort((a, b) => density[b]! - density[a]! || a - b)
+  const bearings = Array.from({ length: 12 }, (_, k) => (k / 12) * 2 * Math.PI).sort(
+    (a, b) => Math.sin(b) - Math.sin(a) || a - b,
+  )
 
   const boxes: Box[] = new Array<Box>(items.length)
   const leaders: ({ px: number; py: number } | null)[] = new Array(items.length).fill(null)
   const placed: Box[] = []
-  const leaderSegs: { x1: number; y1: number; x2: number; y2: number }[] = []
   for (const i of placeOrder) {
-    const { t } = items[i]!
-    const name = t.house[locale]
-    const bw = Math.max(GW, name.length * CH)
-    const bh = GH + LH
     const { ax, ay } = anchors[i]!
-
+    const bw = GW
+    const bh = GH
     /* Standing over its own site first, then beside it, then rings outward.
-       The first clear ground wins, so labels stay as close to their dots as
-       the crowd allows; the rings run far enough that the tightest cluster
-       on the map — Bali, Lombok and Sumbawa within three degrees — still
-       resolves. */
+       Glyph-only boxes are small enough that almost everything lands on the
+       first try — the simulation over the full registry needs one leader. */
     const candidates: Box[] = [
-      { bx: ax - bw / 2, by: ay - bh - 8, bw, bh },
-      { bx: ax - bw / 2, by: ay + 10, bw, bh },
-      { bx: ax + 10, by: ay - bh / 2, bw, bh },
-      { bx: ax - bw - 10, by: ay - bh / 2, bw, bh },
+      { bx: ax - bw / 2, by: ay - bh - 6, bw, bh },
+      { bx: ax - bw / 2, by: ay + 8, bw, bh },
+      { bx: ax + 8, by: ay - bh / 2, bw, bh },
+      { bx: ax - bw - 8, by: ay - bh / 2, bw, bh },
     ]
-    for (const r of [30, 50, 74, 102, 134, 170, 210, 254, 302, 354, 410]) {
+    for (const r of [26, 42, 62, 86, 114, 146]) {
       for (const a of bearings) {
         candidates.push({
           bx: ax + r * Math.cos(a) - bw / 2,
@@ -413,127 +352,128 @@ function SiteMap({
         })
       }
     }
-
-    const inFrame = (c: Box) =>
-      c.bx >= MARGIN && c.by >= MARGIN && c.bx + c.bw <= w - MARGIN && c.by + c.bh <= h - MARGIN
-    const onClearGround = (c: Box) =>
-      placed.every((p) => clearOf(c, p)) && dots.every((d) => clearOf(c, d))
-    /* Where this candidate's leader would meet it: the nearest edge point. */
-    const endpoint = (c: Box): [number, number] => [
-      Math.min(Math.max(ax, c.bx), c.bx + c.bw),
-      Math.min(Math.max(ay, c.by), c.by + c.bh),
-    ]
-    /* The tidiness tier: this label's leader crosses nobody, and nobody's
-       leader crosses this label. */
-    const tidy = (c: Box) => {
-      const [px, py] = endpoint(c)
-      return (
-        leaderSegs.every((l) => !segHitsBox(l.x1, l.y1, l.x2, l.y2, c)) &&
-        placed.every((p) => !segHitsBox(ax, ay, px, py, p)) &&
-        dots.every((d, j) => j === i || !segHitsBox(ax, ay, px, py, d))
-      )
-    }
-
     const box =
-      candidates.find((c) => inFrame(c) && onClearGround(c) && tidy(c)) ??
-      candidates.find((c) => inFrame(c) && onClearGround(c)) ??
-      candidates[0]!
+      candidates.find(
+        (c) =>
+          c.bx >= MARGIN &&
+          c.by >= MARGIN &&
+          c.bx + c.bw <= w - MARGIN &&
+          c.by + c.bh <= h - MARGIN &&
+          placed.every((p) => clearOf(c, p)) &&
+          dots.every((d) => clearOf(c, d)),
+      ) ?? candidates[0]!
     placed.push(box)
     boxes[i] = box
-
-    /* The leader runs to the label's nearest edge, and only when the label
-       has actually moved away from its dot. */
-    const [px, py] = endpoint(box)
-    if (Math.hypot(ax - px, ay - py) > 12) {
-      leaders[i] = { px, py }
-      leaderSegs.push({ x1: ax, y1: ay, x2: px, y2: py })
-    }
+    const px = Math.min(Math.max(ax, box.bx), box.bx + box.bw)
+    const py = Math.min(Math.max(ay, box.by), box.by + box.bh)
+    if (Math.hypot(ax - px, ay - py) > 10) leaders[i] = { px, py }
   }
 
-  const labels = items.map(({ t, s }, i) => ({
-    t,
-    s,
-    name: t.house[locale],
-    ax: anchors[i]!.ax,
-    ay: anchors[i]!.ay,
-    box: boxes[i]!,
-    leader: leaders[i]!,
-  }))
+  /*
+   * The plaques, one per site, shown on the glyph's hover or focus. They are
+   * their own layer after every glyph so an open plaque always paints over
+   * its neighbours — svg stacks by document order and has no other z. The
+   * pairing is a stylesheet generated from the registry, which is the same
+   * move the rest of the page makes: the list is the input, nothing is
+   * hand-kept.
+   */
+  const labels = items.map(({ t, s }, i) => {
+    const name = t.house[locale]
+    const site = t.site.name
+    const box = boxes[i]!
+    const tw = Math.max(name.length * CH, site.length * CH * 0.87) + 20
+    const th = 56
+    const tx = Math.min(Math.max(box.bx + box.bw / 2 - tw / 2, MARGIN), w - MARGIN - tw)
+    const ty = box.by - th - 8 >= MARGIN ? box.by - th - 8 : box.by + box.bh + 8
+    return { t, s, name, site, box, tx, ty, tw, th, ...anchors[i]!, leader: leaders[i] }
+  })
+  const tipCss = items
+    .map(
+      ({ t }) =>
+        `#peta-${t.key}:hover ~ #peta-tip-${t.key}, #peta-${t.key}:focus ~ #peta-tip-${t.key} { opacity: 1; }`,
+    )
+    .join('\n')
 
   return (
-    <>
-      <div className="bleed px-6">
-        <svg
-          viewBox={`0 0 ${w} ${h}`}
-          className="w-full rounded border border-hairline bg-sheet"
+    <div className="bleed px-6">
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full rounded border border-hairline bg-sheet">
+        <style>{tipCss}</style>
+        {/*
+          The land first, everything else over it. One path for the whole
+          archipelago: the rings are separate loops in one `d`, so the browser
+          fills them as one shape and the sea between two islands is the page,
+          not a colour.
+        */}
+        <path
+          d={COASTLINE.map(
+            (ring) =>
+              'M' + ring.map(([lon, lat]) => `${g(x(lon))} ${g(y(lat))}`).join('L') + 'Z',
+          ).join('')}
+          fill="var(--wash)"
+          stroke="var(--hairline)"
+          vectorEffect="non-scaling-stroke"
+          fillRule="evenodd"
           aria-hidden="true"
-        >
-          {/*
-            The land first, everything else over it. One path for the whole
-            archipelago: the rings are separate loops in one `d`, so the browser
-            fills them as one shape and the sea between two islands is the page,
-            not a colour.
-          */}
-          <path
-            d={COASTLINE.map(
-              (ring) =>
-                'M' +
-                ring.map(([lon, lat]) => `${g(x(lon))} ${g(y(lat))}`).join('L') +
-                'Z',
-            ).join('')}
-            fill="var(--wash)"
-            stroke="var(--hairline)"
-            vectorEffect="non-scaling-stroke"
-            fillRule="evenodd"
-          />
-          {labels.map(({ t, ax, ay, leader }) => (
-            <g key={`site-${t.key}`}>
-              {leader ? (
-                <line
-                  x1={g(ax)}
-                  y1={g(ay)}
-                  x2={g(leader.px)}
-                  y2={g(leader.py)}
-                  stroke="var(--muted)"
-                  vectorEffect="non-scaling-stroke"
-                />
-              ) : null}
-              <rect x={g(ax - 3)} y={g(ay - 3)} width={6} height={6} fill="var(--bolu)" />
-            </g>
-          ))}
-          {labels.map(({ t, s, name, box }) => (
-            <g key={t.key}>
-              <ElevationGlyph s={s} x={box.bx + (box.bw - GW) / 2} y={box.by} w={GW} h={GH} />
-              <text
-                x={g(box.bx + box.bw / 2)}
-                y={g(box.by + GH + LH - 5)}
-                textAnchor="middle"
-                fontSize={FS}
-                letterSpacing="0.05em"
-                className="font-mono uppercase"
-                fill="var(--bolu)"
-              >
-                {name}
-              </text>
-            </g>
-          ))}
-        </svg>
-      </div>
-      <ol className="mt-3 grid max-w-3xl grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
-        {items.map(({ t }) => (
-          <li key={t.key}>
-            <Link
-              href={`${houseHref(locale, t.slug)}/`}
-              className="flex items-baseline gap-3 rounded py-1 transition-colors duration-state hover:bg-wash"
-            >
-              <span className="min-w-0 truncate text-body text-bolu">{t.house[locale]}</span>
-              <span className="ml-auto shrink-0 font-mono text-meta text-muted">
-                {t.site.name}
-              </span>
-            </Link>
-          </li>
+        />
+        {labels.map(({ t, ax, ay, leader }) => (
+          <g key={`dot-${t.key}`} aria-hidden="true">
+            {leader ? (
+              <line
+                x1={g(ax)}
+                y1={g(ay)}
+                x2={g(leader.px)}
+                y2={g(leader.py)}
+                stroke="var(--muted)"
+                vectorEffect="non-scaling-stroke"
+              />
+            ) : null}
+            <rect x={g(ax - 3)} y={g(ay - 3)} width={6} height={6} fill="var(--bolu)" />
+          </g>
         ))}
-      </ol>
-    </>
+        {labels.map(({ t, s, name, site, box }) => (
+          <a
+            key={t.key}
+            id={`peta-${t.key}`}
+            href={`${houseHref(locale, t.slug)}/`}
+            aria-label={`${name} — ${site}`}
+          >
+            {/* The silhouette's thin members are a mean hover target; the
+                invisible rect makes the whole box one. */}
+            <rect x={g(box.bx)} y={g(box.by)} width={box.bw} height={box.bh} fill="transparent" />
+            <ElevationGlyph s={s} x={box.bx} y={box.by} w={box.bw} h={box.bh} />
+          </a>
+        ))}
+        {labels.map(({ t, name, site, tx, ty, tw, th }) => (
+          <g
+            key={`tip-${t.key}`}
+            id={`peta-tip-${t.key}`}
+            className="pointer-events-none opacity-0 transition-opacity duration-state"
+            aria-hidden="true"
+          >
+            <rect x={g(tx)} y={g(ty)} width={g(tw)} height={th} rx={2} fill="var(--bolu)" />
+            <text
+              x={g(tx + 10)}
+              y={g(ty + 24)}
+              fontSize={FS}
+              letterSpacing="0.05em"
+              className="font-mono uppercase"
+              fill="var(--kapur)"
+            >
+              {name}
+            </text>
+            <text
+              x={g(tx + 10)}
+              y={g(ty + 44)}
+              fontSize={FS * 0.87}
+              letterSpacing="0.05em"
+              className="font-mono uppercase"
+              fill="var(--muted-on-ink)"
+            >
+              {site}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
   )
 }
