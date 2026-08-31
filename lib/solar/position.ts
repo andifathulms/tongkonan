@@ -13,8 +13,28 @@
 const DEG = Math.PI / 180
 const RAD = 180 / Math.PI
 
+/**
+ * The island group a site stands in (or floats off, for the one site with no
+ * ground). A fact about the site, like its coordinates, so it lives beside
+ * them: the landing's index groups by it, and a thirty-sixth site brings its
+ * own. The seven groups are the ones an Indonesian atlas uses.
+ */
+export interface Island {
+  readonly id: string
+  readonly en: string
+}
+
+export const SUMATERA: Island = { id: 'Sumatera', en: 'Sumatra' }
+export const JAWA: Island = { id: 'Jawa', en: 'Java' }
+export const KALIMANTAN: Island = { id: 'Kalimantan', en: 'Kalimantan' }
+export const SULAWESI: Island = { id: 'Sulawesi', en: 'Sulawesi' }
+export const BALI_NUSA_TENGGARA: Island = { id: 'Bali & Nusa Tenggara', en: 'Bali & Nusa Tenggara' }
+export const MALUKU: Island = { id: 'Maluku', en: 'Maluku' }
+export const PAPUA: Island = { id: 'Papua', en: 'Papua' }
+
 export interface Site {
   readonly name: string
+  readonly island: Island
   /** degrees, north positive */
   readonly latitude: number
   /** degrees, east positive */
@@ -25,6 +45,7 @@ export interface Site {
 }
 
 export const RANTEPAO: Site = {
+  island: SULAWESI,
   name: 'Rantepao',
   latitude: -2.97,
   longitude: 119.9,
@@ -43,6 +64,7 @@ export const RANTEPAO: Site = {
  * move the house and the sun moves with it.
  */
 export const BUKITTINGGI: Site = {
+  island: SUMATERA,
   name: 'Bukittinggi',
   latitude: -0.3,
   longitude: 100.37,
@@ -60,6 +82,7 @@ export const BUKITTINGGI: Site = {
  * case where the answer is that there isn't one.
  */
 export const YOGYAKARTA: Site = {
+  island: JAWA,
   name: 'Yogyakarta',
   latitude: -7.8,
   longitude: 110.36,
@@ -84,6 +107,7 @@ export const YOGYAKARTA: Site = {
  * than as an abstraction.
  */
 export const UBUD: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Ubud',
   latitude: -8.51,
   longitude: 115.26,
@@ -97,6 +121,7 @@ export const UBUD: Site = {
  * latitude.
  */
 export const BAWOMATALUO: Site = {
+  island: SUMATERA,
   name: 'Bawömataluo',
   latitude: 0.58,
   longitude: 97.79,
@@ -111,6 +136,7 @@ export const BAWOMATALUO: Site = {
  * doing work a slider labelled "sun angle" would never show.
  */
 export const PALANGKA_RAYA: Site = {
+  island: KALIMANTAN,
   name: 'Palangka Raya',
   latitude: -1.68,
   longitude: 113.38,
@@ -124,6 +150,7 @@ export const PALANGKA_RAYA: Site = {
  * least obvious from a glance at the map.
  */
 export const WAINGAPU: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Waingapu',
   latitude: -9.66,
   longitude: 120.26,
@@ -133,6 +160,7 @@ export const WAINGAPU: Site = {
 
 /** Palembang, on the Musi in South Sumatra. */
 export const PALEMBANG: Site = {
+  island: SUMATERA,
   name: 'Palembang',
   latitude: -2.98,
   longitude: 104.76,
@@ -142,6 +170,7 @@ export const PALEMBANG: Site = {
 
 /** Pare-Pare, on the west coast of South Sulawesi. */
 export const PARE_PARE: Site = {
+  island: SULAWESI,
   name: 'Pare-Pare',
   latitude: -4.0,
   longitude: 119.63,
@@ -155,6 +184,7 @@ export const PARE_PARE: Site = {
  * Indonesia is three time zones wide and this is the far end of it.
  */
 export const ANGGI: Site = {
+  island: PAPUA,
   name: 'Anggi',
   latitude: -1.1,
   longitude: 133.9,
@@ -164,6 +194,7 @@ export const ANGGI: Site = {
 
 /** Mataram, on Lombok. */
 export const MATARAM: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Mataram',
   latitude: -8.58,
   longitude: 116.32,
@@ -177,6 +208,7 @@ export const MATARAM: Site = {
  * reason one building in this project is shaped by cold.
  */
 export const WAMENA: Site = {
+  island: PAPUA,
   name: 'Wamena',
   latitude: -4.08,
   longitude: 138.95,
@@ -192,6 +224,7 @@ export const WAMENA: Site = {
  * property of a house that floats.
  */
 export const WAKATOBI: Site = {
+  island: SULAWESI,
   name: 'Wakatobi',
   latitude: -5.3,
   longitude: 123.6,
@@ -201,6 +234,7 @@ export const WAKATOBI: Site = {
 
 /** Banda Aceh — the northernmost and westernmost site in the collection. */
 export const BANDA_ACEH: Site = {
+  island: SUMATERA,
   name: 'Banda Aceh',
   latitude: 5.55,
   longitude: 95.32,
@@ -210,6 +244,7 @@ export const BANDA_ACEH: Site = {
 
 /** Kanekes, in the hills of southern Banten. */
 export const KANEKES: Site = {
+  island: JAWA,
   name: 'Kanekes',
   latitude: -6.55,
   longitude: 106.25,
@@ -219,6 +254,7 @@ export const KANEKES: Site = {
 
 /** Kabanjahe, in the Karo highlands — the northernmost site in the collection. */
 export const KABANJAHE: Site = {
+  island: SUMATERA,
   name: 'Kabanjahe',
   latitude: 3.19,
   longitude: 98.52,
@@ -228,6 +264,7 @@ export const KABANJAHE: Site = {
 
 /** Airmadidi, in North Minahasa: the second site in this collection for one people. */
 export const AIRMADIDI: Site = {
+  island: SULAWESI,
   name: 'Airmadidi',
   latitude: 1.4,
   longitude: 124.98,
@@ -237,6 +274,7 @@ export const AIRMADIDI: Site = {
 
 /** Sumbawa Besar, on Sumbawa: the sultanate's own ground. */
 export const SUMBAWA_BESAR: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Sumbawa Besar',
   latitude: -8.49,
   longitude: 117.42,
@@ -246,6 +284,7 @@ export const SUMBAWA_BESAR: Site = {
 
 /** Siak Sri Indrapura, on the Siak river in Riau. */
 export const SIAK: Site = {
+  island: SUMATERA,
   name: 'Siak Sri Indrapura',
   latitude: 0.79,
   longitude: 102.05,
@@ -255,6 +294,7 @@ export const SIAK: Site = {
 
 /** Jailolo, in West Halmahera: north of the equator, and east of Ambon. */
 export const JAILOLO: Site = {
+  island: MALUKU,
   name: 'Jailolo',
   latitude: 1.08,
   longitude: 127.48,
@@ -264,6 +304,7 @@ export const JAILOLO: Site = {
 
 /** Jakarta, at Condet: the only city site in the collection. */
 export const JAKARTA: Site = {
+  island: JAWA,
   name: 'Jakarta',
   latitude: -6.27,
   longitude: 106.86,
@@ -273,6 +314,7 @@ export const JAKARTA: Site = {
 
 /** Seba, on Rai Hawu: the southernmost site in the collection. */
 export const SEBA: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Seba',
   latitude: -10.49,
   longitude: 121.83,
@@ -282,6 +324,7 @@ export const SEBA: Site = {
 
 /** Muara Siberut, in the Mentawai Islands: the second-westernmost site here. */
 export const SIBERUT: Site = {
+  island: SUMATERA,
   name: 'Muara Siberut',
   latitude: -1.6,
   longitude: 99.15,
@@ -291,6 +334,7 @@ export const SIBERUT: Site = {
 
 /** Bukit Duabelas, in Jambi: the forest the Orang Rimba move through. */
 export const BUKIT_DUABELAS: Site = {
+  island: SUMATERA,
   name: 'Bukit Duabelas',
   latitude: -2.0,
   longitude: 102.6,
@@ -303,6 +347,7 @@ export const BUKIT_DUABELAS: Site = {
  * collection, a little past Waingapu.
  */
 export const SOE: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Soe',
   latitude: -9.86,
   longitude: 124.28,
@@ -312,6 +357,7 @@ export const SOE: Site = {
 
 /** Bena, in the Ngada highlands of Flores: the second site on that island. */
 export const BENA: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Bena',
   latitude: -8.87,
   longitude: 120.98,
@@ -321,6 +367,7 @@ export const BENA: Site = {
 
 /** Baubau, on Buton: the Wolio keraton, and the malige inside its wall. */
 export const BAUBAU: Site = {
+  island: SULAWESI,
   name: 'Baubau',
   latitude: -5.47,
   longitude: 122.62,
@@ -330,6 +377,7 @@ export const BAUBAU: Site = {
 
 /** Sumenep, at the east end of Madura: the tanean lanjang country. */
 export const SUMENEP: Site = {
+  island: JAWA,
   name: 'Sumenep',
   latitude: -7.0,
   longitude: 113.87,
@@ -342,6 +390,7 @@ export const SUMENEP: Site = {
  * in the collection, and the fourth in the eastern time zone.
  */
 export const YANIRUMA: Site = {
+  island: PAPUA,
   name: 'Yaniruma',
   latitude: -5.28,
   longitude: 139.66,
@@ -354,6 +403,7 @@ export const YANIRUMA: Site = {
  * and the second time that has happened — Airmadidi and Tomohon were the first.
  */
 export const GIANYAR: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Gianyar',
   latitude: -8.54,
   longitude: 115.33,
@@ -363,6 +413,7 @@ export const GIANYAR: Site = {
 
 /** Tomohon, in the North Sulawesi highlands — the second site north of the equator. */
 export const TOMOHON: Site = {
+  island: SULAWESI,
   name: 'Tomohon',
   latitude: 1.33,
   longitude: 124.84,
@@ -372,6 +423,7 @@ export const TOMOHON: Site = {
 
 /** Jayapura, on Youtefa Bay in Papua — the easternmost site in the collection. */
 export const JAYAPURA: Site = {
+  island: PAPUA,
   name: 'Jayapura',
   latitude: -2.6,
   longitude: 140.7,
@@ -381,6 +433,7 @@ export const JAYAPURA: Site = {
 
 /** Ambon, in Central Maluku. */
 export const AMBON: Site = {
+  island: MALUKU,
   name: 'Ambon',
   latitude: -3.7,
   longitude: 128.18,
@@ -390,6 +443,7 @@ export const AMBON: Site = {
 
 /** Banjarmasin, on the Barito delta in South Kalimantan. */
 export const BANJARMASIN: Site = {
+  island: KALIMANTAN,
   name: 'Banjarmasin',
   latitude: -3.32,
   longitude: 114.59,
@@ -398,6 +452,7 @@ export const BANJARMASIN: Site = {
 }
 
 export const WAE_REBO: Site = {
+  island: BALI_NUSA_TENGGARA,
   name: 'Wae Rebo',
   latitude: -8.72,
   longitude: 120.29,

@@ -128,7 +128,13 @@ export function ElevationShelf({
   items,
   caption,
 }: {
-  items: readonly { key: string; href: string; label: string; s: Silhouette }[]
+  /**
+   * `href` makes a label a link. The 404 passes it — there the shelf is the
+   * wayfinding. The landing does not: its index is directly below, and a
+   * hero that repeats all of the index's links at label size is the same
+   * decision offered twice, the second time at eleven pixels.
+   */
+  items: readonly { key: string; href?: string; label: string; s: Silhouette }[]
   caption: string
 }) {
   const shelf = packShelf(
@@ -198,19 +204,28 @@ export function ElevationShelf({
                 next row's ground line.
               */}
               <div className="relative h-10">
-                {row.items.map((p) => (
-                  <Link
-                    key={p.key}
-                    href={p.href}
-                    className="micro absolute top-1 -translate-x-1/2 text-center leading-tight text-bolu underline-offset-4 hover:underline"
-                    style={{
-                      left: `${(p.centre / W) * 100}%`,
-                      width: `${((p.width + GAP) / W) * 100}%`,
-                    }}
-                  >
-                    {p.label}
-                  </Link>
-                ))}
+                {row.items.map((p) => {
+                  const place = {
+                    left: `${(p.centre / W) * 100}%`,
+                    width: `${((p.width + GAP) / W) * 100}%`,
+                  }
+                  const face =
+                    'micro absolute top-1 -translate-x-1/2 text-center leading-tight text-bolu'
+                  return p.href ? (
+                    <Link
+                      key={p.key}
+                      href={p.href}
+                      className={`${face} underline-offset-4 hover:underline`}
+                      style={place}
+                    >
+                      {p.label}
+                    </Link>
+                  ) : (
+                    <span key={p.key} className={face} style={place}>
+                      {p.label}
+                    </span>
+                  )
+                })}
               </div>
             </div>
           )

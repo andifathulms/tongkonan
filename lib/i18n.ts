@@ -144,6 +144,22 @@ export const COPY = {
       'Satu skala untuk semua rumah, digambar dari bagian-bagian model itu sendiri.',
       'One scale for every house, drawn from the model’s own parts.',
     ),
+    /*
+     * The index's finding tools. The filter's empty line carries the query
+     * back, because "nothing matches" without saying what was asked is the
+     * reader's fault by default.
+     */
+    filterLabel: t(
+      'Saring menurut nama, suku, tempat, atau pulau',
+      'Filter by name, people, place, or island',
+    ),
+    filterEmpty: t('Tidak ada yang cocok dengan “{q}”.', 'Nothing matches “{q}”.'),
+    /* Says what the plate number is, so it stops implying an order it is not.
+       The index is arranged by island; the stamp records collection history. */
+    plateGloss: t(
+      'Nomor lembar mencatat urutan masuk ke koleksi; daftar ini disusun menurut kepulauan, barat ke timur.',
+      'Plate numbers record the order of joining the collection; this index is arranged by island group, west to east.',
+    ),
     /* Alt text for a house's share card. The card carries no text of its
        own — the unfurled link already shows title and description — so the
        alt says what the picture is. */

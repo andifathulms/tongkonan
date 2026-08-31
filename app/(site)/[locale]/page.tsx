@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { IndexFilter } from '@/components/IndexFilter'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
 import { Mark } from '@/components/Mark'
 import { ElevationGlyph, ElevationMark, ElevationShelf } from '@/components/Elevation'
@@ -114,12 +115,15 @@ export default function Landing({ params }: { params: { locale: string } }) {
       <h1 className="mt-12 max-w-3xl text-display text-bolu">{pick(COPY.tagline, locale)}</h1>
       <p className="mt-5 max-w-2xl text-lead text-muted">{pick(COPY.landing.lede, locale)}</p>
 
+      {/*
+        The shelf is the hero picture, not a third copy of the index: labels
+        annotate the drawing and the links live in the index below, once.
+      */}
       <div className="mt-8">
         <ElevationShelf
           caption={pick(COPY.landing.shelfCaption, locale)}
           items={built.map(({ t, s }) => ({
             key: t.key,
-            href: `${houseHref(locale, t.slug)}/`,
             label: t.house[locale],
             s,
           }))}
@@ -169,28 +173,94 @@ export default function Landing({ params }: { params: { locale: string } }) {
         {/*
           The legend for the card bars, drawn once above the index rather than
           once per card: no colour may carry a meaning only the code knows.
+          Beside it, what the plate number is — a stamp of collection history —
+          because the index stopped being ordered by it.
         */}
-        <div className="mb-4">
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
           <SplitLegend locale={locale} />
+          <p className="max-w-md text-meta text-muted">
+            {pick(COPY.landing.plateGloss, locale)}
+          </p>
         </div>
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sheet:grid-cols-3">
-          {built.map(({ t, b, s }, i) => (
-            <HouseCard
-              key={t.key}
-              locale={locale}
-              tradition={t}
-              plate={i + 1}
-              s={s}
-              frame={frame}
-              parts={b.house.parts.length}
-              joints={b.house.joints.length}
-            />
+        {/*
+          One enumeration, findable two ways: grouped by island west to east
+          (the axis a reader actually holds — "the house from Kalimantan"),
+          and filtered by typing. The islands come off the sites, the order
+          off their longitudes, so a thirty-sixth house files itself.
+        */}
+        <IndexFilter
+          label={pick(COPY.landing.filterLabel, locale)}
+          empty={pick(COPY.landing.filterEmpty, locale)}
+        >
+          {groupByIsland(built).map((group) => (
+            <section key={group.island.id} data-kelompok className="mt-8 first:mt-0">
+              <h3 className="mb-3 border-b border-hairline pb-2 text-lead font-medium text-bolu">
+                {group.island[locale]}
+              </h3>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sheet:grid-cols-3">
+                {group.items.map(({ t, b, s, plate }) => (
+                  <HouseCard
+                    key={t.key}
+                    locale={locale}
+                    tradition={t}
+                    plate={plate}
+                    s={s}
+                    frame={frame}
+                    parts={b.house.parts.length}
+                    joints={b.house.joints.length}
+                  />
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </IndexFilter>
         <p className="mt-4 max-w-2xl text-body text-muted">{pick(COPY.tradition.note, locale)}</p>
       </section>
     </main>
   )
+}
+
+/**
+ * The index, grouped by the island its sites stand in, west to east.
+ *
+ * Both facts are computed: the island comes off each site and the order off
+ * each group's westernmost longitude, so the arrangement is geography rather
+ * than an editorial list a new house would have to be filed into by hand.
+ * The plate number is carried through untouched — it stamps collection
+ * history and no longer pretends to be the order.
+ */
+function groupByIsland<T extends { t: Tradition }>(built: readonly T[]) {
+  interface Group {
+    island: { id: string; en: string }
+    west: number
+    items: (T & { plate: number })[]
+  }
+  const groups = new Map<string, Group>()
+  built.forEach((entry, i) => {
+    const island = entry.t.site.island
+    const group: Group = groups.get(island.id) ?? { island, west: Infinity, items: [] }
+    group.west = Math.min(group.west, entry.t.site.longitude)
+    group.items.push({ ...entry, plate: i + 1 })
+    groups.set(island.id, group)
+  })
+  return [...groups.values()].sort((a, b) => a.west - b.west)
+}
+
+/** Everything a reader might type to find this card, in either language. */
+function searchText(t: Tradition): string {
+  return [
+    t.house.id,
+    t.house.en,
+    t.people.id,
+    t.people.en,
+    t.place.id,
+    t.place.en,
+    t.site.name,
+    t.site.island.id,
+    t.site.island.en,
+  ]
+    .join(' ')
+    .toLowerCase()
 }
 
 function HouseCard({
@@ -213,7 +283,7 @@ function HouseCard({
   const split = tradition.split
   const share = split.total === 0 ? 0 : Math.round((split.interpolated / split.total) * 100)
   return (
-    <li className="reveal h-full">
+    <li className="reveal h-full" data-cari={searchText(tradition)}>
       <Link
         href={`${houseHref(locale, tradition.slug)}/`}
         className="press flex h-full flex-col rounded border border-hairline bg-sheet transition-colors duration-state hover:border-muted hover:bg-wash"
