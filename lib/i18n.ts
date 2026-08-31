@@ -193,9 +193,17 @@ export const COPY = {
     plate: t('Lembar', 'Plate'),
     doorsHeading: t('Cara membaca rumah ini', 'Ways to read this house'),
   },
+  /*
+   * The canvas's accessible name. `{house}` is filled by the route that
+   * knows which house it is showing: this string said "tongkonan" for years
+   * after the second house arrived, so every viewport announced the wrong
+   * building to a screen reader on thirty-four of thirty-five traditions —
+   * the one neutrality leak the architecture tests cannot see, because they
+   * strip copy. test/copy.test.ts now holds the placeholder in place.
+   */
   modelLabel: t(
-    'Model tongkonan, dihitung dari aturannya',
-    'Tongkonan model, generated from its rules',
+    'Model {house}, dihitung dari aturannya',
+    '{house} model, generated from its rules',
   ),
   openIn: t('Buka dalam Bahasa Indonesia', 'Open in English'),
 

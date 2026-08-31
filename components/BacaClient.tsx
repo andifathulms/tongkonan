@@ -6,7 +6,7 @@ import { Viewport } from './viewport/Viewport'
 import { ProvenanceStrip } from './Provenance'
 import { useReaderState } from './useReaderState'
 import { flag, readFlag, unless } from '@/lib/reader'
-import { Choice, Toggle } from './Controls'
+import { Choice, Toggle, fill } from './Controls'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { tradition } from '@/lib/tradition/registry'
@@ -162,6 +162,7 @@ export function BacaClient({ locale, tradisi }: { locale: Locale; tradisi: Tradi
       <Viewport
         locale={locale}
         built={built}
+        label={fill(pick(COPY.modelLabel, locale), { house: t0.house[locale] })}
         sun={sun}
         view={section ? 'potongan' : 'tampak'}
         figure

@@ -19,6 +19,14 @@ export interface ViewportProps {
    * the key it needs to generate the right materials.
    */
   built: Built
+  /**
+   * The canvas's accessible name, filled by the route that knows whose house
+   * this is — the viewport itself stays neutral and announces what it is
+   * told. It used to read a shared string that said "tongkonan" over every
+   * tradition, which was the one place the app told a screen reader all
+   * thirty-five houses were Toraja.
+   */
+  label: string
   sun: SolarPosition
   view: ViewKey
   figure: boolean
@@ -42,6 +50,7 @@ const TRANSITION_MS = 1100
 export function Viewport({
   locale,
   built,
+  label,
   sun,
   view,
   figure,
@@ -326,7 +335,7 @@ export function Viewport({
         className="block h-full w-full touch-none"
         role="img"
         tabIndex={0}
-        aria-label={pick(COPY.modelLabel, locale)}
+        aria-label={label}
         aria-describedby={hintId}
         onKeyDown={onKeyDown}
       />

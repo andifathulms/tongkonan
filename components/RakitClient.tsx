@@ -312,6 +312,7 @@ export function RakitClient({ locale, tradisi }: { locale: Locale; tradisi: Trad
       <Viewport
         locale={locale}
         built={built}
+        label={fill(pick(COPY.modelLabel, locale), { house: t0.house[locale] })}
         sun={sun}
         view="perspektif"
         figure

@@ -6,6 +6,7 @@ import { Viewport, usePrefersReducedMotion } from './viewport/Viewport'
 import type { ViewKey } from './viewport/scene'
 import {
   OrientationNote,
+  fill,
   PlaceNote,
   SceneToggles,
   SunControls,
@@ -175,6 +176,7 @@ export function BangunClient({ locale, tradisi }: { locale: Locale; tradisi: Tra
       <Viewport
         locale={locale}
         built={built}
+        label={fill(pick(COPY.modelLabel, locale), { house: t.house[locale] })}
         sun={sun}
         view={view}
         figure={figure}
