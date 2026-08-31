@@ -87,6 +87,9 @@ export const COPY = {
     'Drag or arrow keys to rotate · scroll or +/− to zoom',
   ),
   computed: t('Dihitung dari aturan', 'Computed from the rules'),
+  /* Over the elevation while a route's one facade loads: the generator is
+     arriving, not the picture — the picture is already there. */
+  loading: t('Menyiapkan model…', 'Preparing the model…'),
 
   /* The first tab stop on the working routes, for keyboard readers: the rail
      holds every control, and the drawing should not cost a walk through all

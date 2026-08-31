@@ -5,12 +5,14 @@ import { RailSection, Sheet } from './Sheet'
 import { Viewport } from './viewport/Viewport'
 import { ProvenanceStrip } from './Provenance'
 import { useReaderState } from './useReaderState'
+import { useTradition } from './useTradition'
+import { ModelLoading } from './ModelLoading'
+import type { ModelIntro } from './ModelLoading'
 import { flag, readFlag, unless } from '@/lib/reader'
 import { Choice, Toggle, fill } from './Controls'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { tradition } from '@/lib/tradition/registry'
-import type { TraditionKey } from '@/lib/tradition/registry'
+import type { Tradition, TraditionKey } from '@/lib/tradition/registry'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
 
@@ -24,7 +26,27 @@ import { solarPosition } from '@/lib/solar/position'
  * shape is carrying information, and this route spends it.
  */
 
-export function BacaClient({ locale, tradisi }: { locale: Locale; tradisi: TraditionKey }) {
+/**
+ * The route's shell: load this one house's facade, and until it arrives
+ * show the intro the server rendered — whose house, its caution, and its
+ * elevation. The intro is also the page's static HTML, so a reader without
+ * JavaScript gets the words and the drawing rather than an empty sheet.
+ */
+export function BacaClient({
+  locale,
+  tradisi,
+  intro,
+}: {
+  locale: Locale
+  tradisi: TraditionKey
+  intro: ModelIntro
+}) {
+  const t0 = useTradition(tradisi)
+  if (!t0) return <ModelLoading locale={locale} intro={intro} />
+  return <BacaInner locale={locale} t0={t0} />
+}
+
+function BacaInner({ locale, t0 }: { locale: Locale; t0: Tradition }) {
   /*
    * A specific house with a history, rather than a neutral default.
    *
@@ -33,7 +55,6 @@ export function BacaClient({ locale, tradisi }: { locale: Locale; tradisi: Tradi
    * married would be a blank page on the route whose whole subject is what
    * can be read off a building.
    */
-  const t0 = useMemo(() => tradition(tradisi), [tradisi])
   /* The one thing a reader chooses here: façade, or cut open. */
   const [vantage, setVantage] = useReaderState(
     { section: false, site: true },

@@ -30,6 +30,7 @@ import type { Split } from '@/lib/core/provenance'
 import type { AnyHouse, AnyPart, Dim, ProvenanceClass, Source } from '@/lib/core/types'
 import type { Sensitivity } from '@/lib/core/sensitivity'
 import type { Site } from '@/lib/solar/position'
+import type { TraditionKey } from './keys'
 import { AIRMADIDI, AMBON, BAUBAU, BENA, BUKIT_DUABELAS, GIANYAR, ANGGI, BANDA_ACEH, WAKATOBI, JAYAPURA, JAILOLO, JAKARTA, KABANJAHE, KANEKES, TOMOHON, BANJARMASIN, BAWOMATALUO, MATARAM, WAMENA, BUKITTINGGI, PALANGKA_RAYA, PALEMBANG, PARE_PARE, RANTEPAO, SEBA, SIAK, SUMBAWA_BESAR, SIBERUT, SOE, SUMENEP, UBUD, WAE_REBO, WAINGAPU, YANIRUMA, YOGYAKARTA } from '@/lib/solar/position'
 
 import * as toraja from './toraja/facade'
@@ -68,12 +69,14 @@ import * as sahu from './sahu/facade'
 import * as riau from './riau/facade'
 import * as sumbawa from './sumbawa/facade'
 
-export const TRADITION_KEYS = ['toraja', 'minang', 'jawa', 'manggarai', 'bali', 'nias', 'dayak', 'sumba', 'palembang', 'bugis', 'arfak', 'sasak', 'dani', 'banjar', 'maluku', 'tobati', 'minahasa', 'karo', 'sunda', 'aceh', 'bajau', 'waruga', 'bade', 'korowai', 'madura', 'buton', 'ngada', 'atoni', 'rimba', 'mentawai', 'sabu', 'betawi', 'sahu', 'riau', 'sumbawa'] as const
-export type TraditionKey = (typeof TRADITION_KEYS)[number]
+/*
+ * The keys live in ./keys so a client can validate a segment without
+ * importing thirty-five facades; re-exported here so server code keeps its
+ * one import.
+ */
+export { TRADITION_KEYS, isTraditionKey } from './keys'
+export type { TraditionKey } from './keys'
 
-export function isTraditionKey(value: string): value is TraditionKey {
-  return (TRADITION_KEYS as readonly string[]).includes(value)
-}
 
 /** A phrase in both locales. Vocabulary and copy alike. */
 export interface Text {

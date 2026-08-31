@@ -14,15 +14,30 @@ import {
 } from './Controls'
 import { RuleControlsFor } from './rules'
 import { ProvenanceStrip } from './Provenance'
-import { Derivation } from './Derivation'
-import { DrawingExport } from './DrawingExport'
+import dynamic from 'next/dynamic'
+
+/*
+ * Both exist for one house and return null for the rest, but their imports —
+ * the worked derivation and the whole orthographic drawing layer — shipped
+ * with every house's route. Dynamic keeps them server-rendered where they
+ * render at all, and out of the thirty-four bundles where they never do.
+ */
+const Derivation = dynamic(() => import('./Derivation').then((m) => m.Derivation), {
+  ssr: true,
+})
+const DrawingExport = dynamic(
+  () => import('./DrawingExport').then((m) => m.DrawingExport),
+  { ssr: true },
+)
 import { RailSection } from './Sheet'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
-import { tradition } from '@/lib/tradition/registry'
-import type { Built, TraditionKey } from '@/lib/tradition/registry'
+import type { Built, Tradition, TraditionKey } from '@/lib/tradition/registry'
 import { flag, readChoice, readFlag, readInt, unless } from '@/lib/reader'
 import { useReaderState } from './useReaderState'
+import { useTradition } from './useTradition'
+import { ModelLoading } from './ModelLoading'
+import type { ModelIntro } from './ModelLoading'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import type { DatePreset } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
@@ -90,8 +105,27 @@ function encodeBangun(v: BangunVantage): readonly (readonly [string, string | nu
  * or a laras is: the rules live in the query string, the controls that edit
  * them belong to the tradition, and what arrives back is a built house.
  */
-export function BangunClient({ locale, tradisi }: { locale: Locale; tradisi: TraditionKey }) {
-  const t = useMemo(() => tradition(tradisi), [tradisi])
+/**
+ * The route's shell: load this one house's facade, and until it arrives
+ * show the intro the server rendered — whose house, its caution, and its
+ * elevation. The intro is also the page's static HTML, so a reader without
+ * JavaScript gets the words and the drawing rather than an empty sheet.
+ */
+export function BangunClient({
+  locale,
+  tradisi,
+  intro,
+}: {
+  locale: Locale
+  tradisi: TraditionKey
+  intro: ModelIntro
+}) {
+  const t = useTradition(tradisi)
+  if (!t) return <ModelLoading locale={locale} intro={intro} />
+  return <BangunInner locale={locale} t={t} />
+}
+
+function BangunInner({ locale, t }: { locale: Locale; t: Tradition }) {
   const [query, setQuery, addressReady] = useRuleAddress(t.defaultQuery)
   /*
     Everything the reader is doing, in the fragment: which way the camera

@@ -8,11 +8,13 @@ import { ProvenanceStrip } from './Provenance'
 import { COPY, pick } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { SEQUENCE_SECONDS } from '@/lib/core/assembly'
-import { tradition } from '@/lib/tradition/registry'
 import type { StageView, Tradition, TraditionKey } from '@/lib/tradition/registry'
 import { datePresets, presetInstant } from '@/lib/solar/presets'
 import { solarPosition } from '@/lib/solar/position'
 import { useReaderState } from './useReaderState'
+import { useTradition } from './useTradition'
+import { ModelLoading } from './ModelLoading'
+import type { ModelIntro } from './ModelLoading'
 import { readInt, unless } from '@/lib/reader'
 
 const RAKIT_DEFAULTS = { stage: '', explode: 0 }
@@ -48,9 +50,28 @@ function encodeRakit(v: RakitVantage): readonly (readonly [string, string | null
  * is generated data rather than an animation curve someone drew. Nothing else
  * on this screen may compete with it.
  */
-export function RakitClient({ locale, tradisi }: { locale: Locale; tradisi: TraditionKey }) {
+/**
+ * The route's shell: load this one house's facade, and until it arrives
+ * show the intro the server rendered — whose house, its caution, and its
+ * elevation. The intro is also the page's static HTML, so a reader without
+ * JavaScript gets the words and the drawing rather than an empty sheet.
+ */
+export function RakitClient({
+  locale,
+  tradisi,
+  intro,
+}: {
+  locale: Locale
+  tradisi: TraditionKey
+  intro: ModelIntro
+}) {
+  const t0 = useTradition(tradisi)
+  if (!t0) return <ModelLoading locale={locale} intro={intro} />
+  return <RakitInner locale={locale} t0={t0} />
+}
+
+function RakitInner({ locale, t0 }: { locale: Locale; t0: Tradition }) {
   const reducedMotion = usePrefersReducedMotion()
-  const t0 = useMemo(() => tradition(tradisi), [tradisi])
   const built = useMemo(() => t0.build(t0.defaultQuery), [t0])
   const { house, timeline } = built
   const stageInfo = useMemo(() => stageLookup(t0), [t0])
