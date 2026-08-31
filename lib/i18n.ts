@@ -221,8 +221,23 @@ export const COPY = {
     sumber: t('Setiap ukuran dan asalnya.', 'Every dimension and where it came from.'),
   } satisfies Record<Route, Dict>,
 
+  /*
+   * The address being put right. The query string promises a complete
+   * description; when one arrives with rules missing, the gaps are filled
+   * with the defaults and the address in the bar is completed — and that is
+   * said, because a citation that silently means something else is the one
+   * failure this project's addresses exist to prevent.
+   */
+  address: {
+    filled: t(
+      'Alamat yang datang tidak menuliskan semua aturan. Yang hilang diisi dengan nilai baku, dan alamat di bilah dilengkapi.',
+      'The address arrived without all its rules written. The missing ones were filled with the defaults, and the address in the bar was completed.',
+    ),
+  },
+
   controls: {
     heading: t('Aturan', 'Rules'),
+    reset: t('Kembali ke aturan baku', 'Back to the default rules'),
     rank: t('Pangkat', 'Rank'),
     bays: t('Ruang', 'Bays'),
     horns: t('Tanduk', 'Horns'),

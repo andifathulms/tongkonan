@@ -108,6 +108,29 @@ export function BangunClient({ locale, tradisi }: { locale: Locale; tradisi: Tra
   const built: Built = useMemo(() => t.build(query), [t, query])
   const rebuild = useRebuildTransition(built.query, usePrefersReducedMotion(), addressReady)
 
+  /*
+   * The address, put right on arrival. The query string is a citation and a
+   * citation must mean what it says: an address that arrived with rules
+   * missing used to keep its truncated form in the bar while the page showed
+   * the completed house — two descriptions, one of them silently wrong. Now
+   * the bar is completed to the canonical query once, and the filling-in is
+   * said in the rail rather than absorbed. The note retires the moment the
+   * reader changes a rule, because from then on the address is theirs.
+   */
+  const [filledIn, setFilledIn] = useState(false)
+  const normalised = useRef(false)
+  useEffect(() => {
+    if (!addressReady || normalised.current) return
+    normalised.current = true
+    const raw = window.location.search.replace(/^\?/, '')
+    if (raw !== '' && raw !== built.query) setFilledIn(true)
+    if (built.query !== query) setQuery(built.query)
+  }, [addressReady, built.query, query, setQuery])
+  const changeRules = (next: string) => {
+    setFilledIn(false)
+    setQuery(next)
+  }
+
   const sun = useMemo(() => {
     const preset = presets.find((p) => p.key === presetKey) ?? presets[0]
     if (!preset) throw new Error('no date presets')
@@ -132,9 +155,34 @@ export function BangunClient({ locale, tradisi }: { locale: Locale; tradisi: Tra
           <RuleControlsFor
             tradition={t.key}
             query={built.query}
-            onChange={setQuery}
+            onChange={changeRules}
             locale={locale}
           />
+          {/*
+            The way back to the described house, and the admission when an
+            arriving address had to be completed. The reset appears only once
+            there is somewhere to come back from: an always-on reset would
+            imply the default is the correct house and the reader's is a
+            deviation, which is the opposite of what the controls argue.
+          */}
+          {filledIn || built.query !== t.defaultQuery ? (
+            <RailSection>
+              {filledIn ? (
+                <p className="mb-3 text-body text-muted">
+                  {pick(COPY.address.filled, locale)}
+                </p>
+              ) : null}
+              {built.query !== t.defaultQuery ? (
+                <button
+                  type="button"
+                  onClick={() => changeRules(t.defaultQuery)}
+                  className="press w-full rounded border border-hairline bg-sheet px-2 py-2 text-body text-bolu transition-colors duration-state hover:bg-wash"
+                >
+                  {pick(COPY.controls.reset, locale)}
+                </button>
+              ) : null}
+            </RailSection>
+          ) : null}
           {/*
             Directly under the rules, because it explains the rules. Only one
             house has one written: see the note on `Derivation`.
