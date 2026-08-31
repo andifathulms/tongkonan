@@ -5,10 +5,17 @@
  * is the one it computes: the houses' own silhouettes on drafting film. The
  * usual way to build og images is a headless rasteriser with an embedded
  * font; this project vendors no fonts and hand-writes its generation, so the
- * cards carry no text — the card's title and description are already text,
- * in the reader's own locale, beside the image — and the rasteriser is ours:
- * the silhouette loops scan-filled into a pixel buffer, supersampled twice
- * for clean edges, and encoded as PNG over node's zlib.
+ * rasteriser is ours — the silhouette loops scan-filled into a pixel buffer,
+ * supersampled twice for clean edges, and encoded as PNG over node's zlib.
+ *
+ * The cards used to carry no text, on the reasoning that the title and the
+ * description are already text beside the image in the reader's own locale.
+ * That is true of a page that unfurls a link and false of a chat, where the
+ * thumbnail arrives first and small — and thirty-five wordless silhouettes
+ * at thumbnail size are thirty-five dark shapes. So a card is now a sheet
+ * with a title block: the collection at the head, the plate number opposite,
+ * the house standing on its ground line, and its name and place beneath.
+ * The lettering is geometry too, from test/lettering.ts.
  *
  * Run through test/og.test.ts. Pure arithmetic end to end, so the same
  * commit draws the same card on any machine.
@@ -16,6 +23,8 @@
 
 import { deflateSync, inflateSync } from 'node:zlib'
 import type { Silhouette } from '@/lib/core/silhouette'
+import { CAP, strokes, widthOf } from './lettering'
+import type { Pt } from './lettering'
 
 export const CARD_W = 1200
 export const CARD_H = 630
@@ -36,21 +45,67 @@ export interface Placed {
   readonly x: number
   /** pixels per metre */
   readonly scale: number
+  /**
+   * The ground line this one stands on, y in card pixels.
+   *
+   * Per house rather than per card, because the collection's card is the
+   * shelf and the shelf wraps: thirty-five buildings in one row across 1200
+   * pixels is a strip of grey teeth, which is the same thing the landing
+   * found at fourteen. Rows mean more than one ground line.
+   */
+  readonly baseline: number
+}
+
+/* ── The sheet ───────────────────────────────────────────────────────────
+ * One layout, used by every card, so a house's card and the collection's are
+ * the same object at different contents. Distances in card pixels from the
+ * top-left, which is what the rest of this file measures in.
+ */
+
+/** Left and right margin for everything lettered. */
+export const MARGIN = 56
+/** Baseline of the head line, and of the plate number opposite it. */
+const HEAD_BASE = 60
+/** The hairline under the head. */
+const HEAD_RULE = 86
+/** The house's ground line, and the top of the space it stands in. */
+export const GROUND = 470
+export const SKY = 112
+/** Baselines and largest sizes for the title block. */
+const TITLE_BASE = 536
+const TITLE_CAP = 46
+const SUB_BASE = 586
+const SUB_CAP = 19
+const HEAD_CAP = 14
+/** The head is set wide, the way the interface sets its measured labels. */
+const HEAD_TRACKING = 3.4
+
+/** What a card says. Empty strings are simply not lettered. */
+export interface Sheet {
+  /** the collection, at the head of every card */
+  readonly head: string
+  /** the plate number, opposite the head; the collection's card has none */
+  readonly plate: string
+  /** the building, the largest thing on the card */
+  readonly title: string
+  /** where it stands, under the title */
+  readonly sub: string
 }
 
 /**
- * Draw a card: film field, a ground line, and houses standing on it.
- * `baseline` is the ground line's y in card pixels. Returns the rgb pixel
- * buffer — encoding is separate, so a drift check can compare pixels and
- * stay indifferent to which zlib wrote the committed file.
+ * Draw a card: film field, the title block, and houses standing on the
+ * ground lines they each name. Returns the rgb pixel buffer — encoding is separate, so a drift check can compare
+ * pixels and stay indifferent to which zlib wrote the committed file.
  */
-export function drawCard(placed: readonly Placed[], baseline: number): Uint8Array {
+export function drawCard(placed: readonly Placed[], sheet: Sheet): Uint8Array {
   const w = CARD_W * SS
   const h = CARD_H * SS
   const buf = new Uint8Array(w * h * 3)
   fillRect(buf, w, 0, 0, w, h, FILM)
-  // the ground line: two card pixels of muted ink, full width
-  fillRect(buf, w, 0, Math.round((baseline - 1) * SS), w, 2 * SS, MUTED)
+  // A ground line under every row, two card pixels of muted ink, full width.
+  for (const y of new Set(placed.map((p) => p.baseline))) {
+    fillRect(buf, w, 0, Math.round((y - 1) * SS), w, 2 * SS, MUTED)
+  }
   for (const p of placed) {
     fillLoops(
       buf,
@@ -61,14 +116,104 @@ export function drawCard(placed: readonly Placed[], baseline: number): Uint8Arra
           ([x, y]) =>
             [
               (p.x + (x - p.s.min[0]) * p.scale) * SS,
-              (baseline - y * p.scale) * SS,
+              (p.baseline - y * p.scale) * SS,
             ] as const,
         ),
       ),
       BOLU,
     )
   }
+
+  // The head, and the hairline that separates it from the drawing.
+  if (sheet.head) {
+    letter(buf, w, h, sheet.head, MARGIN, HEAD_BASE, HEAD_CAP, MUTED, HEAD_TRACKING)
+  }
+  if (sheet.plate) {
+    const pw = widthOf(sheet.plate, HEAD_TRACKING) * (HEAD_CAP / CAP)
+    letter(
+      buf, w, h, sheet.plate, CARD_W - MARGIN - pw, HEAD_BASE, HEAD_CAP, MUTED,
+      HEAD_TRACKING,
+    )
+  }
+  if (sheet.head || sheet.plate) {
+    fillRect(buf, w, MARGIN * SS, HEAD_RULE * SS, (CARD_W - MARGIN * 2) * SS, SS, MUTED)
+  }
+  // The title block. Both lines come down in size rather than run off the
+  // sheet: "Balai selaso jatuh kembar" is a real name and has to fit beside
+  // "Uma", at whatever size that costs it.
+  const room = CARD_W - MARGIN * 2
+  if (sheet.title) {
+    letter(buf, w, h, sheet.title, MARGIN, TITLE_BASE, fitCap(sheet.title, room, TITLE_CAP), BOLU)
+  }
+  if (sheet.sub) {
+    letter(buf, w, h, sheet.sub, MARGIN, SUB_BASE, fitCap(sheet.sub, room, SUB_CAP), MUTED)
+  }
   return downsample(buf, w, h)
+}
+
+/** The largest cap height at which a line still fits the sheet's measure. */
+function fitCap(text: string, room: number, max: number): number {
+  const units = widthOf(text)
+  return Math.min(max, (room / units) * CAP)
+}
+
+/**
+ * Letter a line: the alphabet's strokes, scaled to a cap height, walked with
+ * a round pen. Every quad and every disc is filled on its own rather than
+ * handed to the even-odd filler together, because two overlapping loops in
+ * one even-odd fill cancel where they overlap — a join would come out as a
+ * hole. They are all one colour, so painting them in sequence is free.
+ */
+function letter(
+  buf: Uint8Array,
+  w: number,
+  h: number,
+  text: string,
+  x: number,
+  base: number,
+  cap: number,
+  c: Rgb,
+  tracking?: number,
+): void {
+  const k = (cap / CAP) * SS
+  // One weight, the way a stencil has one weight. The floor keeps the small
+  // lines from thinning to nothing when the card is box-averaged down.
+  const pen = Math.max(1.7 * SS, cap * 0.115 * SS) / 2
+  for (const poly of strokes(text, tracking)) {
+    const pts = poly.map(
+      ([px, py]) => [x * SS + px * k, base * SS - py * k] as Pt,
+    )
+    for (let i = 0; i + 1 < pts.length; i++) {
+      fillLoops(buf, w, h, [quad(pts[i]!, pts[i + 1]!, pen)], c)
+    }
+    for (const p of pts) fillLoops(buf, w, h, [disc(p, pen)], c)
+  }
+}
+
+/** The pen's body along one segment: a rectangle, however the segment lies. */
+function quad(a: Pt, b: Pt, r: number): Pt[] {
+  const dx = b[0] - a[0]
+  const dy = b[1] - a[1]
+  const len = Math.hypot(dx, dy)
+  if (len === 0) return [a, a, a]
+  const nx = (-dy / len) * r
+  const ny = (dx / len) * r
+  return [
+    [a[0] + nx, a[1] + ny],
+    [b[0] + nx, b[1] + ny],
+    [b[0] - nx, b[1] - ny],
+    [a[0] - nx, a[1] - ny],
+  ]
+}
+
+/** The pen's nib: a round cap at a vertex, and a round join between two. */
+function disc(p: Pt, r: number): Pt[] {
+  const out: Pt[] = []
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2
+    out.push([p[0] + r * Math.cos(a), p[1] + r * Math.sin(a)])
+  }
+  return out
 }
 
 /** Decode one of our own PNGs back to pixels. Filter 0 only — we wrote it. */

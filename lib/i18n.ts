@@ -575,7 +575,14 @@ function head(
   image: { file: string; alt: string },
 ) {
   const url = urlFor(locale)
-  const images = [{ url: image.file, width: 1200, height: 630, alt: image.alt }]
+  /*
+    The type is stated because some scrapers will not render a card without
+    it, and a link that unfurls everywhere except one chat app is a link that
+    does not unfurl.
+  */
+  const images = [
+    { url: image.file, width: 1200, height: 630, alt: image.alt, type: 'image/png' },
+  ]
   return {
     title,
     description,
@@ -602,10 +609,17 @@ function head(
   }
 }
 
-/** A house's card and its alt, from the slug the card file is named by. */
+/**
+ * A house's card and its alt, from the slug the card file is named by.
+ *
+ * One card per locale, because the card letters the house's name and the
+ * place it stands and both are written in the reader's language. Everything
+ * else on a shared link falls back to the other locale gracefully; a picture
+ * cannot.
+ */
 function houseImage(locale: Locale, slug: string, house: string) {
   return {
-    file: `og/${slug}.png`,
+    file: `og/${locale}/${slug}.png`,
     alt: pick(COPY.landing.ogAlt, locale).replace('{house}', house),
   }
 }
@@ -633,7 +647,7 @@ export function landingMetadata(locale: Locale, houses: string) {
     (l) => landingUrl(l),
     /* The collection's card is the shelf, and its caption already says
        exactly what the picture is. */
-    { file: 'og/semua.png', alt: pick(COPY.landing.shelfCaption, locale) },
+    { file: `og/${locale}/semua.png`, alt: pick(COPY.landing.shelfCaption, locale) },
   )
 }
 
