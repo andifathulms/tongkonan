@@ -79,7 +79,7 @@ export function IndexFilter({
             onChange={(e) => setQ(e.target.value)}
             autoComplete="off"
             spellCheck={false}
-            className="mt-2 w-full rounded border border-hairline bg-sheet px-3 py-2 text-body text-bolu placeholder:text-muted"
+            className="mt-2 w-full rounded border border-hairline bg-sheet px-3 py-2 text-body text-bolu"
           />
         </>
       ) : null}

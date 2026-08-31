@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Moved } from '@/components/Moved'
-import { DEFAULT_LOCALE, LOCALES, isLocale, pageUrl } from '@/lib/i18n'
+import { COPY, DEFAULT_LOCALE, LOCALES, isLocale, pageUrl, pick } from '@/lib/i18n'
 import { DEFAULT_TRADITION, tradition } from '@/lib/tradition/registry'
 
 /**
@@ -15,7 +15,8 @@ import { DEFAULT_TRADITION, tradition } from '@/lib/tradition/registry'
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale = isLocale(params.locale) ? params.locale : DEFAULT_LOCALE
   return {
-    title: 'Pasak',
+    // The abandoned project name sat here long after the rename.
+    title: pick(COPY.appName, locale),
     robots: { index: false, follow: true },
     alternates: { canonical: pageUrl('bangun', locale, tradition(DEFAULT_TRADITION).slug) },
   }

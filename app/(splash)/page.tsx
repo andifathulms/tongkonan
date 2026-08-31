@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { Mark } from '@/components/Mark'
 import { COPY, LOCALES, LOCALE_NAMES, homeHref, pick } from '@/lib/i18n'
-import { TRADITIONS } from '@/lib/tradition/registry'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
@@ -50,16 +49,6 @@ export default function Index() {
           </Link>
         ))}
       </nav>
-      {/*
-        Both houses are named here, under the language links, because the
-        root is where someone arrives knowing nothing and the app is two
-        buildings rather than one. The refresh still goes to the first: a
-        splash nobody reads should not become a decision everybody has to
-        make.
-      */}
-      <p className="text-body text-muted">
-        {TRADITIONS.map((t) => t.house.id).join(' · ')}
-      </p>
       <meta httpEquiv="refresh" content={`0; url=${BASE}${homeHref('id')}/`} />
     </main>
   )

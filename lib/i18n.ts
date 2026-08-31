@@ -83,8 +83,8 @@ export const COPY = {
    * a second hidden sentence saying the same thing to a screen reader.
    */
   hint: t(
-    'Seret atau tombol panah untuk memutar · gulir atau +/− untuk mendekat',
-    'Drag or arrow keys to rotate · scroll or +/− to zoom',
+    'Seret atau tombol panah untuk memutar · gulir atau +/− untuk mendekat · Home memulihkan pandangan',
+    'Drag or arrow keys to rotate · scroll or +/− to zoom · Home resets the view',
   ),
   computed: t('Dihitung dari aturan', 'Computed from the rules'),
   /* Over the elevation while a route's one facade loads: the generator is
@@ -98,6 +98,20 @@ export const COPY = {
   /* Before the map, whose glyphs are one link per house: a keyboard reader
      should not pay the whole archipelago to reach the index below it. */
   skipMap: t('Lewati peta, langsung ke daftar', 'Skip the map, straight to the index'),
+
+  /*
+   * The moved pages: the four old tradition-less paths, still answering.
+   * They lead with what happened, because a philosophical paragraph over a
+   * wall of doors told an old citation's follower everything except that
+   * their address had moved.
+   */
+  moved: {
+    heading: t('Alamat ini berpindah', 'This address has moved'),
+    line: t(
+      'Jalur kini menyebutkan tradisinya, karena koleksinya telah bertambah. Aturan dalam alamat Anda ikut terbawa ke alamat yang baru.',
+      'The path now names its tradition, because the collection has grown. The rules in your address are carried to the new one.',
+    ),
+  },
 
   /*
    * The 404, written for both readers at once: the page that answers a wrong

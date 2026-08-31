@@ -1,51 +1,58 @@
+'use client'
+
+import { useEffect } from 'react'
 import Link from 'next/link'
-import { COPY, LOCALES, href, pick } from '@/lib/i18n'
+import { COPY, homeHref, href, pick } from '@/lib/i18n'
 import type { Locale, Route } from '@/lib/i18n'
 import { TRADITIONS } from '@/lib/tradition/registry'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 /**
- * The old address, still answering.
+ * The old address, still answering — and now actually keeping its promise.
  *
  * When the second house arrived the path gained a tradition segment, and a
- * citable address that stops resolving is not much of a citation. So the old
- * paths stay and say where the page went. There is no server to redirect
- * from, so this is a real page with real links and a meta refresh on top: the
- * refresh handles the ordinary case in a frame, and the links handle every
- * case where it does not fire.
+ * citable address that stops resolving is not much of a citation. The page
+ * always said the query travelled with the reader; the static meta refresh
+ * could never carry it, because it is written at export time and the query
+ * arrives at read time. So the redirect is done on mount, with the query and
+ * the fragment attached, and the refresh stays only as the no-JavaScript
+ * fallback — those readers get the links below and their rules stay in the
+ * address bar to reattach by hand.
  *
- * It offers both houses rather than silently choosing one. Someone arriving
- * here followed a link to a tongkonan, so that is the first and default
- * option — but the reason the address changed is that there is now more than
- * one house, and saying so is more useful than a redirect that hides it.
+ * One primary door, not a wall: the first house is where every old citation
+ * pointed, so that is the door. The rest of the collection is one link away
+ * at the landing, which is built for choosing.
  */
 export function Moved({ locale, route }: { locale: Locale; route: Route }) {
   const first = TRADITIONS[0]
   if (!first) throw new Error('no traditions registered')
   const target = `${BASE}${href(locale, first.slug, route)}/`
 
+  useEffect(() => {
+    window.location.replace(`${target}${window.location.search}${window.location.hash}`)
+  }, [target])
+
   return (
-    <main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-6 px-6 py-24">
+    <main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-5 px-6 py-24">
       <p className="micro text-bolu">{pick(COPY.appName, locale)}</p>
-      <p className="text-lead text-bolu">{pick(COPY.tradition.note, locale)}</p>
-      <nav>
-        <ul className="flex flex-col gap-3">
-          {TRADITIONS.map((t) => (
-            <li key={t.key}>
-              <Link
-                href={`${href(locale, t.slug, route)}/`}
-                className="text-body underline underline-offset-4"
-              >
-                {pick(COPY.nav[route], locale)} — {t.house[locale]}{' '}
-                <span aria-hidden>→</span>
-              </Link>
-              <p className="mt-1 text-body text-muted">{t.place[locale]}</p>
-            </li>
-          ))}
-        </ul>
+      <h1 className="text-title font-medium text-bolu">{pick(COPY.moved.heading, locale)}</h1>
+      <p className="text-body text-bolu">{pick(COPY.moved.line, locale)}</p>
+      <nav className="flex flex-col gap-3">
+        <Link
+          href={`${href(locale, first.slug, route)}/`}
+          className="press w-fit rounded bg-bolu px-4 py-2 text-body text-kapur transition-opacity duration-state hover:opacity-90"
+        >
+          {pick(COPY.nav[route], locale)} — {first.house[locale]} <span aria-hidden>→</span>
+        </Link>
+        <Link
+          href={`${homeHref(locale)}/`}
+          className="w-fit text-body text-bolu underline underline-offset-4"
+        >
+          {pick(COPY.tradition.all, locale)} <span aria-hidden>→</span>
+        </Link>
       </nav>
-      {LOCALES.includes(locale) ? <meta httpEquiv="refresh" content={`0; url=${target}`} /> : null}
+      <meta httpEquiv="refresh" content={`4; url=${target}`} />
     </main>
   )
 }

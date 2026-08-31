@@ -1,5 +1,5 @@
 /**
- * The twelve buildings, as one list the app can walk.
+ * The collection, as one list the app can walk.
  *
  * Eleven of them are houses and the twelfth is a granary, which is why this
  * comment no longer says "houses".
