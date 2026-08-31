@@ -10,7 +10,7 @@
  * water rather than air: this is a city on low ground that floods.
  */
 
-import { groundRect } from '@/lib/core/scene'
+import { groundBox } from '@/lib/core/scene'
 import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -48,12 +48,20 @@ function zones(layout: Layout, topY: number): readonly Zone[] {
 }
 
 /**
- * The plot, the road, and the neighbours on both sides.
+ * The plot with its neighbours, and the road it is measured from.
  *
  * Every other site figure in this project is something the household made or
  * chose. This one is a line it was given, and the two blocks beyond it are the
  * point of drawing it at all: what is on the far side of a boundary is not the
  * household's business, and that is exactly what makes the boundary bind.
+ *
+ * Two marks rather than one, and the reason is that a caption stands
+ * somewhere. The boundary, the road and the neighbours were a single figure
+ * named "Kavling, jalan, dan tetangga" — three things in three places under
+ * one label, which could only ever be written over one of them, and was
+ * written over the house. The boundary keeps the neighbours, because they are
+ * its argument; the road is its own fact at its own end and gets its own
+ * name.
  */
 function site(layout: Layout): readonly SiteMark[] {
   const roadZ = -layout.plot.halfZ
@@ -70,16 +78,26 @@ function site(layout: Layout): readonly SiteMark[] {
   return [
     {
       key: 'kavling',
-      nameId: 'Kavling, jalan, dan tetangga',
-      nameEn: 'The plot, the road and the neighbours',
-      glossId: `Garis batas ${(layout.plot.halfX * 2).toFixed(0)} × ${(layout.plot.halfZ * 2).toFixed(0)} m, dengan jalan di satu ujung dan rumah orang lain di kedua sisinya. Semua gambar tapak lain dalam kumpulan ini adalah sesuatu yang dibuat atau dipilih penghuninya; yang ini garis yang diberikan kepadanya — dan justru rumah tetangga di seberang garis itulah alasan garisnya mengikat.`,
-      glossEn: `A boundary ${(layout.plot.halfX * 2).toFixed(0)} × ${(layout.plot.halfZ * 2).toFixed(0)} m, with a road at one end and other people’s houses on both sides. Every other site figure in this collection is something the household made or chose; this is a line it was given — and the neighbours’ houses across it are the reason the line binds at all.`,
+      nameId: 'Kavling dan tetangga',
+      nameEn: 'The plot and the neighbours',
+      glossId: `Garis batas ${(layout.plot.halfX * 2).toFixed(0)} × ${(layout.plot.halfZ * 2).toFixed(0)} m, dengan rumah orang lain di kedua sisinya. Semua gambar tapak lain dalam kumpulan ini adalah sesuatu yang dibuat atau dipilih penghuninya; yang ini garis yang diberikan kepadanya — dan justru rumah tetangga di seberang garis itulah alasan garisnya mengikat.`,
+      glossEn: `A boundary ${(layout.plot.halfX * 2).toFixed(0)} × ${(layout.plot.halfZ * 2).toFixed(0)} m, with other people’s houses on both sides. Every other site figure in this collection is something the household made or chose; this is a line it was given — and the neighbours’ houses across it are the reason the line binds at all.`,
       lines: [
-        groundRect(-layout.plot.halfX, -layout.plot.halfZ, layout.plot.halfX * 2, layout.plot.halfZ * 2),
-        groundRect(-layout.plot.halfX * 1.8, roadZ - 6, layout.plot.halfX * 3.6, 6),
+        groundBox(0, 0, layout.plot.halfX * 2, layout.plot.halfZ * 2),
       ],
       closed: true,
       volumes,
+      provenance: 'interpolated',
+    },
+    {
+      key: 'jalan',
+      nameId: 'Jalan',
+      nameEn: 'The road',
+      glossId: `Jalan di ujung muka kavling. Letak rumah ini diukur terhadapnya dan bukan terhadap kerabat: langkannya menghadap orang lewat, dan sempadan ${layout.plot.setback.toFixed(1)} m yang disisakan di depan adalah jarak ke jalan itu.`,
+      glossEn: `The road at the front end of the plot. This house is positioned against it rather than against kin: the terrace faces the people passing, and the ${layout.plot.setback.toFixed(1)} m left open at the front is the distance to that road.`,
+      lines: [groundBox(0, roadZ - 3, layout.plot.halfX * 3.6, 6)],
+      closed: true,
+      volumes: [],
       provenance: 'interpolated',
     },
   ]

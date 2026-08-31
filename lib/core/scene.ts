@@ -196,6 +196,71 @@ export interface SceneModel {
   readonly figureAt: Vec3
 }
 
+/**
+ * Where a ground figure's caption belongs: on the ground it names, never on
+ * the house.
+ *
+ * The mean of a figure's vertices is the right answer for something standing
+ * beside the building — a barn, a grave, a row of lumbung — and the wrong one
+ * for anything that surrounds it. A yard, a clearing, a bay, a fortress wall
+ * and a plot boundary all average to their own centre, and their centre is
+ * where the house is: sixteen of the collection's figures were labelling the
+ * roof they were meant to be pointing away from.
+ *
+ * So the mean stands unless it lands within the drip envelope — the roof's
+ * reach rather than the walls', because from a raking view the roof is what
+ * covers the ground. When it does, the caption moves into the widest piece of
+ * open ground the figure actually names: the gap between the eave and the
+ * figure's own edge, measured on all four sides, with the caption placed
+ * halfway across the largest. It stays inside the thing it names, clear of
+ * the building, and steady as the reader turns the model — a fact about the
+ * ground plan rather than about the camera.
+ *
+ * Here rather than in the renderer because it is arithmetic on a plan, and a
+ * shape computed inside a component is in the wrong file.
+ */
+export function captionAt(
+  lines: readonly (readonly (readonly [number, number])[])[],
+  drip: { readonly x: number; readonly z: number },
+): readonly [number, number] {
+  let x = 0
+  let z = 0
+  let n = 0
+  let minX = Infinity
+  let maxX = -Infinity
+  let minZ = Infinity
+  let maxZ = -Infinity
+  for (const line of lines) {
+    for (const p of line) {
+      x += p[0]
+      z += p[1]
+      n += 1
+      minX = Math.min(minX, p[0])
+      maxX = Math.max(maxX, p[0])
+      minZ = Math.min(minZ, p[1])
+      maxZ = Math.max(maxZ, p[1])
+    }
+  }
+  if (!n) return [0, 0]
+  const cx = x / n
+  const cz = z / n
+  // Clear of the eave already: the figure is a thing on the ground, so the
+  // caption sits on it.
+  if (Math.abs(cx) > drip.x || Math.abs(cz) > drip.z) return [cx, cz]
+
+  // Otherwise it is around the house, and the caption takes the widest gap
+  // between the eave and the figure's own edge.
+  const sides: readonly { gap: number; at: readonly [number, number] }[] = [
+    { gap: maxX - drip.x, at: [(drip.x + maxX) / 2, cz] },
+    { gap: -minX - drip.x, at: [(-drip.x + minX) / 2, cz] },
+    { gap: maxZ - drip.z, at: [cx, (drip.z + maxZ) / 2] },
+    { gap: -minZ - drip.z, at: [cx, (-drip.z + minZ) / 2] },
+  ]
+  const widest = sides.reduce((best, s) => (s.gap > best.gap ? s : best), sides[0]!)
+  // A figure with no ground outside the eave at all: nowhere better to go.
+  return widest.gap <= 0 ? [cx, cz] : widest.at
+}
+
 /* ── Ground figures ───────────────────────────────────────────────────── */
 
 /**
@@ -204,6 +269,29 @@ export interface SceneModel {
  * Here rather than in fourteen scene files, because a yard is a rectangle in
  * every tradition that has one and the arithmetic knows nothing about which.
  */
+/**
+ * A rectangle on the ground from its centre and its size.
+ *
+ * The same shape `groundRect` draws, said the other way — and it exists
+ * because eight traditions said it the other way by mistake. A `SiteVolume`
+ * declares itself as `at` plus `size`, so that is the vocabulary in a scene
+ * file's head; passing a width and a depth to a function that wants a far
+ * corner draws a figure half again too big and shifted by half its own size,
+ * and nothing catches it, because a rectangle is still a rectangle. The plot
+ * boundary of the rumah kebaya was drawn 24 × 33 m under a caption that read
+ * 16 × 22, and its road covered the house.
+ *
+ * So a figure can now be written in whichever terms it is thought in.
+ */
+export function groundBox(
+  cx: number,
+  cz: number,
+  width: number,
+  depth: number,
+): readonly (readonly [number, number])[] {
+  return groundRect(cx - width / 2, cz - depth / 2, cx + width / 2, cz + depth / 2)
+}
+
 export function groundRect(
   x0: number,
   z0: number,

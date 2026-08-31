@@ -8,7 +8,7 @@
  * this hall is about, so the copy says it instead.
  */
 
-import { groundRect } from '@/lib/core/scene'
+import { groundBox } from '@/lib/core/scene'
 import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -72,7 +72,7 @@ function site(layout: Layout): readonly SiteMark[] {
       nameEn: 'The yard and the river',
       glossId: `Halaman balai dan tepi sungai ${bank.toFixed(0)} m di mukanya. Balai berdiri di tempat yang dapat dicapai seluruh negeri, dan di Riau itu berarti tepi sungai. Ini sungai ketiga dalam kumpulan ini: yang di rumah betang mengalir melewati kampung, yang di Siberut adalah jalannya sendiri, dan yang ini yang dihadapi balai.`,
       glossEn: `The hall’s yard, and a river bank ${bank.toFixed(0)} m in front of it. A balai stands where the whole negeri can reach it, and in Riau that has meant a river bank. It is the third river in the collection: the betang’s runs past a village strung along it, Siberut’s is the street itself, and this one is what the hall faces.`,
-      lines: [groundRect(-r * 1.5, -(bank + 10), r * 3, 10)],
+      lines: [groundBox(0, -(bank + 5), r * 3, 10)],
       closed: true,
       volumes,
       provenance: 'interpolated',

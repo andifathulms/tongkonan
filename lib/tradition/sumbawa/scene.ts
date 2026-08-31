@@ -7,7 +7,7 @@
  * it is ninety-nine posts at the spacing a beam allows.
  */
 
-import { groundRect } from '@/lib/core/scene'
+import { groundBox } from '@/lib/core/scene'
 import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -68,7 +68,7 @@ function site(layout: Layout): readonly SiteMark[] {
       nameEn: 'The palace court',
       glossId: `Halaman berjari-jari ${r.toFixed(0)} m di dalam pagar keliling. Istana adalah satu-satunya jenis bangunan dalam kumpulan ini yang tapaknya sebuah kewenangan: pagar ini bukan pertahanan seperti dinding benteng di Baubau, melainkan garis yang menandai di mana tanah kesultanan mulai.`,
       glossEn: `A court ${r.toFixed(0)} m across inside its wall. A palace is the one kind of building in this collection whose site is a jurisdiction: this wall is not a defence like the fortress wall at Baubau but a line marking where the sultanate’s own ground begins.`,
-      lines: [groundRect(-r, -r * 0.8, r * 2, r * 1.6)],
+      lines: [groundBox(0, 0, r * 2, r * 1.6)],
       closed: true,
       volumes,
       provenance: 'interpolated',

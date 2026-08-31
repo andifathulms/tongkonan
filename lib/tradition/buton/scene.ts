@@ -71,7 +71,22 @@ function site(layout: Layout): readonly SiteMark[] {
       nameEn: 'The fortress wall',
       glossId: `Rumah ini berdiri di dalam benteng Keraton Buton, dinding batu karang yang melingkupi satu kampung utuh, bukan satu pekarangan. Yang digambar adalah sisi dinding yang terdekat dan jaraknya, ${r.toFixed(0)} m. Ini satu-satunya tapak dalam kumpulan ini yang berupa pertahanan.`,
       glossEn: `This house stands inside the Keraton wall at Baubau, a coral-stone wall enclosing a whole settlement rather than a compound. What is drawn is the nearest run of it and its distance, ${r.toFixed(0)} m. It is the only site in this collection that is a fortification.`,
-      lines: [groundRect(-r, -r, r * 1.5, r * 1.5), groundRing(0, 0, r * 0.75, 24)],
+      /*
+       * The two runs of wall themselves, as an open corner — not a rectangle
+       * around the house. It was a rectangle whose far corner was given as a
+       * size, so it enclosed the house at a size nothing had chosen; the wall
+       * is what is drawn here, and it is drawn where the two volumes above
+       * stand, because a figure and its solids may not disagree about where
+       * the same wall is.
+       */
+      lines: [
+        [
+          [-r, r * 0.75],
+          [-r, -r],
+          [r * 0.75, -r],
+        ],
+        groundRing(0, 0, r * 0.75, 24),
+      ],
       closed: false,
       volumes,
       provenance: 'interpolated',

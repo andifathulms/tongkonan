@@ -16,7 +16,7 @@
  * are the setting, and the ancestors are the subject.
  */
 
-import { groundRect } from '@/lib/core/scene'
+import { groundBox } from '@/lib/core/scene'
 import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -89,8 +89,8 @@ function site(layout: Layout): readonly SiteMark[] {
       glossId: 'Rumah-rumah kampung berjajar di kedua sisi alun-alun dan menghadap ke dalam. Di seluruh kumpulan ini rumah adalah pokoknya dan yang di sekelilingnya adalah tapak; hanya di sini urutannya terbalik — yang dimodelkan adalah yang berdiri di antara rumah-rumah itu.',
       glossEn: 'The village houses stand in two rows along the square and face into it. Everywhere else in this collection the house is the subject and what surrounds it is the site; here alone it is the other way round — what is modelled is what stands between the houses.',
       lines: [
-        groundRect(-layout.nua.halfX - depth, -layout.nua.halfZ, depth, layout.nua.halfZ * 2),
-        groundRect(layout.nua.halfX, -layout.nua.halfZ, depth, layout.nua.halfZ * 2),
+        groundBox(-(layout.nua.halfX + depth / 2), 0, depth, layout.nua.halfZ * 2),
+        groundBox(layout.nua.halfX + depth / 2, 0, depth, layout.nua.halfZ * 2),
       ],
       closed: true,
       volumes,

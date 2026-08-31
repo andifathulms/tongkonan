@@ -10,7 +10,7 @@
  * real division in the copy rather than bending a field until it lies.
  */
 
-import { groundRect } from '@/lib/core/scene'
+import { groundBox } from '@/lib/core/scene'
 import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -73,7 +73,7 @@ function site(layout: Layout): readonly SiteMark[] {
       nameEn: 'The river',
       glossId: `Sungai selebar ${width.toFixed(0)} m di depan rumah, ${bank.toFixed(0)} m dari serambi. Di Siberut sungai adalah jalan: orang datang dengan perahu dan naik ke serambi depan, yang memang tidak berdinding. Ini tepi sungai kedua dalam kumpulan ini setelah rumah betang, dan keduanya berbeda maksudnya — di sana sungai mengalir melewati kampung, di sini sungai itulah jalannya.`,
       glossEn: `A ${width.toFixed(0)} m river in front of the house, ${bank.toFixed(0)} m from the veranda. On Siberut the river is the road: people arrive by canoe and step up onto the front veranda, which is exactly why it has no walls. It is the second river bank in the collection after the betang’s, and the two mean different things — there a river runs past a village, here the river is the street.`,
-      lines: [groundRect(-layout.halfX * 3, -(bank + width), layout.halfX * 6, width)],
+      lines: [groundBox(0, -(bank + width / 2), layout.halfX * 6, width)],
       closed: true,
       volumes,
       provenance: 'canon',

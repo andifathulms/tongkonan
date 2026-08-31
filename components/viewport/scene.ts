@@ -16,7 +16,7 @@
 import * as THREE from 'three'
 import type { AnyHouse, AnyPart, ProvenanceClass } from '@/lib/core/types'
 import type { SceneModel, SiteVolume } from '@/lib/core/scene'
-import { sectionAxis } from '@/lib/core/scene'
+import { captionAt, sectionAxis } from '@/lib/core/scene'
 import type { Kinds } from '@/lib/core/kinds'
 import type { SolarPosition } from '@/lib/solar/position'
 import { sunDirection } from '@/lib/solar/position'
@@ -1041,7 +1041,10 @@ class SiteRig {
       this.ribbon(closed, 0.16, edge, 0.014)
       if (!site.closed) this.ribbon(this.tickMarks(closed), 0.12, edge, 0.014)
       for (const volume of site.volumes) this.solid(volume)
-      this.anchorsByKey.set(site.key, anchorOf(closed))
+      // Where the caption goes is a fact about the ground plan, so the rule
+      // lives in the core and this only puts it into world space.
+      const [cx, cz] = captionAt(closed, model.drip)
+      this.anchorsByKey.set(site.key, new THREE.Vector3(cx, 0, cz))
     }
   }
 
@@ -1372,20 +1375,6 @@ function containsOrigin(line: readonly (readonly [number, number])[]): boolean {
   return inside
 }
 
-/** The mean of a figure's vertices: where its caption sits. */
-function anchorOf(lines: readonly (readonly (readonly [number, number])[])[]): THREE.Vector3 {
-  let x = 0
-  let z = 0
-  let n = 0
-  for (const line of lines) {
-    for (const p of line) {
-      x += p[0]
-      z += p[1]
-      n += 1
-    }
-  }
-  return new THREE.Vector3(n ? x / n : 0, 0, n ? z / n : 0)
-}
 
 /* ── Pieces ───────────────────────────────────────────────────────────── */
 

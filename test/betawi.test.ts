@@ -189,12 +189,29 @@ describe('the build sequence', () => {
 })
 
 describe('the scene model', () => {
-  it('draws the boundary and the neighbours beyond it', () => {
+  /*
+   * Two figures, not one. They were a single mark holding the boundary, the
+   * road and the neighbours — three things in three places under one caption,
+   * which a caption cannot do. The boundary keeps the neighbours because they
+   * are its argument; the road stands at its own end under its own name.
+   */
+  it('draws the boundary with its neighbours, and the road apart from them', () => {
     const { house, layout } = buildHouse(DEFAULT_RULES)
     const scene = sceneModel(house, layout)
-    expect(scene.site).toHaveLength(1)
-    expect(scene.site[0]?.volumes).toHaveLength(2)
-    expect(scene.site[0]?.lines.length).toBe(2)
+    expect(scene.site.map((m) => m.key)).toEqual(['kavling', 'jalan'])
+
+    const kavling = scene.site.find((m) => m.key === 'kavling')
+    expect(kavling?.volumes).toHaveLength(2)
+    expect(kavling?.lines.length).toBe(1)
+    // The boundary encloses the house: it is the ground the house stands on.
+    expect(kavling?.lines[0]?.some(([, z]) => z > layout.house.halfZ)).toBe(true)
+
+    const jalan = scene.site.find((m) => m.key === 'jalan')
+    expect(jalan?.volumes).toHaveLength(0)
+    expect(jalan?.lines.length).toBe(1)
+    // And the road lies wholly in front of the plot, never across it.
+    for (const [, z] of jalan?.lines[0] ?? []) expect(z).toBeLessThanOrEqual(-layout.plot.halfZ)
+
     expect(scene.underfloorHeight).toBeCloseTo(DIMS.plinthHeight.value, 9)
   })
 })

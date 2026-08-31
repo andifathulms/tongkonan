@@ -22,7 +22,7 @@
  *   division in the copy rather than bending the field until it lies.
  */
 
-import { groundRect } from '@/lib/core/scene'
+import { groundBox } from '@/lib/core/scene'
 import type { SceneModel, SiteMark, SiteVolume, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -93,7 +93,7 @@ function site(layout: Layout): readonly SiteMark[] {
       nameEn: 'The lane and the next tanean',
       glossId: 'Kelompok-kelompok ini berdiri berderet: satu keluarga, sebuah lorong, keluarga berikutnya. Ini satu-satunya gambar tapak dalam kumpulan ini yang isinya contoh lain dari pokok bahasannya sendiri — bukan lumbung di samping rumah, melainkan seluruh susunan milik tetangga.',
       glossEn: 'These clusters stand in a line: one family, a lane, the next family. It is the only site figure in the collection whose contents are another instance of its own subject — not a granary beside a house, but the neighbours’ whole arrangement.',
-      lines: [groundRect(-layout.yard.halfX * 1.4, east - lane / 2, layout.yard.halfX * 2.8, lane)],
+      lines: [groundBox(0, east, layout.yard.halfX * 2.8, lane)],
       closed: true,
       volumes,
       provenance: 'interpolated',

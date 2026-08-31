@@ -19,7 +19,7 @@
  * the way home.
  */
 
-import { groundRect } from '@/lib/core/scene'
+import { groundBox } from '@/lib/core/scene'
 import type { SceneModel, SiteMark, Zone } from '@/lib/core/scene'
 import { DIMS } from './rules'
 import type { House, Layout } from './types'
@@ -79,8 +79,8 @@ function site(layout: Layout): readonly SiteMark[] {
       glossEn:
         'The road to the cremation ground and the crossing it passes. At the crossing the tower is spun about so the spirit loses its bearings and cannot find the way home. The only site figure in the collection that is a route rather than a place — because this building does not stay anywhere.',
       lines: [
-        groundRect(-reach, -w / 2, reach * 2, w),
-        groundRect(-w / 2, -reach, w, reach * 2),
+        groundBox(0, 0, reach * 2, w),
+        groundBox(0, 0, w, reach * 2),
       ],
       closed: true,
       volumes: [],
