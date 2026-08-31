@@ -40,7 +40,17 @@ export function BandingClient({ locale }: { locale: Locale }) {
   useEffect(() => {
     const p = new URLSearchParams(window.location.search)
     const find = (slug: string | null) => TRADITIONS.find((t) => t.slug === slug)?.slug
-    setPair((prev) => ({ a: find(p.get('a')) ?? prev.a, b: find(p.get('b')) ?? prev.b }))
+    setPair((prev) => {
+      const a = find(p.get('a')) ?? prev.a
+      let b = find(p.get('b')) ?? prev.b
+      /*
+       * A door arriving with only ?a= gets a partner, not a mirror: the
+       * front doors pre-fill one side, and a comparison of a building with
+       * itself is an honest drawing of nothing.
+       */
+      if (a === b) b = TRADITIONS.find((t) => t.slug !== a)!.slug
+      return { a, b }
+    })
     setSettled(true)
   }, [])
 
@@ -169,12 +179,16 @@ export function BandingClient({ locale }: { locale: Locale }) {
               </p>
               <dl className="mt-4 flex flex-col gap-1">
                 {b.readout.map((row) => (
+                  // Wraps rather than crushes: on the narrowest screens the
+                  // figure drops under its label and stays whole.
                   <div
                     key={row.label.en}
-                    className="flex items-baseline justify-between gap-3"
+                    className="flex flex-wrap items-baseline justify-between gap-x-3"
                   >
                     <dt className="text-meta text-muted">{row.label[locale]}</dt>
-                    <dd className="num whitespace-nowrap text-meta text-bolu">{row.value}</dd>
+                    <dd className="num ml-auto whitespace-nowrap text-meta text-bolu">
+                      {row.value}
+                    </dd>
                   </div>
                 ))}
               </dl>

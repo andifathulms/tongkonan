@@ -157,6 +157,21 @@ export default function House({ params }: { params: { locale: string; tradisi: s
               </Link>
             </li>
           ))}
+          {/*
+            The fifth door, and the one that leads out of the house: the
+            comparison, pre-filled with this building on the left. It sits
+            with the doors because comparing is a way of reading this house,
+            even though the page it opens holds two.
+          */}
+          <li className="h-full">
+            <Link
+              href={`/${locale}/banding/?a=${t.slug}`}
+              className="press flex h-full flex-col gap-1 rounded border border-hairline bg-sheet px-4 py-4 transition-colors duration-state hover:border-muted hover:bg-wash"
+            >
+              <span className="text-lead text-bolu">{pick(COPY.banding.title, locale)}</span>
+              <span className="text-body text-muted">{pick(COPY.banding.doorGloss, locale)}</span>
+            </Link>
+          </li>
         </ul>
       </section>
 

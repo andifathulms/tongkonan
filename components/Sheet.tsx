@@ -234,6 +234,17 @@ function TitleBlock({
             )
           })}
         </ul>
+        {/*
+          The fifth door, quieter than the four: it leads out of this house
+          into the comparison, pre-filled with this building on the left, so
+          the classroom's "compare it with…" is one step from anywhere.
+        */}
+        <Link
+          href={`/${locale}/banding/?a=${tradition.slug}`}
+          className="press mt-1 block rounded px-2 py-1.5 text-meta text-muted transition-colors duration-state hover:bg-wash hover:text-bolu"
+        >
+          {pick(COPY.banding.from, locale)} <span aria-hidden>→</span>
+        </Link>
       </nav>
     </header>
   )

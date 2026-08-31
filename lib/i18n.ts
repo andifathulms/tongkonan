@@ -423,6 +423,12 @@ export const COPY = {
     first: t('Bangunan pertama', 'First building'),
     second: t('Bangunan kedua', 'Second building'),
     open: t('Bandingkan dua bangunan', 'Compare two buildings'),
+    /* The fifth door on a house's front door, and its line in the rail. */
+    doorGloss: t(
+      'Bangunan ini berdampingan dengan bangunan lain, pada satu skala.',
+      'This building beside another, at one scale.',
+    ),
+    from: t('Bandingkan dengan bangunan lain', 'Compare with another building'),
   },
 
   tradition: {
