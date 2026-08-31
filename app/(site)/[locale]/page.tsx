@@ -253,17 +253,18 @@ function HouseCard({
  * rule 4 says there is no runtime network.
  *
  * Each site is the building itself and nothing else: its silhouette at glyph
- * size, standing at the true coordinates, linked to its front door. The names
+ * size, centred on the true coordinates, linked to its front door. The names
  * came off the map because they were the space problem — with text, a third
- * of the labels hung off leaders in the open sea; without it, everything but
- * one glyph in the Bali crowd stands on its own ground. The name and the site
- * come back on hover or keyboard focus, as a plaque, and they travel with the
- * link's aria-label, so the map is now the index and the old legend list
- * below it is gone.
+ * of the labels hung off leaders in the open sea; without it, nearly every
+ * glyph stands on its own ground. The name and the site come back on hover or
+ * keyboard focus, as a plaque, and they travel with the link's aria-label, so
+ * the map is the index and needs no legend.
  *
- * Still deterministic: a solver walks the crowded sites first and rings
- * outward for the few that need nudging, and a dot with a hairline leader
- * marks any glyph that stands off its exact coordinates.
+ * There are no dots and no leaders either: the building is the marker. In
+ * the Bali crowd a solver — crowded sites first, rings outward, south
+ * preferred — nudges a few glyphs by up to a degree and a half, which is
+ * under the width of the glyph itself; the plaque's site name is the precise
+ * answer, and the coordinates' real work happens in the solar arithmetic.
  */
 function SiteMap({
   locale,
@@ -289,8 +290,8 @@ function SiteMap({
   /* Marker and plaque geometry, in viewBox units. */
   const GW = 46 // glyph box
   const GH = 32
-  const FS = 15 // plaque name size; the site line is a step down
-  const CH = FS * 0.66 // one mono character, tracking included
+  const NAME_FS = 16 // plaque name, sans at text weight
+  const SITE_FS = 14 // the site line, italic, a step down
   const MARGIN = 6
   const GAP = 4
 
@@ -310,9 +311,6 @@ function SiteMap({
     ax: x(t.site.longitude),
     ay: y(t.site.latitude),
   }))
-  /* No glyph may cover any site's dot — a marker under a neighbour is a site
-     the map has silently dropped. */
-  const dots: Box[] = anchors.map(({ ax, ay }) => ({ bx: ax - 4, by: ay - 4, bw: 8, bh: 8 }))
 
   /* The crowded sites choose first; the sparse ones, which have room by
      definition, adapt. Rings prefer south, where the open water is. */
@@ -327,21 +325,16 @@ function SiteMap({
   )
 
   const boxes: Box[] = new Array<Box>(items.length)
-  const leaders: ({ px: number; py: number } | null)[] = new Array(items.length).fill(null)
   const placed: Box[] = []
   for (const i of placeOrder) {
     const { ax, ay } = anchors[i]!
     const bw = GW
     const bh = GH
-    /* Standing over its own site first, then beside it, then rings outward.
-       Glyph-only boxes are small enough that almost everything lands on the
-       first try — the simulation over the full registry needs one leader. */
-    const candidates: Box[] = [
-      { bx: ax - bw / 2, by: ay - bh - 6, bw, bh },
-      { bx: ax - bw / 2, by: ay + 8, bw, bh },
-      { bx: ax + 8, by: ay - bh / 2, bw, bh },
-      { bx: ax - bw - 8, by: ay - bh / 2, bw, bh },
-    ]
+    /* Centred on its own site first, then rings outward. Glyph-only boxes
+       are small enough that almost everything lands on the first try — the
+       simulation over the full registry nudges nine, none past a degree and
+       a half. */
+    const candidates: Box[] = [{ bx: ax - bw / 2, by: ay - bh / 2, bw, bh }]
     for (const r of [26, 42, 62, 86, 114, 146]) {
       for (const a of bearings) {
         candidates.push({
@@ -359,14 +352,10 @@ function SiteMap({
           c.by >= MARGIN &&
           c.bx + c.bw <= w - MARGIN &&
           c.by + c.bh <= h - MARGIN &&
-          placed.every((p) => clearOf(c, p)) &&
-          dots.every((d) => clearOf(c, d)),
+          placed.every((p) => clearOf(c, p)),
       ) ?? candidates[0]!
     placed.push(box)
     boxes[i] = box
-    const px = Math.min(Math.max(ax, box.bx), box.bx + box.bw)
-    const py = Math.min(Math.max(ay, box.by), box.by + box.bh)
-    if (Math.hypot(ax - px, ay - py) > 10) leaders[i] = { px, py }
   }
 
   /*
@@ -381,11 +370,14 @@ function SiteMap({
     const name = t.house[locale]
     const site = t.site.name
     const box = boxes[i]!
-    const tw = Math.max(name.length * CH, site.length * CH * 0.87) + 20
-    const th = 56
+    /* Sans is not measurable the way mono is; 0.58em per character is the
+       face's average advance with headroom, and the padding absorbs the
+       rest. */
+    const tw = Math.max(name.length * NAME_FS * 0.58, site.length * SITE_FS * 0.58) + 24
+    const th = 54
     const tx = Math.min(Math.max(box.bx + box.bw / 2 - tw / 2, MARGIN), w - MARGIN - tw)
     const ty = box.by - th - 8 >= MARGIN ? box.by - th - 8 : box.by + box.bh + 8
-    return { t, s, name, site, box, tx, ty, tw, th, ...anchors[i]!, leader: leaders[i] }
+    return { t, s, name, site, box, tx, ty, tw, th }
   })
   const tipCss = items
     .map(
@@ -415,21 +407,6 @@ function SiteMap({
           fillRule="evenodd"
           aria-hidden="true"
         />
-        {labels.map(({ t, ax, ay, leader }) => (
-          <g key={`dot-${t.key}`} aria-hidden="true">
-            {leader ? (
-              <line
-                x1={g(ax)}
-                y1={g(ay)}
-                x2={g(leader.px)}
-                y2={g(leader.py)}
-                stroke="var(--muted)"
-                vectorEffect="non-scaling-stroke"
-              />
-            ) : null}
-            <rect x={g(ax - 3)} y={g(ay - 3)} width={6} height={6} fill="var(--bolu)" />
-          </g>
-        ))}
         {labels.map(({ t, s, name, site, box }) => (
           <a
             key={t.key}
@@ -451,22 +428,24 @@ function SiteMap({
             aria-hidden="true"
           >
             <rect x={g(tx)} y={g(ty)} width={g(tw)} height={th} rx={2} fill="var(--bolu)" />
+            {/* The name plainly, the site set off in italic — two kinds of
+                fact, told apart the way a caption tells them apart. */}
             <text
-              x={g(tx + 10)}
-              y={g(ty + 24)}
-              fontSize={FS}
-              letterSpacing="0.05em"
-              className="font-mono uppercase"
+              x={g(tx + 12)}
+              y={g(ty + 23)}
+              fontSize={NAME_FS}
+              fontWeight={600}
+              className="font-sans"
               fill="var(--kapur)"
             >
               {name}
             </text>
             <text
-              x={g(tx + 10)}
-              y={g(ty + 44)}
-              fontSize={FS * 0.87}
-              letterSpacing="0.05em"
-              className="font-mono uppercase"
+              x={g(tx + 12)}
+              y={g(ty + 42)}
+              fontSize={SITE_FS}
+              fontStyle="italic"
+              className="font-sans"
               fill="var(--muted-on-ink)"
             >
               {site}
