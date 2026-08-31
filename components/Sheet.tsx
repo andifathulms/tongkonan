@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
+import { Mark } from '@/components/Mark'
 import { COPY, LOCALES, ROUTES, homeHref, houseHref, href, pick } from '@/lib/i18n'
 import type { Locale, Route } from '@/lib/i18n'
 import type { Tradition } from '@/lib/tradition/registry'
@@ -179,7 +180,11 @@ function TitleBlock({
       <div className="hidden sheet:block">
         <div className="flex items-baseline justify-between gap-3">
           {/* The wordmark is the way back up: the collection is the landing page. */}
-          <Link href={`${homeHref(locale)}/`} className="micro text-bolu">
+          <Link
+            href={`${homeHref(locale)}/`}
+            className="flex items-center gap-2 micro text-bolu"
+          >
+            <Mark />
             {pick(COPY.appName, locale)}
           </Link>
           <LocaleSwitch locale={locale} targets={localeTargets(route, tradition)} />

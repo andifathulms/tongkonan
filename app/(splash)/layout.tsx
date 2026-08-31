@@ -7,6 +7,32 @@ export const metadata: Metadata = {
   metadataBase: new URL(`${SITE_ORIGIN}${BASE_PATH}/`),
   // The one place the old name survived the rename.
   title: pick(COPY.appName, DEFAULT_LOCALE),
+  /*
+    Written out with the base path in it. Next applies the base path to the
+    icons it generates but not to the manifest link, so the emitted href was
+    /manifest.webmanifest — correct in dev and a 404 on Pages, where the site
+    lives at a subpath.
+  */
+  manifest: `${BASE_PATH}/manifest.webmanifest`,
+  /*
+    Every other page's share card is a computed drawing of the house it is
+    about. This page is about no house — it is the door with both languages
+    on it — so it takes the collection's own card instead. It is the only
+    picture on the site that is drawn rather than generated, and it is here
+    because there is nothing here to generate.
+  */
+  openGraph: {
+    type: 'website',
+    title: pick(COPY.appName, DEFAULT_LOCALE),
+    description: pick(COPY.tagline, DEFAULT_LOCALE),
+    images: [{ url: 'brand/og.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: pick(COPY.appName, DEFAULT_LOCALE),
+    description: pick(COPY.tagline, DEFAULT_LOCALE),
+    images: [{ url: 'brand/og.png', width: 1200, height: 630 }],
+  },
 }
 
 export const viewport: Viewport = {

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
+import { Mark } from '@/components/Mark'
 import { ElevationGlyph, ElevationMark, ElevationShelf } from '@/components/Elevation'
 import { COASTLINE, FRAME } from '@/lib/geo/nusantara'
 import { SplitBar, SplitLegend } from '@/components/split'
@@ -77,7 +78,10 @@ export default function Landing({ params }: { params: { locale: string } }) {
         "a bar over content" means one thing across the site.
       */}
       <header className="sticky top-0 z-20 -mx-6 flex min-h-control items-center justify-between gap-3 border-b border-hairline bg-veil px-6 py-2 backdrop-blur-veil">
-        <p className="micro text-bolu">{pick(COPY.appName, locale)}</p>
+        <p className="flex items-center gap-2 micro text-bolu">
+          <Mark />
+          {pick(COPY.appName, locale)}
+        </p>
         <nav className="micro hidden items-center gap-5 sm:flex">
           <a href="#cerita" className="transition-colors duration-state hover:text-bolu">
             {pick(COPY.landing.storyHeading, locale)}

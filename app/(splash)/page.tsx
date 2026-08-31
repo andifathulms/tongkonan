@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Mark } from '@/components/Mark'
 import { COPY, LOCALES, LOCALE_NAMES, homeHref, pick } from '@/lib/i18n'
 import { TRADITIONS } from '@/lib/tradition/registry'
 
@@ -18,7 +19,16 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 export default function Index() {
   return (
     <main className="mx-auto flex min-h-full max-w-xl flex-col justify-center gap-6 px-6 py-24">
-      <p className="micro text-bolu">{pick(COPY.appName, 'id')}</p>
+      {/*
+        The one screen with room for the mark at a size you can read it at.
+        Everywhere else it sits at cap height beside the name; here it is the
+        first thing on an otherwise empty page, so it is allowed to be an
+        object rather than a bullet.
+      */}
+      <p className="flex items-center gap-3 micro text-bolu">
+        <Mark size={40} />
+        {pick(COPY.appName, 'id')}
+      </p>
       <div className="flex flex-col gap-3">
         {LOCALES.map((l) => (
           <p key={l} lang={l} className={l === 'id' ? 'text-lead' : 'text-body text-muted'}>

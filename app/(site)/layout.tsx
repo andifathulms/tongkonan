@@ -11,6 +11,13 @@ import { BASE_PATH, SITE_ORIGIN } from '@/lib/i18n'
 export const metadata: Metadata = {
   metadataBase: new URL(`${SITE_ORIGIN}${BASE_PATH}/`),
   title: { default: 'Rumah Adat Nusantara', template: '%s' },
+  /*
+    Written out with the base path in it. Next applies the base path to the
+    icons it generates but not to the manifest link, so the emitted href was
+    /manifest.webmanifest — correct in dev and a 404 on Pages, where the site
+    lives at a subpath.
+  */
+  manifest: `${BASE_PATH}/manifest.webmanifest`,
 }
 
 export const viewport: Viewport = {
