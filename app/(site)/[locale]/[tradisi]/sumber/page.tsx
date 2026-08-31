@@ -103,6 +103,83 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           </p>
           <p className="mt-2 max-w-prose text-body">{pick(COPY.sources.intro, locale)}</p>
 
+          {/*
+            Order serves the stated first reader: a student comes for the
+            citations, so the dimensions and the bibliography stand before
+            the sensitivity probes and the counterexample, which are the
+            researcher's rooms of this document.
+          */}
+          <hr className="rule mb-7 mt-12" />
+
+          <h2 className="text-lead font-medium text-bolu">
+            {pick(COPY.sources.tableHeading, locale)}
+          </h2>
+          <div className="reveal mt-4 overflow-x-auto">
+            <table className="w-full min-w-table border-collapse text-left">
+              <thead>
+                <tr className="border-b border-hairline">
+                  <Th>{pick(COPY.sources.dimension, locale)}</Th>
+                  <Th right>{pick(COPY.sources.value, locale)}</Th>
+                  <Th>{pick(COPY.sources.klass, locale)}</Th>
+                  <Th>{pick(COPY.sources.note, locale)}</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {t0.dims.map(({ key, dim }) => {
+                  return (
+                    <tr key={key} className="border-b border-hairline align-top">
+                      <td className="py-3 pr-4">
+                        <span className="font-mono text-meta">{key}</span>
+                      </td>
+                      <td className="num whitespace-nowrap py-3 pr-4 text-meta">
+                        {formatValue(dim)}
+                        {/*
+                          Kept inside the value cell rather than given a fifth
+                          column: the table is already wide enough to scroll on
+                          a phone, and this belongs beside the number it is
+                          about.
+                        */}
+                        <IfWrong
+                          s={sensitivityOf(sensitivity, key)}
+                          label={t0.probeLabel}
+                          pct={pct}
+                          locale={locale}
+                        />
+                      </td>
+                      <td className="py-3 pr-4">
+                        <ProvenanceTag klass={dim.class} locale={locale} />
+                      </td>
+                      <td className="py-3 text-meta leading-snug">
+                        {locale === 'id' ? dim.note : dim.noteEn}
+                        <span className="mt-1 block text-meta leading-snug text-muted">
+                          {dim.source === 'none'
+                            ? pick(COPY.sources.none, locale)
+                            : (t0.sources.find((x) => x.key === dim.source)?.citation ?? dim.source)}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <hr className="rule mb-7 mt-12" />
+
+          <h2 className="text-lead font-medium text-bolu">
+            {pick(COPY.sources.sourceHeading, locale)}
+          </h2>
+          <ul className="reveal mt-4 flex flex-col gap-4">
+            {t0.sources.filter((s) => s.key !== 'none').map((s) => (
+              <li key={s.key}>
+                <p className="micro">
+                  {s.key} · {s.kind}
+                </p>
+                <p className="mt-1 max-w-prose text-body leading-snug">{s.citation}</p>
+              </li>
+            ))}
+          </ul>
+
           <hr className="rule mb-7 mt-12" />
 
           <h2 className="text-lead font-medium text-bolu">
@@ -166,61 +243,6 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           <hr className="rule mb-7 mt-12" />
 
           <h2 className="text-lead font-medium text-bolu">
-            {pick(COPY.sources.tableHeading, locale)}
-          </h2>
-          <div className="reveal mt-4 overflow-x-auto">
-            <table className="w-full min-w-table border-collapse text-left">
-              <thead>
-                <tr className="border-b border-hairline">
-                  <Th>{pick(COPY.sources.dimension, locale)}</Th>
-                  <Th right>{pick(COPY.sources.value, locale)}</Th>
-                  <Th>{pick(COPY.sources.klass, locale)}</Th>
-                  <Th>{pick(COPY.sources.note, locale)}</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {t0.dims.map(({ key, dim }) => {
-                  return (
-                    <tr key={key} className="border-b border-hairline align-top">
-                      <td className="py-3 pr-4">
-                        <span className="font-mono text-meta">{key}</span>
-                      </td>
-                      <td className="num whitespace-nowrap py-3 pr-4 text-meta">
-                        {formatValue(dim)}
-                        {/*
-                          Kept inside the value cell rather than given a fifth
-                          column: the table is already wide enough to scroll on
-                          a phone, and this belongs beside the number it is
-                          about.
-                        */}
-                        <IfWrong
-                          s={sensitivityOf(sensitivity, key)}
-                          label={t0.probeLabel}
-                          pct={pct}
-                          locale={locale}
-                        />
-                      </td>
-                      <td className="py-3 pr-4">
-                        <ProvenanceTag klass={dim.class} locale={locale} />
-                      </td>
-                      <td className="py-3 text-meta leading-snug">
-                        {locale === 'id' ? dim.note : dim.noteEn}
-                        <span className="mt-1 block text-meta leading-snug text-muted">
-                          {dim.source === 'none'
-                            ? pick(COPY.sources.none, locale)
-                            : (t0.sources.find((x) => x.key === dim.source)?.citation ?? dim.source)}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          <hr className="rule mb-7 mt-12" />
-
-          <h2 className="text-lead font-medium text-bolu">
             {pick(COPY.checks.heading, locale)}
           </h2>
           <p className="mt-2 max-w-prose text-body text-muted">
@@ -276,22 +298,6 @@ export default function Sumber({ params }: { params: { locale: string; tradisi: 
           <p className="mt-3 max-w-prose text-body text-muted">
             {pick(COPY.checks.counterNote, locale)}
           </p>
-
-          <hr className="rule mb-7 mt-12" />
-
-          <h2 className="text-lead font-medium text-bolu">
-            {pick(COPY.sources.sourceHeading, locale)}
-          </h2>
-          <ul className="reveal mt-4 flex flex-col gap-4">
-            {t0.sources.filter((s) => s.key !== 'none').map((s) => (
-              <li key={s.key}>
-                <p className="micro">
-                  {s.key} · {s.kind}
-                </p>
-                <p className="mt-1 max-w-prose text-body leading-snug">{s.citation}</p>
-              </li>
-            ))}
-          </ul>
 
           <hr className="rule mb-7 mt-12" />
 

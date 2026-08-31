@@ -92,6 +92,9 @@ export const COPY = {
      holds every control, and the drawing should not cost a walk through all
      of them. */
   skip: t('Langsung ke isi', 'Skip to content'),
+  /* Before the map, whose glyphs are one link per house: a keyboard reader
+     should not pay the whole archipelago to reach the index below it. */
+  skipMap: t('Lewati peta, langsung ke daftar', 'Skip the map, straight to the index'),
 
   /*
    * The 404, written for both readers at once: the page that answers a wrong

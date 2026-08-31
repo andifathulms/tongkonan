@@ -162,6 +162,14 @@ export default function Landing({ params }: { params: { locale: string } }) {
       */}
       <section id="tapak" className="reveal scroll-mt-16">
         <h2 className="micro mb-4">{pick(COPY.landing.sitesHeading, locale)}</h2>
+        {/* The map is one link per house; a keyboard reader can decline the
+            whole archipelago in one stop. Visible only while focused. */}
+        <a
+          href="#rumah"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-30 focus:rounded focus:bg-bolu focus:px-3 focus:py-2 focus:text-body focus:text-kapur"
+        >
+          {pick(COPY.skipMap, locale)}
+        </a>
         <SiteMap locale={locale} items={built.map(({ t, s }) => ({ t, s }))} />
         <p className="mt-3 max-w-3xl text-body text-muted">
           {pick(COPY.landing.sitesNote, locale)}
