@@ -22,6 +22,14 @@ import type { Locale } from '@/lib/i18n'
 import { TRADITIONS } from '@/lib/tradition/registry'
 import type { Tradition } from '@/lib/tradition/registry'
 
+/*
+ * The map's glyphs are svg <a> elements, which next/link does not wrap — so
+ * the base path Next prepends to every <Link> has to be said here by hand.
+ * Empty in dev, the repository's subpath on Pages; forgetting it sent every
+ * glyph to the host's root and a 404.
+ */
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale = isLocale(params.locale) ? params.locale : DEFAULT_LOCALE
   return landingMetadata(locale, TRADITIONS.map((t) => t.house[locale]).join(' · '))
@@ -411,7 +419,7 @@ function SiteMap({
           <a
             key={t.key}
             id={`peta-${t.key}`}
-            href={`${houseHref(locale, t.slug)}/`}
+            href={`${BASE}${houseHref(locale, t.slug)}/`}
             aria-label={`${name} — ${site}`}
           >
             {/* The silhouette's thin members are a mean hover target; the
