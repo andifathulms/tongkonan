@@ -4,3 +4,7 @@ out/
 .DS_Store
 *.tsbuildinfo
 .env*
+
+# The brand kit as delivered. What the app actually serves is vendored into
+# public/brand/ and app/, so the source folder does not need to be tracked.
+exports/
