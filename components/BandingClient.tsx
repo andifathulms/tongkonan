@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { MakerSignature } from '@/components/MakerSignature'
 import Link from 'next/link'
 import { ElevationShelf } from './Elevation'
 import { LocaleSwitch } from './LocaleSwitch'
@@ -203,9 +204,16 @@ export function BandingClient({ locale }: { locale: Locale }) {
         })}
       </div>
 
-      <p className="mt-8 max-w-2xl border-t border-hairline pt-4 text-body text-muted">
-        {pick(COPY.tradition.note, locale)}
-      </p>
+      {/*
+        One seam at the foot of the page, carrying both things on it: the note
+        about the figures on the left, the maker's mark opposite. A second
+        rule under the first would read as two footers, and the note is not a
+        credit — it is a warning about the numbers above it.
+      */}
+      <footer className="mt-8 flex flex-col gap-4 border-t border-hairline pt-4 sheet:flex-row sheet:items-start sheet:justify-between">
+        <p className="max-w-2xl text-body text-muted">{pick(COPY.tradition.note, locale)}</p>
+        <MakerSignature locale={locale} className="shrink-0" />
+      </footer>
     </main>
   )
 }

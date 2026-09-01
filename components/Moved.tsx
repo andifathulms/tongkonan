@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { MakerSignature } from '@/components/MakerSignature'
 import Link from 'next/link'
 import { COPY, homeHref, href, pick } from '@/lib/i18n'
 import type { Locale, Route } from '@/lib/i18n'
@@ -52,6 +53,9 @@ export function Moved({ locale, route }: { locale: Locale; route: Route }) {
           {pick(COPY.tradition.all, locale)} <span aria-hidden>→</span>
         </Link>
       </nav>
+      <footer className="mt-2 border-t border-hairline pt-4">
+        <MakerSignature locale={locale} />
+      </footer>
       <meta httpEquiv="refresh" content={`4; url=${target}`} />
     </main>
   )

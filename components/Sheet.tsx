@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
 import { Mark } from '@/components/Mark'
+import { MakerSignature } from '@/components/MakerSignature'
 import { COPY, LOCALES, ROUTES, homeHref, houseHref, href, pick } from '@/lib/i18n'
 import type { Locale, Route } from '@/lib/i18n'
 import type { Tradition } from '@/lib/tradition/registry'
@@ -86,6 +87,16 @@ export function Sheet({
       >
         <TitleBlock locale={locale} route={route} tradition={tradition} />
         <div className="flex flex-col">{rail}</div>
+        {/*
+          The foot of the rail, which on these four routes is the foot of the
+          page — the drawing beside it fills the screen and has no bottom.
+          mt-auto so the signature sits at the bottom of a short rail and
+          after the last section of a long one, rather than floating in the
+          middle of either.
+        */}
+        <footer className="mt-auto border-t border-hairline px-4 py-3">
+          <MakerSignature locale={locale} />
+        </footer>
       </aside>
       {/*
         On a phone a drawing stays stuck to the top of the screen while the

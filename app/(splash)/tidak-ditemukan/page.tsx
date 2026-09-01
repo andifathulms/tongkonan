@@ -4,6 +4,7 @@ import { ElevationShelf } from '@/components/Elevation'
 import { silhouette } from '@/lib/core/silhouette'
 import { COPY, LOCALES, LOCALE_NAMES, homeHref, houseHref, pick } from '@/lib/i18n'
 import { TRADITIONS } from '@/lib/tradition/registry'
+import { MakerSignature } from '@/components/MakerSignature'
 
 export const metadata: Metadata = {
   title: `404 — ${pick(COPY.appName, 'id')}`,
@@ -73,6 +74,9 @@ export default function NotFound() {
           s,
         }))}
       />
+      <footer className="mt-2 border-t border-hairline pt-4">
+        <MakerSignature locale="id" />
+      </footer>
     </main>
   )
 }

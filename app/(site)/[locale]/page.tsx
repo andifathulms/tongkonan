@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { IndexFilter } from '@/components/IndexFilter'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
+import { MakerSignature } from '@/components/MakerSignature'
 import { MapDoors } from '@/components/MapDoors'
 import { groupByIsland, searchText } from '@/components/islands'
 import { Mark } from '@/components/Mark'
@@ -238,6 +239,16 @@ export default function Landing({ params }: { params: { locale: string } }) {
           </Link>
         </p>
       </section>
+
+      {/*
+        The page's one seam at the foot of it. The landing has no legal or
+        data credit on screen — the coastline's is in the file that carries
+        it and in the readme — so this bar holds the signature alone, set to
+        the right where the eye leaves the page.
+      */}
+      <footer className="mt-12 flex justify-end border-t border-hairline pt-4">
+        <MakerSignature locale={locale} />
+      </footer>
     </main>
   )
 }

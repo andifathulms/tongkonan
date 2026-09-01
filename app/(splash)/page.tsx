@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Mark } from '@/components/Mark'
+import { MakerSignature } from '@/components/MakerSignature'
 import { COPY, LOCALES, LOCALE_NAMES, homeHref, pick } from '@/lib/i18n'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
@@ -49,6 +50,9 @@ export default function Index() {
           </Link>
         ))}
       </nav>
+      <footer className="mt-2 border-t border-hairline pt-4">
+        <MakerSignature locale="id" />
+      </footer>
       <meta httpEquiv="refresh" content={`0; url=${BASE}${homeHref('id')}/`} />
     </main>
   )

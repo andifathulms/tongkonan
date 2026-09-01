@@ -445,6 +445,15 @@ export const COPY = {
     from: t('Bandingkan dengan bangunan lain', 'Compare with another building'),
   },
 
+  /*
+   * The author's credit. Localised like every other string here, because a
+   * site whose default locale is Indonesian should not say one English
+   * sentence at the bottom of every page. The name and the year are not
+   * translated: a name is a name, and a year is a figure.
+   */
+  maker: {
+    built: t('Dirancang & dibangun oleh', 'Designed & built by'),
+  },
   tradition: {
     /*
      * Said where the houses are listed, because a reader who has just watched

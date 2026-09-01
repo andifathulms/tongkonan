@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { MakerSignature } from '@/components/MakerSignature'
 import { LocaleSwitch } from '@/components/LocaleSwitch'
 import { ElevationSheet } from '@/components/Elevation'
 import { SplitBar, SplitLegend } from '@/components/split'
@@ -175,11 +176,17 @@ export default function House({ params }: { params: { locale: string; tradisi: s
         </ul>
       </section>
 
-      <footer className="mt-8 border-t border-hairline pt-4">
+      {/*
+        One seam, two things on it: the way back up on the left, the maker's
+        mark opposite. They stack on a phone, in that order — the navigation
+        is what somebody came to the bottom of the page for.
+      */}
+      <footer className="mt-8 flex flex-col gap-3 border-t border-hairline pt-4 sm:flex-row sm:items-center sm:justify-between">
         <Link href={`${homeHref(locale)}/`} className="micro text-bolu underline underline-offset-4">
           <span aria-hidden>← </span>
           {pick(COPY.tradition.all, locale)}
         </Link>
+        <MakerSignature locale={locale} />
       </footer>
     </main>
   )
